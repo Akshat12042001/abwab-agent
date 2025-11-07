@@ -6,6 +6,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import config from './config';
 import {NAVIGATION} from '../constants';
 import OnboardingStack from './stacks/onboarding';
+import BottomTabs from './bottomTabs';
 
 const Stack = createStackNavigator();
 
@@ -22,10 +23,11 @@ class AppNavigator extends React.Component {
             name={NAVIGATION.STACKS.ONBOARDING}
             component={OnboardingStack}
           /> */}
-          <Stack.Screen
+          {/* <Stack.Screen
             name={NAVIGATION.STACKS.AUTH}
             component={AuthenticationStack}
-          />
+          /> */}
+          <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} />
         </Stack.Navigator>
       </NavigationContainer>
     );

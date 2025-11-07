@@ -68,5 +68,11 @@
   "RESET_PASSWORD_SCREEN": {
     "RESET_YOUR_PASSWORD": "إعادة تعيين كلمة المرور الخاصة بك",
     "YOUR_NEW_PASSWORD_MUST_BE_DIFFERENT_FROM_PREVIOUS_PASSWORD": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور السابقة."
+  },
+  "TABS": {
+    "HOME": "الرئيسية",
+    "APPOINTMENTS": "المواعيد",
+    "MESSAGES": "الرسائل",
+    "PROFILE": "الملف الشخصي"
   }
 }

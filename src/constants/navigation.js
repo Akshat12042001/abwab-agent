@@ -3,6 +3,13 @@ export default {
     AUTH: 'Auth',
     MAIN: 'Main',
     ONBOARDING: 'Onboarding',
+    TABS: 'Tabs',
+  },
+  TABS: {
+    HOME: 'Tabs-Home',
+    APPOINTMENTS: 'Tabs-Appointments',
+    MESSAGES: 'Tabs-Messages',
+    PROFILE: 'Tabs-Profile',
   },
   AUTH: {
     LOGIN_SCREEN: 'Auth-LoginScreen',

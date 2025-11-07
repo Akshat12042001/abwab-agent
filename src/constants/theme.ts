@@ -31,6 +31,7 @@ export const COLORS = {
   GREY_SECONDARY: '#71717A',
   GREY_QUATERNARY: '#D4D4D8',
   PRIMARY_20: '#BBDFC633',
+  RED_NOTIFICATION: '#EF4444',
 };
 
 export const FONT_SIZE = {

@@ -68,5 +68,11 @@
   "RESET_PASSWORD_SCREEN": {
     "RESET_YOUR_PASSWORD": "Reset your password",
     "YOUR_NEW_PASSWORD_MUST_BE_DIFFERENT_FROM_PREVIOUS_PASSWORD": "Your new password must be different from previous password."
+  },
+  "TABS": {
+    "HOME": "Home",
+    "APPOINTMENTS": "Appointments",
+    "MESSAGES": "Messages",
+    "PROFILE": "Profile"
   }
 }
