@@ -1,4 +1,4 @@
-package com.dummyproject
+package com.app.agent
 
 import android.app.Application
 import com.facebook.react.PackageList

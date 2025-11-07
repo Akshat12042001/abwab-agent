@@ -1,0 +1,20 @@
+{
+  "ONBOARDING_SCREEN": {
+    "REAL_LEADS_AT_YOUR_FINGERTIPS": "العملاء المحتملون في متناول يدك",
+    "GET_INSTANT_VIEWING_REQUESTS": "احصل على طلبات مشاهدة فورية. قبول، رفض، أو إعادة جدولة بنقرة واحدة.",
+    "MASTER_YOUR_SCHEDULE": "تحكم في جدولك الزمني",
+    "BROWSE_VERIFIED_LISTINGS": "تصفح القوائم الموثوقة، وفلتر حسب احتياجاتك الدقيقة، واحفظ المفضلات لديك - كل ذلك في مكان واحد.",
+    "ALL_COMMUNICATION_CENTRALIZED": "كل الاتصالات، مركزية",
+    "ACCESS_CLIENT_HISTORY": "الوصول إلى تاريخ العملاء والملاحظات لتخصيص خدمتك وإغلاق المزيد من الصفقات."
+  },
+  "BUTTONS": {
+    "NEXT": "التالي",
+    "SKIP": "تخطي",
+    "SIGN_IN": "تسجيل الدخول",
+    "GET_STARTED": "ابدأ الآن"
+  },
+  "GET_STARTED_SCREEN": {
+    "LETS_GET_GOING": "لنبدأ",
+    "ABWAB_GIVES_YOU_EVERYTHING": "أبواب توفر لك كل ما تحتاجه لإدارة مشاهداتك، والتواصل مع العملاء، وتتبع أدائك."
+  }
+}

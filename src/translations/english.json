@@ -1,0 +1,20 @@
+{
+  "ONBOARDING_SCREEN": {
+    "REAL_LEADS_AT_YOUR_FINGERTIPS": "Realtime Leads at Your FingerTips",
+    "GET_INSTANT_VIEWING_REQUESTS": "Get instant viewing requests. Accept, reject, or reschedule with a single tap",
+    "MASTER_YOUR_SCHEDULE": "Master Your Schedule",
+    "BROWSE_VERIFIED_LISTINGS": "Browse verified listings, filter by your exact needs, and save your favorites—all in one place.",
+    "ALL_COMMUNICATION_CENTRALIZED": "All Communication, Centralized",
+    "ACCESS_CLIENT_HISTORY": "Access client history and notes to personalize your service and close more deals."
+  },
+  "BUTTONS": {
+    "NEXT": "Next",
+    "SKIP": "Skip",
+    "SIGN_IN": "Sign in",
+    "GET_STARTED": "Get started"
+  },
+  "GET_STARTED_SCREEN": {
+    "LETS_GET_GOING": "Let's Get Going",
+    "ABWAB_GIVES_YOU_EVERYTHING": "Abwab gives you everything you need to manage your viewings, communicate with clients, and track your performance."
+  }
+}
