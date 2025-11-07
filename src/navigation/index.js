@@ -18,10 +18,10 @@ class AppNavigator extends React.Component {
     return (
       <NavigationContainer ref={ref => NavigationService.setNavigatorRef(ref)}>
         <Stack.Navigator screenOptions={config}>
-          <Stack.Screen
+          {/* <Stack.Screen
             name={NAVIGATION.STACKS.ONBOARDING}
             component={OnboardingStack}
-          />
+          /> */}
           <Stack.Screen
             name={NAVIGATION.STACKS.AUTH}
             component={AuthenticationStack}

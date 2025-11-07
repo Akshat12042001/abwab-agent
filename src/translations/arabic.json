@@ -11,10 +11,62 @@
     "NEXT": "التالي",
     "SKIP": "تخطي",
     "SIGN_IN": "تسجيل الدخول",
-    "GET_STARTED": "ابدأ الآن"
+    "GET_STARTED": "ابدأ الآن",
+    "SEND_EMAIL": "إرسال البريد الإلكتروني",
+    "VERIFY": "تحقق",
+    "CONFIRM": "تأكيد"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "لنبدأ",
     "ABWAB_GIVES_YOU_EVERYTHING": "أبواب توفر لك كل ما تحتاجه لإدارة مشاهداتك، والتواصل مع العملاء، وتتبع أدائك."
+  },
+  "PLACEHOLDERS": {
+    "VERSION": "الإصدار",
+    "ENTER_YOUR_EMAIL": "أدخل بريدك الإلكتروني",
+    "ENTER_YOUR_PASSWORD": "أدخل كلمة المرور الخاصة بك",
+    "ENTER_YOUR_NAME": "كمال محمد|",
+    "ENTER_YOUR_NUMBER": "أدخل رقمك",
+    "ENTER_YOUR_NEW_PASSWORD": "أدخل كلمة المرور الجديدة",
+    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "أدخل تأكيد كلمة المرور الجديدة"
+  },
+  "LABELS": {
+    "EMAIL_ADDRESS": "عنوان البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "FULL_NAME": "الاسم الكامل",
+    "PHONE_NUMBER": "رقم الهاتف",
+    "NEW_PASSWORD": "كلمة المرور الجديدة",
+    "CONFIRM_NEW_PASSWORD": "تأكيد كلمة المرور الجديدة"
+  },
+  "ERRORS": {
+    "REQUIRED": "مطلوب",
+    "MUST_BE_AT_LEAST_2_CHARACTERS": "يجب أن يكون لديك على الأقل 2 حرف",
+    "EMAIL_IS_REQUIRED": "بريد إلكتروني مطلوب",
+    "EMAIL_IS_INVALID": "بريد إلكتروني غير صالح",
+    "PINCODE_IS_NOT_VALID": "رمز 5 أرقام غير صالح",
+    "MUST_BE_AT_LEAST_8_CHARACTERS": "يجب أن يكون لديك على الأقل 8 حرف",
+    "PASSWORD_LONG": "يجب أن يكون لديك على الأقل 8 حرف",
+    "PASSWORD_MUST_MATCH": "كلمة المرور يجب أن تكون مطابقة"
+  },
+  "LOGIN_SCREEN": {
+    "SIGN_IN_TO_YOUR_ACCOUNT": "قم بتسجيل الدخول إلى حسابك",
+    "DONT_HAVE_AN_ACCOUNT": "يس لديك حساب؟ سجل",
+    "REGISTER": "الآن",
+    "FORGOT_PASSWORD": "نسيت كلمة المرور؟",
+    "REMEMBER_ME": "تذكرني"
+  },
+  "FORGOT_PASSWORD_SCREEN": {
+    "FORGOT_PASSWORD": "نسيت كلمة المرور",
+    "ENTER_YOUR_EMAIL_ACCOUNT_TO_RESET_PASSWORD": "أدخل حساب بريدك الإلكتروني لإعادة تعيين كلمة المرور"
+  },
+  "VERIFICATION_SCREEN": {
+    "ENTER_VERIFICATION_CODE": "أدخل رمز التحقق",
+    "DESCRIPTION": "يرجى التحقق من بريدك الإلكتروني للحصول على رمز التحقق وأدخله هنا لإكمال العملية.",
+    "DIDNT_RECEIVE_CODE": "لم تستلم الرمز؟",
+    "RESEND_CODE": "إعادة إرسال الرمز",
+    "RESEND_IN_SECONDS": "يمكنك إعادة إرسال الرمز خلال {{seconds}} ثانية"
+  },
+  "RESET_PASSWORD_SCREEN": {
+    "RESET_YOUR_PASSWORD": "إعادة تعيين كلمة المرور الخاصة بك",
+    "YOUR_NEW_PASSWORD_MUST_BE_DIFFERENT_FROM_PREVIOUS_PASSWORD": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور السابقة."
   }
 }

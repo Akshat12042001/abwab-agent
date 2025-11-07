@@ -6,5 +6,6 @@ export const ASSETS = {
     ONBOARDING_THREE: require('../assets/images/onboarding3.png'),
     LOGO_ONE: require('../assets/images/logo1.png'),
     MAIN_LOGO: require('../assets/images/mainLogo.png'),
+    LOGO: require('../assets/images/logo.png'),
   },
 };
