@@ -11,10 +11,62 @@
     "NEXT": "Next",
     "SKIP": "Skip",
     "SIGN_IN": "Sign in",
-    "GET_STARTED": "Get started"
+    "GET_STARTED": "Get started",
+    "SEND_EMAIL": "Send Email",
+    "VERIFY": "Verify",
+    "CONFIRM": "Confirm"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "Let's Get Going",
     "ABWAB_GIVES_YOU_EVERYTHING": "Abwab gives you everything you need to manage your viewings, communicate with clients, and track your performance."
+  },
+  "PLACEHOLDERS": {
+    "VERSION": "Version",
+    "ENTER_YOUR_EMAIL": "Enter your email",
+    "ENTER_YOUR_PASSWORD": "Enter your password",
+    "ENTER_YOUR_NAME": "Enter your name",
+    "ENTER_YOUR_NUMBER": "Enter your number",
+    "ENTER_YOUR_NEW_PASSWORD": "Enter your new password",
+    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "Enter your confirm new password"
+  },
+  "LABELS": {
+    "EMAIL_ADDRESS": "Email Address",
+    "PASSWORD": "Password",
+    "FULL_NAME": "Full Name",
+    "PHONE_NUMBER": "Phone Number",
+    "NEW_PASSWORD": "New Password",
+    "CONFIRM_NEW_PASSWORD": "Confirm New Password"
+  },
+  "ERRORS": {
+    "REQUIRED": "Required",
+    "MUST_BE_AT_LEAST_2_CHARACTERS": "Must be at least 2 characters",
+    "EMAIL_IS_REQUIRED": "Email is required",
+    "EMAIL_IS_INVALID": "Email is invalid",
+    "PINCODE_IS_NOT_VALID": "Pincode is not valid",
+    "MUST_BE_AT_LEAST_8_CHARACTERS": "Must be at least 8 characters",
+    "PASSWORD_LONG": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character",
+    "PASSWORD_MUST_MATCH": "Password must match"
+  },
+  "LOGIN_SCREEN": {
+    "SIGN_IN_TO_YOUR_ACCOUNT": "Sign in to your account",
+    "DONT_HAVE_AN_ACCOUNT": "Don't have an account?",
+    "REGISTER": "Register",
+    "FORGOT_PASSWORD": "Forgot Password?",
+    "REMEMBER_ME": "Remember Me"
+  },
+  "FORGOT_PASSWORD_SCREEN": {
+    "FORGOT_PASSWORD": "Forgot password",
+    "ENTER_YOUR_EMAIL_ACCOUNT_TO_RESET_PASSWORD": "Enter your email account to reset password"
+  },
+  "VERIFICATION_SCREEN": {
+    "ENTER_VERIFICATION_CODE": "Enter verification code",
+    "DESCRIPTION": "Please check your email for the verification code and enter it here to complete the process.",
+    "DIDNT_RECEIVE_CODE": "Didn’t receive the code?",
+    "RESEND_CODE": "Resend Code",
+    "RESEND_IN_SECONDS": "You can resend the code in {{seconds}} seconds"
+  },
+  "RESET_PASSWORD_SCREEN": {
+    "RESET_YOUR_PASSWORD": "Reset your password",
+    "YOUR_NEW_PASSWORD_MUST_BE_DIFFERENT_FROM_PREVIOUS_PASSWORD": "Your new password must be different from previous password."
   }
 }

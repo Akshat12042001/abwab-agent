@@ -5,7 +5,10 @@ export default {
     ONBOARDING: 'Onboarding',
   },
   AUTH: {
-    WELCOME_SCREEN: 'Auth-WelcomeScreen',
+    LOGIN_SCREEN: 'Auth-LoginScreen',
+    FORGOT_PASSWORD_SCREEN: 'Auth-ForgotPasswordScreen',
+    VERIFICATION_CODE_SCREEN: 'Auth-VerificationCodeScreen',
+    RESET_PASSWORD_SCREEN: 'Auth-ResetPasswordScreen',
   },
   ONBOARDING: {
     ONBOARDING_SCREEN: 'Onboarding-OnboardingScreen',
