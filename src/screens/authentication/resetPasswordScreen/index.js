@@ -35,7 +35,10 @@ class ResetPasswordScreen extends Component {
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer paddingTop={!!this.props?.insets?.top ? 30 : 0}>
+      <ScreenContainer
+        paddingTop={
+          !!this.props?.insets?.top ? this.props?.insets?.top - 10 : 0
+        }>
         <View style={styles.screen}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
@@ -86,7 +89,7 @@ class ResetPasswordScreen extends Component {
                     <View style={styles.formTopSpacing}>
                       {this.form.fields.map((field, index) => {
                         const fieldKey = field?.type;
-                        const parsedPlaceholder = t(field?.label) || '';
+                        const parsedPlaceholder = t(field?.placeholder) || '';
                         const label = t(field?.label) || '';
 
                         return (

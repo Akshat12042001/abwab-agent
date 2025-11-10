@@ -55,7 +55,9 @@ class VerificationCodeScreen extends Component {
     const {t} = this.props?.i18n;
     return (
       <ScreenContainer
-        paddingTop={!!this.props?.insets?.top ? 30 : 0}
+        paddingTop={
+          !!this.props?.insets?.top ? this.props?.insets?.top - 10 : 0
+        }
         backgroundColor={COLORS.WHITE}>
         <TouchableOpacity style={styles.backButton}>
           <LeftArrowIcon />

@@ -14,7 +14,7 @@ class GetStartedScreen extends Component {
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer>
+      <ScreenContainer paddingBottom={1}>
         <View style={styles.logoContainer}>
           <Image
             source={ASSETS.IMAGES.LOGO_ONE}

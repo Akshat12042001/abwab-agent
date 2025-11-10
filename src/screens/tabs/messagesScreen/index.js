@@ -5,7 +5,7 @@ import {ScreenContainer, StyledText} from '../../../components/atoms';
 class MessagesScreen extends Component {
   render() {
     return (
-      <ScreenContainer>
+      <ScreenContainer center>
         <StyledText>MessagesScreen</StyledText>
       </ScreenContainer>
     );
