@@ -20,7 +20,7 @@ export default ({
         !!center && SharedStyles.center,
         {
           paddingTop: !!paddingTop ? paddingTop : insets.top,
-          paddingBottom: !!paddingBottom ? paddingBottom : insets.bottom,
+          // paddingBottom: !!paddingBottom ? paddingBottom : insets.bottom,
           backgroundColor,
         },
       ]}>

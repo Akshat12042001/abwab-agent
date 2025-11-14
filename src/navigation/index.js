@@ -7,6 +7,7 @@ import config from './config';
 import {NAVIGATION} from '../constants';
 import OnboardingStack from './stacks/onboarding';
 import BottomTabs from './bottomTabs';
+import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
 
@@ -19,19 +20,37 @@ class AppNavigator extends React.Component {
     return (
       <NavigationContainer ref={ref => NavigationService.setNavigatorRef(ref)}>
         <Stack.Navigator screenOptions={config}>
-          {/* <Stack.Screen
-            name={NAVIGATION.STACKS.ONBOARDING}
-            component={OnboardingStack}
-          /> */}
-          {/* <Stack.Screen
-            name={NAVIGATION.STACKS.AUTH}
-            component={AuthenticationStack}
-          /> */}
-          <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} />
+          {!this.props.isOnboardingCompleted ? (
+            <Stack.Screen
+              name={NAVIGATION.STACKS.ONBOARDING}
+              component={OnboardingStack}
+            />
+          ) : !this.props.isLoggedIn ? (
+            <Stack.Screen
+              name={NAVIGATION.STACKS.AUTH}
+              component={AuthenticationStack}
+            />
+          ) : (
+            <>
+              <Stack.Screen
+                name={NAVIGATION.STACKS.TABS}
+                component={BottomTabs}
+              />
+              {/* <Stack.Screen
+                name={NAVIGATION.STACKS.COMMON}
+                component={CommonStack}
+              /> */}
+            </>
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     );
   }
 }
 
-export default AppNavigator;
+const mapStateToProps = state => ({
+  isOnboardingCompleted: state?.onboarding?.isOnboardingCompleted,
+  isLoggedIn: state?.auth?.isLoggedIn,
+});
+
+export default connect(mapStateToProps, {})(AppNavigator);

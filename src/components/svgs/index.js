@@ -10,3 +10,4 @@ export {default as HomeIcon} from './homeIcon';
 export {default as HomeSelectedIcon} from './homeSelectedIcon';
 export {default as ProfileIcon} from './profileIcon';
 export {default as ProfileSelectedIcon} from './profileSelectedIcon';
+export {default as CloseIcon} from './closeIcon';

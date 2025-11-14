@@ -9,8 +9,14 @@ import {ASSETS} from '../../../constants/assets';
 import {COLORS} from '../../../constants';
 import styles from './styles';
 import {withTranslation} from 'react-i18next';
+import {connect} from 'react-redux';
+import {setIsOnboardingCompleted} from '../../../redux/onboarding/onboarding.reducer';
 
 class GetStartedScreen extends Component {
+  handleContinueWithEmail = () => {
+    this.props.setIsOnboardingCompleted(true);
+  };
+
   render() {
     const {t} = this.props?.i18n;
     return (
@@ -46,6 +52,7 @@ class GetStartedScreen extends Component {
           <CustomButton
             title={t('BUTTONS.SIGN_IN')}
             containerStyle={styles.continueButton}
+            onPress={this.handleContinueWithEmail}
           />
         </View>
       </ScreenContainer>
@@ -53,4 +60,6 @@ class GetStartedScreen extends Component {
   }
 }
 
-export default withTranslation()(GetStartedScreen);
+export default withTranslation()(
+  connect(null, {setIsOnboardingCompleted})(GetStartedScreen),
+);

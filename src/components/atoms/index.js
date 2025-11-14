@@ -4,3 +4,4 @@ export {default as CustomButton} from './customButton';
 export {default as Checkbox} from './checkbox';
 export {default as Input} from './input';
 export {default as OtpInput} from './otpInput';
+export {default as CustomToast} from './customToast';

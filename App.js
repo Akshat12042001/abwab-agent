@@ -4,9 +4,20 @@ import AppNavigator from './src/navigation';
 import {getStore, getPersistor} from './src/redux/index';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
-import {StyledText} from './src/components/atoms';
+import {CustomToast, StyledText} from './src/components/atoms';
 import i18n from './src/translations/index';
 import {SplashScreen} from './src/screens/authentication';
+import ToastManager from 'toastify-react-native';
+import {reset} from './src/redux/auth/auth.reducer';
+
+const toastConfig = {
+  customSuccess: ({text1, text2, hide}) => (
+    <CustomToast text1={text1} text2={text2} hide={hide} variant="success" />
+  ),
+  customError: ({text1, text2, hide}) => (
+    <CustomToast text1={text1} text2={text2} hide={hide} variant="error" />
+  ),
+};
 
 const App = () => {
   const store = getStore();
@@ -27,6 +38,12 @@ const App = () => {
           loading={<StyledText>Loading...</StyledText>}
           persistor={persistor}
           onBeforeLift={onBeforeLift}>
+          <ToastManager
+            animationStyle="fade"
+            showCloseIcon={false}
+            config={toastConfig}
+            duration={2000}
+          />
           {isLoading ? <SplashScreen /> : <AppNavigator />}
         </PersistGate>
       </Provider>

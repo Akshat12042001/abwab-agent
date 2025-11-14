@@ -14,8 +14,22 @@ import {
 
 const persistConfig = {
   key: 'root',
-  blacklist: [],
   storage: AsyncStorage,
+  whitelist: ['onboarding', 'auth'],
+  migrate: async state => {
+    try {
+      const isRememberMe = await AsyncStorage.getItem('isRememberMe');
+      if (isRememberMe !== 'true' && state?.auth) {
+        return {
+          ...state,
+          auth: undefined,
+        };
+      }
+      return state;
+    } catch (e) {
+      return state;
+    }
+  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

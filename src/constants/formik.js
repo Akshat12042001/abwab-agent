@@ -94,7 +94,7 @@ export default {
     fields: [fields.email, fields.password],
     schema: Yup.object().shape({
       email: schemas.email,
-      password: schemas.password,
+      password: schemas.stringRequired,
     }),
   },
   FORGOT_PASSWORD: {

@@ -9,10 +9,10 @@ const Stack = createStackNavigator();
 export default () => {
   return (
     <Stack.Navigator screenOptions={config}>
-      {/* <Stack.Screen
+      <Stack.Screen
         name={NAVIGATION.ONBOARDING.ONBOARDING_SCREEN}
         component={OnboardingScreen}
-      /> */}
+      />
       <Stack.Screen
         name={NAVIGATION.ONBOARDING.GET_STARTED_SCREEN}
         component={GetStartedScreen}

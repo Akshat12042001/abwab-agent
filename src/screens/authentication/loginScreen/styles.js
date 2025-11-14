@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.WHITE,
     marginTop: 20,
-    height: SCREEN.HEIGHT,
+    height: SCREEN.HEIGHT / 1.3,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: SCREEN_PADDING,

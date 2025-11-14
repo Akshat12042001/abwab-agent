@@ -6,7 +6,7 @@ import {
 } from '../../../components/atoms';
 import {ImageBackground, TouchableOpacity, View} from 'react-native';
 import {ASSETS} from '../../../constants/assets';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
 import {withTranslation} from 'react-i18next';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
@@ -44,6 +44,13 @@ class OnboardingScreen extends Component {
     const {selectedIndex} = this.state;
     const nextIndex = selectedIndex + 1 < DATA.length ? selectedIndex + 1 : 0;
     this.setState({selectedIndex: nextIndex});
+    if (this.state.selectedIndex === DATA.length - 1) {
+      this.props.navigation.navigate(NAVIGATION.ONBOARDING.GET_STARTED_SCREEN);
+    }
+  };
+
+  handleSkip = () => {
+    this.props.navigation.navigate(NAVIGATION.ONBOARDING.GET_STARTED_SCREEN);
   };
 
   render() {
@@ -56,7 +63,9 @@ class OnboardingScreen extends Component {
             source={current.image}
             resizeMode="cover"
             style={styles.heroImage}>
-            <TouchableOpacity style={styles.skipButton}>
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={this.handleSkip}>
               <StyledText
                 size={16}
                 variant="semiBold"

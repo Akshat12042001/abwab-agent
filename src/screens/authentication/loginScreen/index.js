@@ -7,13 +7,17 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, FORM_SCHEMA} from '../../../constants';
+import {COLORS, FORM_SCHEMA, NAVIGATION} from '../../../constants';
 import {Image, Pressable, TouchableOpacity, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {ASSETS} from '../../../constants/assets';
 import {withTranslation} from 'react-i18next';
 import {Formik} from 'formik';
 import styles from './styles';
+import {makeLoginRequest} from '../../../api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {connect} from 'react-redux';
+import {setUserData} from '../../../redux/auth/auth.reducer';
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -21,6 +25,7 @@ class LoginScreen extends Component {
     this.form = FORM_SCHEMA.LOGIN;
     this.state = {
       isLoading: false,
+      isChecked: false,
     };
     this.initialValues = {
       email: '',
@@ -30,12 +35,38 @@ class LoginScreen extends Component {
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = () => {};
+  onSubmit = async values => {
+    this.setState({isLoading: true});
+    try {
+      const params = {
+        email: values?.email,
+        password: values?.password,
+      };
+
+      const res = await makeLoginRequest(params);
+
+      AsyncStorage.setItem(
+        'isRememberMe',
+        this.state.isChecked ? 'true' : 'false',
+      );
+      // if (!res?.data?.emailVerified) {
+      //   this.props.navigation.navigate(
+      //     NAVIGATION.AUTH.VERIFICATION_CODE_SCREEN,
+      //     {email: values?.email},
+      //   );
+      // } else {
+      this.props.setUserData(res?.data);
+      // }
+    } catch (error) {
+    } finally {
+      this.setState({isLoading: false});
+    }
+  };
 
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer>
+      <ScreenContainer paddingBottom={1}>
         <View style={styles.screen}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
@@ -56,7 +87,7 @@ class LoginScreen extends Component {
                 textStyle={styles.titleSpacing}>
                 {t('LOGIN_SCREEN.SIGN_IN_TO_YOUR_ACCOUNT')}
               </StyledText>
-              <Pressable style={styles.rowStart}>
+              {/* <Pressable style={styles.rowStart}>
                 <StyledText
                   size={14}
                   variant="regular"
@@ -70,7 +101,7 @@ class LoginScreen extends Component {
                   textStyle={styles.registerGap}>
                   {t('LOGIN_SCREEN.REGISTER')}
                 </StyledText>
-              </Pressable>
+              </Pressable> */}
             </View>
             <View style={styles.card}>
               <Formik
@@ -132,7 +163,12 @@ class LoginScreen extends Component {
                             {t('LOGIN_SCREEN.REMEMBER_ME')}
                           </StyledText>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() =>
+                            this.props.navigation.navigate(
+                              NAVIGATION.AUTH.FORGOT_PASSWORD_SCREEN,
+                            )
+                          }>
                           <StyledText
                             size={14}
                             variant="medium"
@@ -142,6 +178,7 @@ class LoginScreen extends Component {
                         </TouchableOpacity>
                       </View>
                       <CustomButton
+                        isLoading={this.state.isLoading}
                         title={t('BUTTONS.SIGN_IN')}
                         onPress={handleSubmit}
                         isDisabled={
@@ -160,4 +197,4 @@ class LoginScreen extends Component {
     );
   }
 }
-export default withTranslation()(LoginScreen);
+export default withTranslation()(connect(null, {setUserData})(LoginScreen));
