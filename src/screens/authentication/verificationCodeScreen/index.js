@@ -12,7 +12,8 @@ import styles from './styles';
 import {withTranslation} from 'react-i18next';
 import {SharedStyles} from '../../../shared';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
-import {makeVerifyOtpRequest} from '../../../api/auth';
+import {makeResendOtpRequest, makeVerifyOtpRequest} from '../../../api/auth';
+import {successToast} from '../../../utils/alerts';
 
 class VerificationCodeScreen extends Component {
   constructor(props) {
@@ -48,10 +49,19 @@ class VerificationCodeScreen extends Component {
     }, 1000);
   };
 
-  handleResend = () => {
+  handleResend = async () => {
     if (!this.state.canResend) return;
     // TODO: trigger resend code API here if available
-    this.startResendTimer();
+    try {
+      const res = await makeResendOtpRequest({
+        email: this.email,
+        type: 'AGENT',
+      });
+      if (res?.statusCode === 200) {
+        successToast(res?.message);
+        this.startResendTimer();
+      }
+    } catch (error) {}
   };
 
   handleVerify = async () => {
@@ -103,7 +113,7 @@ class VerificationCodeScreen extends Component {
           <View style={styles.otpWrap}>
             <OtpInput
               otp={this.state.otp}
-              length={4}
+              length={5}
               setOtp={text => this.setState({otp: text, error: ''})}
               onSubmit={() => {}}
               error={this.state.error}
@@ -111,7 +121,7 @@ class VerificationCodeScreen extends Component {
           </View>
           <CustomButton
             title={t('BUTTONS.VERIFY')}
-            isDisabled={this.state.otp.length !== 4}
+            isDisabled={this.state.otp.length !== 5}
             isLoading={this.state.isLoading}
             onPress={this.handleVerify}
           />

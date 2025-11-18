@@ -6,6 +6,7 @@ const AUTH_ENDPOINTS = {
   VERIFY_OTP: '/agent/verify-otp',
   FORGOT_PASSWORD: '/agent/forgot-password',
   CHANGE_PASSWORD: '/agent/change-password',
+  RESEND_OTP: '/resend-otp',
 };
 
 export const makeLoginRequest = data => {
@@ -29,6 +30,12 @@ export const makeForgotPasswordRequest = data => {
 export const makeChangePasswordRequest = (data, token) => {
   return APIClient('', token)
     .post(AUTH_ENDPOINTS.CHANGE_PASSWORD, data)
+    .then(res => res.data);
+};
+
+export const makeResendOtpRequest = data => {
+  return APIClient()
+    .post(AUTH_ENDPOINTS.RESEND_OTP, data)
     .then(res => res.data);
 };
 

@@ -1,4 +1,4 @@
-package com.app.agent
+package com.abwab.agent
 
 import android.app.Application
 import com.facebook.react.PackageList
