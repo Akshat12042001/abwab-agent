@@ -92,5 +92,17 @@
     "PENDING": "قيد المراجعة",
     "ACCEPTED": "مقبول",
     "DECLINED": "مرفوض"
+  },
+  "MODALS": {
+    "NEW_VIEWING_REQUEST": {
+      "TITLE": "طلب عرض جديد",
+      "RESPOND_QUICKLY": "استجب بسرعة",
+      "VISIT_INFORMATION": "معلومات الزيارة",
+      "APPOINTMENT_DATE": "تاريخ الموعد",
+      "APPOINTMENT_TIME": "وقت الموعد",
+      "MEETING_POINT": "نقطة الاجتماع",
+      "ACCEPT_REQUEST": "قبول الطلب",
+      "DECLINE": "رفض"
+    }
   }
 }

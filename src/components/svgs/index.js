@@ -17,3 +17,4 @@ export {default as LeftIcon} from './leftIcon';
 export {default as RightIcon} from './rightIcon';
 export {default as ArrowRightIcon} from './arrowRight';
 export {default as MessageBubbleIcon} from './messageBubbleIcon';
+export {default as TimerIcon} from './timerIcon';

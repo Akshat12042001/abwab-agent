@@ -13,6 +13,7 @@ import {
   ConversationRateBarGraph,
   CommissionTrackingChart,
 } from '../../../components/molecules';
+import {NewRequestModal} from '../../../components/modals';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
 import {withTranslation} from 'react-i18next';
@@ -35,6 +36,7 @@ class HomeScreen extends Component {
       currentIndex: 0,
       selectedPeriodIndex: 0,
       showAllMonths: false,
+      showNewRequestModal: false,
     };
   }
 
@@ -46,6 +48,26 @@ class HomeScreen extends Component {
     this.setState(prevState => ({
       showAllMonths: !prevState.showAllMonths,
     }));
+  };
+
+  handleOpenNewRequestModal = () => {
+    this.setState({showNewRequestModal: true});
+  };
+
+  handleCloseNewRequestModal = () => {
+    this.setState({showNewRequestModal: false});
+  };
+
+  handleAcceptRequest = () => {
+    // Handle accept logic here
+    console.log('Request accepted');
+    this.handleCloseNewRequestModal();
+  };
+
+  handleDeclineRequest = () => {
+    // Handle decline logic here
+    console.log('Request declined');
+    this.handleCloseNewRequestModal();
   };
 
   render() {
@@ -72,7 +94,9 @@ class HomeScreen extends Component {
                   </StyledText>
                 </View>
               </View>
-              <TouchableOpacity style={styles.notificationButton}>
+              <TouchableOpacity
+                style={styles.notificationButton}
+                onPress={this.handleOpenNewRequestModal}>
                 <NotificationIcon />
                 <View style={styles.notificationBadge} />
               </TouchableOpacity>
@@ -181,6 +205,12 @@ class HomeScreen extends Component {
           <ConversationRateBarGraph onToggleMonths={this.handleToggleMonths} />
           <CommissionTrackingChart />
         </ScrollView>
+        <NewRequestModal
+          visible={this.state.showNewRequestModal}
+          onClose={this.handleCloseNewRequestModal}
+          onAccept={this.handleAcceptRequest}
+          onDecline={this.handleDeclineRequest}
+        />
       </ScreenContainer>
     );
   }

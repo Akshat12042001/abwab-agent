@@ -92,5 +92,17 @@
     "PENDING": "Pending",
     "ACCEPTED": "Accepted",
     "DECLINED": "Declined"
+  },
+  "MODALS": {
+    "NEW_VIEWING_REQUEST": {
+      "TITLE": "New Viewing Request",
+      "RESPOND_QUICKLY": "Respond quickly",
+      "VISIT_INFORMATION": "Visit Information",
+      "APPOINTMENT_DATE": "Appointment Date",
+      "APPOINTMENT_TIME": "Appointment Time",
+      "MEETING_POINT": "Meeting Point",
+      "ACCEPT_REQUEST": "Accept Request",
+      "DECLINE": "Decline"
+    }
   }
 }
