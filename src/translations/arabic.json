@@ -74,5 +74,20 @@
     "APPOINTMENTS": "المواعيد",
     "MESSAGES": "الرسائل",
     "PROFILE": "الملف الشخصي"
+  },
+  "HOME_SCREEM": {
+    "TODAY_PERFORMANCE": "أداء اليوم",
+    "YOU_VE_RESPONDED_TO_LEADS_IN_UNDER_2_MINUTES": "لقد ردت على {{responded}}/{{total}} طلبات في أقل من {{time}}",
+    "VIEWING_REQUESTS": "طلبات العرض",
+    "SEE_ALL": "عرض الكل",
+    "PERFORMANCE_OVERVIEW": "نظرة عامة على الأداء",
+    "MONTHLY": "شهري",
+    "YEARLY": "سنوي",
+    "TOTAL_VISITS": "عدد الزيارات",
+    "RESERVATIONS": "عدد الحجوزات",
+    "VISITS_VS_RESERVATIONS": "الزيارات مقابل الحجوزات",
+    "VISITS": "الزيارات",
+    "CONVERSION_RATE_TREND": "اتجاه معدل التحويل",
+    "COMMISSION_TRACKING": "تتبع العمولة"
   }
 }

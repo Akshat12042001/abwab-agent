@@ -32,6 +32,12 @@ export const COLORS = {
   GREY_QUATERNARY: '#D4D4D8',
   PRIMARY_20: '#BBDFC633',
   RED_NOTIFICATION: '#EF4444',
+  WHITE_80: 'rgba(255, 255, 255, 0.8)',
+  SECONDARY_BASE: 'rgba(251, 216, 115, 1)',
+  GREYSCALE_300: 'rgba(203, 213, 225, 1)',
+  GREYSCALE_400: 'rgba(148, 163, 184, 1)',
+  GREEN_500: 'rgba(174, 223, 49, 1)',
+  ORANGE: 'rgba(250, 164, 63, 1)',
 };
 
 export const FONT_SIZE = {

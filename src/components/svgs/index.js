@@ -11,3 +11,7 @@ export {default as HomeSelectedIcon} from './homeSelectedIcon';
 export {default as ProfileIcon} from './profileIcon';
 export {default as ProfileSelectedIcon} from './profileSelectedIcon';
 export {default as CloseIcon} from './closeIcon';
+export {default as NotificationIcon} from './notificationIcon';
+export {default as MedalIcon} from './medalIcon';
+export {default as LeftIcon} from './leftIcon';
+export {default as RightIcon} from './rightIcon';

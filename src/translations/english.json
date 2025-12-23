@@ -74,5 +74,20 @@
     "APPOINTMENTS": "Appointments",
     "MESSAGES": "Messages",
     "PROFILE": "Profile"
+  },
+  "HOME_SCREEM": {
+    "TODAY_PERFORMANCE": "Today's Performance",
+    "YOU_VE_RESPONDED_TO_LEADS_IN_UNDER_2_MINUTES": "You've responded to {{responded}}/{{total}} leads in under {{time}}",
+    "VIEWING_REQUESTS": "Viewing Requests",
+    "SEE_ALL": "SEE ALL",
+    "PERFORMANCE_OVERVIEW": "Performance Overview",
+    "MONTHLY": "Monthly",
+    "YEARLY": "Yearly",
+    "TOTAL_VISITS": "Total Visits",
+    "RESERVATIONS": "Reservations",
+    "VISITS_VS_RESERVATIONS": "Visits vs Reservations",
+    "VISITS": "Visits",
+    "CONVERSION_RATE_TREND": "Conversion Rate Trend",
+    "COMMISSION_TRACKING": "Commission Tracking"
   }
 }
