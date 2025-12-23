@@ -33,11 +33,43 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
   },
+  messageContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 12,
+    marginBottom: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.PRIMARY_20,
+    borderRadius: 12,
+    flex: 1,
+  },
+  messageBubble: {
+    flex: 1,
+    marginLeft: 8,
+    padding: 10,
+    backgroundColor: COLORS.PRIMARY_LIGHTEST,
+    borderRadius: 8,
+  },
   appointmentContainer: {
     marginTop: 16,
     padding: 12,
     backgroundColor: COLORS.LIGHT_GREY_BG,
     borderRadius: 12,
+  },
+  appointmentDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  appointmentTypeTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  appointmentTypeText: {
+    textTransform: 'capitalize',
   },
   buttonsRow: {
     flexDirection: 'row',

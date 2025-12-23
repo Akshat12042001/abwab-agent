@@ -88,6 +88,9 @@
     "VISITS_VS_RESERVATIONS": "Visits vs Reservations",
     "VISITS": "Visits",
     "CONVERSION_RATE_TREND": "Conversion Rate Trend",
-    "COMMISSION_TRACKING": "Commission Tracking"
+    "COMMISSION_TRACKING": "Commission Tracking",
+    "PENDING": "Pending",
+    "ACCEPTED": "Accepted",
+    "DECLINED": "Declined"
   }
 }

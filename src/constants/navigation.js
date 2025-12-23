@@ -4,6 +4,7 @@ export default {
     MAIN: 'Main',
     ONBOARDING: 'Onboarding',
     TABS: 'Tabs',
+    COMMON: 'Common',
   },
   TABS: {
     HOME: 'Tabs-Home',
@@ -20,5 +21,8 @@ export default {
   ONBOARDING: {
     ONBOARDING_SCREEN: 'Onboarding-OnboardingScreen',
     GET_STARTED_SCREEN: 'Onboarding-GetStartedScreen',
+  },
+  COMMON: {
+    VIEWING_REQUEST_SCREEN: 'Common-ViewingRequestScreen',
   },
 };

@@ -88,6 +88,9 @@
     "VISITS_VS_RESERVATIONS": "الزيارات مقابل الحجوزات",
     "VISITS": "الزيارات",
     "CONVERSION_RATE_TREND": "اتجاه معدل التحويل",
-    "COMMISSION_TRACKING": "تتبع العمولة"
+    "COMMISSION_TRACKING": "تتبع العمولة",
+    "PENDING": "قيد المراجعة",
+    "ACCEPTED": "مقبول",
+    "DECLINED": "مرفوض"
   }
 }

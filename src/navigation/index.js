@@ -7,6 +7,7 @@ import config from './config';
 import {NAVIGATION} from '../constants';
 import OnboardingStack from './stacks/onboarding';
 import BottomTabs from './bottomTabs';
+import CommonStack from './stacks/common';
 import {connect} from 'react-redux';
 
 const Stack = createStackNavigator();
@@ -32,13 +33,17 @@ class AppNavigator extends React.Component {
             />
           ) : (
             <> */}
-          <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} />
+          {/* <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} /> */}
           {/* <Stack.Screen
                 name={NAVIGATION.STACKS.COMMON}
                 component={CommonStack}
               /> */}
           {/* </>
           )} */}
+          <Stack.Screen
+            name={NAVIGATION.STACKS.COMMON}
+            component={CommonStack}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     );

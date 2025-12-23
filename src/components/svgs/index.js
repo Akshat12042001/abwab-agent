@@ -15,3 +15,5 @@ export {default as NotificationIcon} from './notificationIcon';
 export {default as MedalIcon} from './medalIcon';
 export {default as LeftIcon} from './leftIcon';
 export {default as RightIcon} from './rightIcon';
+export {default as ArrowRightIcon} from './arrowRight';
+export {default as MessageBubbleIcon} from './messageBubbleIcon';
