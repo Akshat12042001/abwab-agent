@@ -25,5 +25,7 @@ export default {
   COMMON: {
     VIEWING_REQUEST_SCREEN: 'Common-ViewingRequestScreen',
     NOTIFICATIONS_SCREEN: 'Common-NotificationsScreen',
+    PROPERTY_DETAIL_SCREEN: 'Common-PropertyDetailScreen',
+    DEVELOPER_DETAIL_SCREEN: 'Common-DeveloperDetailScreen',
   },
 };

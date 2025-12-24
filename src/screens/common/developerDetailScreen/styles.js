@@ -1,0 +1,293 @@
+import {StyleSheet} from 'react-native';
+import {COLORS, SCREEN, SCREEN_PADDING} from '../../../constants';
+import {SharedStyles} from '../../../shared';
+
+const styles = StyleSheet.create({
+  carouselImageBg: {
+    width: '100%',
+    height: '100%',
+  },
+  gridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  highlightCard: {
+    width: '48%',
+    borderWidth: 1,
+    borderColor: COLORS.GREYSCALE_200,
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 14,
+    height: 120,
+    justifyContent: 'center',
+    paddingHorizontal: 30,
+  },
+  highlightIcon: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.PRIMARY_30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  highlightText: {textAlign: 'center'},
+  overlayTopRow: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    paddingHorizontal: SCREEN_PADDING,
+    flexDirection: 'row',
+  },
+  headerCircleBtn: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.WHITE,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerCircleBtnSpacing: {
+    marginLeft: 12,
+  },
+  rightHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  dotsContainer: {
+    position: 'absolute',
+    bottom: 38,
+    width: '100%',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+  },
+  dotBase: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  dotActive: {
+    backgroundColor: COLORS.PRIMARY,
+  },
+  dotInactive: {
+    backgroundColor: COLORS.GREYSCALE_200,
+  },
+  contentSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: COLORS.WHITE,
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 24,
+    paddingBottom: 120,
+    marginTop: -20,
+  },
+  devLogoContainer: {
+    height: 80,
+    width: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+    position: 'absolute',
+    top: -40,
+    left: 20,
+  },
+  devLogoImage: {height: '100%', width: '100%'},
+  devLogoPlaceholder: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: COLORS.GREYSCALE_100,
+  },
+  devNameRow: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  verifiedPillWrap: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: COLORS.PRIMARY_30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 100,
+    marginLeft: 10,
+  },
+  verifiedIcon: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  aiRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 6,
+    marginTop: 6,
+  },
+  aiRatingText: {
+    marginLeft: 2,
+  },
+  factsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  factChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 100,
+    backgroundColor: COLORS.GREYSCALE_50,
+    marginBottom: 10,
+    marginRight: 5,
+  },
+  factChipText: {marginLeft: 4},
+  tabsPillBar: {
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.GREYSCALE_50,
+    borderRadius: 100,
+    justifyContent: 'space-between',
+  },
+  tabPill: {
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+    flex: 0.3,
+  },
+  overviewBlock: {marginTop: 20},
+  overviewParaSpacing: {marginTop: 4},
+  sectionHeading: {marginTop: 10, marginBottom: 16},
+  // Projects grid
+  projectsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 26,
+  },
+  projectCard: {
+    width: '48%',
+    borderRadius: 12,
+    backgroundColor: COLORS.WHITE,
+    overflow: 'hidden',
+    marginBottom: 14,
+    ...SharedStyles.shadow,
+  },
+  projectImageWrap: {
+    height: 112,
+    width: '100%',
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    overflow: 'hidden',
+  },
+  projectImage: {height: '100%', width: '100%'},
+  roiBadge: {
+    position: 'absolute',
+    right: 10,
+    top: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: COLORS.GREYSCALE_50,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: COLORS.GREYSCALE_200,
+  },
+  projectBody: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  projectSub: {
+    marginTop: 4,
+  },
+  projectPrice: {
+    marginTop: 6,
+  },
+  // Reviews
+  reviewsBlock: {
+    marginTop: 16,
+  },
+  reviewsHeader: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  reviewsStarsRow: {
+    flexDirection: 'row',
+    columnGap: 4,
+    marginTop: 6,
+  },
+  reviewsSub: {
+    marginTop: 4,
+  },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    justifyContent: 'space-between',
+  },
+  barLabel: {
+    flex: 1,
+  },
+  barTrack: {
+    height: 6,
+    borderRadius: 12,
+    backgroundColor: COLORS.YELLOW_50,
+    // flex: 1.2,
+    overflow: 'hidden',
+    width: SCREEN.WIDTH / 2,
+  },
+  barFill: {
+    height: '100%',
+    backgroundColor: COLORS.YELLOW,
+  },
+  reviewChipsRow: {
+    flexDirection: 'row',
+    columnGap: 8,
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  reviewChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: COLORS.GREYSCALE_100,
+  },
+  reviewChipActive: {
+    backgroundColor: COLORS.PRIMARY,
+    borderColor: COLORS.PRIMARY,
+  },
+  reviewItem: {
+    paddingVertical: 12,
+  },
+  reviewHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reviewStarsRow: {
+    flexDirection: 'row',
+    columnGap: 4,
+    marginTop: 6,
+  },
+  reviewText: {
+    marginTop: 6,
+  },
+  reviewDivider: {
+    height: 1,
+    backgroundColor: COLORS.GREYSCALE_200,
+    marginTop: 12,
+  },
+});
+export default styles;

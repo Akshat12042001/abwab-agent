@@ -6,3 +6,4 @@ export {default as Input} from './input';
 export {default as OtpInput} from './otpInput';
 export {default as CustomToast} from './customToast';
 export {default as CommonHeader} from './commonHeader';
+export {default as DropdownComponent} from './dropdownComponent';

@@ -38,6 +38,12 @@ export const COLORS = {
   GREYSCALE_400: 'rgba(148, 163, 184, 1)',
   GREEN_500: 'rgba(174, 223, 49, 1)',
   ORANGE: 'rgba(250, 164, 63, 1)',
+  YELLOW: '#FACC15',
+  YELLOW_50: '#FEF3C7',
+  RED_FILL: '#EF4444',
+  PRIMARY_30: '#BBDFC64D',
+  PRIMARY_300: '#4A9B6A',
+  PRIMARY_400: '#6BB88A',
 };
 
 export const FONT_SIZE = {

@@ -2,7 +2,12 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NAVIGATION} from '../../constants';
 import config from '../config';
-import {ViewingRequestScreen, NotificationsScreen} from '../../screens/common';
+import {
+  ViewingRequestScreen,
+  NotificationsScreen,
+  PropertyDetailScreen,
+  DeveloperDetailScreen,
+} from '../../screens/common';
 
 const Stack = createStackNavigator();
 
@@ -13,9 +18,17 @@ export default () => {
         name={NAVIGATION.COMMON.VIEWING_REQUEST_SCREEN}
         component={ViewingRequestScreen}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={NAVIGATION.COMMON.NOTIFICATIONS_SCREEN}
         component={NotificationsScreen}
+      /> */}
+      {/* <Stack.Screen
+        name={NAVIGATION.COMMON.PROPERTY_DETAIL_SCREEN}
+        component={PropertyDetailScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.DEVELOPER_DETAIL_SCREEN}
+        component={DeveloperDetailScreen}
       />
     </Stack.Navigator>
   );
