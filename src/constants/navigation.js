@@ -24,5 +24,6 @@ export default {
   },
   COMMON: {
     VIEWING_REQUEST_SCREEN: 'Common-ViewingRequestScreen',
+    NOTIFICATIONS_SCREEN: 'Common-NotificationsScreen',
   },
 };

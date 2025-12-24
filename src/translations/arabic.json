@@ -35,7 +35,8 @@
     "FULL_NAME": "الاسم الكامل",
     "PHONE_NUMBER": "رقم الهاتف",
     "NEW_PASSWORD": "كلمة المرور الجديدة",
-    "CONFIRM_NEW_PASSWORD": "تأكيد كلمة المرور الجديدة"
+    "CONFIRM_NEW_PASSWORD": "تأكيد كلمة المرور الجديدة",
+    "NOTIFICATIONS": "الإشعارات"
   },
   "ERRORS": {
     "REQUIRED": "مطلوب",

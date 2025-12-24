@@ -33,17 +33,17 @@ class AppNavigator extends React.Component {
             />
           ) : (
             <> */}
-          <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} />
+          {/* <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} /> */}
           {/* <Stack.Screen
                 name={NAVIGATION.STACKS.COMMON}
                 component={CommonStack}
               /> */}
           {/* </>
           )} */}
-          {/* <Stack.Screen
+          <Stack.Screen
             name={NAVIGATION.STACKS.COMMON}
             component={CommonStack}
-          /> */}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     );
