@@ -28,5 +28,7 @@ export default {
     PROPERTY_DETAIL_SCREEN: 'Common-PropertyDetailScreen',
     DEVELOPER_DETAIL_SCREEN: 'Common-DeveloperDetailScreen',
     APPOINTMENT_DETAIL_SCREEN: 'Common-AppointmentDetailScreen',
+    CALENDER_MANAGEMENT_SCREEN: 'Common-CalenderManagementScreen',
+    SUCCESS_SCREEN: 'Common-SuccessScreen',
   },
 };

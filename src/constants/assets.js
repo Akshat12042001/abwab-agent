@@ -9,5 +9,6 @@ export const ASSETS = {
     LOGO: require('../assets/images/logo.png'),
     PERSON: require('../assets/images/person.png'),
     DUMMY_IMAGE: require('../assets/images/dummyImage.png'),
+    BG_IMAGE: require('../assets/images/bgImage.png'),
   },
 };

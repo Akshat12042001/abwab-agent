@@ -8,6 +8,8 @@ import {
   PropertyDetailScreen,
   DeveloperDetailScreen,
   AppointmentDetailScreen,
+  CalenderManagementScreen,
+  SuccessScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -31,9 +33,17 @@ export default () => {
         name={NAVIGATION.COMMON.DEVELOPER_DETAIL_SCREEN}
         component={DeveloperDetailScreen}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={NAVIGATION.COMMON.APPOINTMENT_DETAIL_SCREEN}
         component={AppointmentDetailScreen}
+      /> */}
+      {/* <Stack.Screen
+        name={NAVIGATION.COMMON.CALENDER_MANAGEMENT_SCREEN}
+        component={CalenderManagementScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.SUCCESS_SCREEN}
+        component={SuccessScreen}
       />
     </Stack.Navigator>
   );

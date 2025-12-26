@@ -213,5 +213,47 @@
     "NOTE_PLACEHOLDER": "eg, \"Waited 15 minutes.\", \"Client called to cancel last minute.\", \"No answer to calls or messages.\"",
     "CONFIRM_AND_LOG": "Confirm & Log No-Show",
     "CANCEL": "Cancel"
+  },
+  "CALENDAR_MANAGEMENT_SCREEN": {
+    "TITLE": "Calendar management",
+    "WORKING_HOURS": "Working Hours",
+    "DAY": "Day",
+    "AVAIL": "Avail",
+    "START": "Start",
+    "END": "End"
+  },
+  "SUCCESS_SCREEN": {
+    "VISIT_FEEDBACK_TITLE": "Visit Feedback",
+    "REPORT_NO_SHOW_TITLE": "Report a No-Show",
+    "FEEDBACK_SUBMITTED_SUCCESSFULLY": "Feedback submitted successfully",
+    "REPORT_SUBMITTED_SUCCESSFULLY": "Report submitted successfully",
+    "THANK_YOU_FOR_FEEDBACK": "Thank you for your feedback",
+    "NO_SHOW_RESPONSE_RECORDED": "Your No-Show response has been recorded",
+    "DONE": "Done"
+  },
+  "PROFILE_SCREEN": {
+    "MY_PROFILE": "My Profile",
+    "VERIFIED_AGENT": "Verified Agent",
+    "RATING": "Rating",
+    "COMPLETED": "Completed",
+    "VIEWINGS": "Viewings",
+    "ACCOUNT_DETAILS": "Account Details",
+    "REVIEWS": "Reviews",
+    "PROPERTY_VERIFICATION_REQUESTS": "Property Verification Requests",
+    "SETTINGS": "Settings",
+    "ACCOUNT_SETTINGS": "Account Settings",
+    "INFORMATION_ACCOUNT": "Information account",
+    "NOTIFICATION_SOUND": "Notification & Sound",
+    "MANAGE_ALERTS": "Manage Alerts",
+    "LANGUAGE": "Language",
+    "ENGLISH_EN": "English (EN)",
+    "HELP": "Help",
+    "HELP_CENTER": "Help Center",
+    "GET_SUPPORTS_FAQS": "Get supports & FAQs",
+    "TERMS_CONDITIONS": "Term & Conditions",
+    "READ_TERMS_CONDITIONS": "Read our term & conditions",
+    "PRIVACY_POLICY": "Privacy Policy",
+    "OUR_PRIVACY_POLICY": "Our privacy policy",
+    "LOGOUT": "Logout"
   }
 }

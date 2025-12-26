@@ -212,5 +212,47 @@
     "NOTE_PLACEHOLDER": "مثال: \"انتظرت 15 دقيقة.\"، \"اتصل العميل لإلغاء الموعد في اللحظة الأخيرة.\"، \"لا رد على المكالمات أو الرسائل.\"",
     "CONFIRM_AND_LOG": "تأكيد وتسجيل عدم الحضور",
     "CANCEL": "إلغاء"
+  },
+  "CALENDAR_MANAGEMENT_SCREEN": {
+    "TITLE": "إدارة التقويم",
+    "WORKING_HOURS": "ساعات العمل",
+    "DAY": "اليوم",
+    "AVAIL": "متاح",
+    "START": "بداية",
+    "END": "نهاية"
+  },
+  "SUCCESS_SCREEN": {
+    "VISIT_FEEDBACK_TITLE": "تقييم الزيارة",
+    "REPORT_NO_SHOW_TITLE": "الإبلاغ عن عدم الحضور",
+    "FEEDBACK_SUBMITTED_SUCCESSFULLY": "تم إرسال التقييم بنجاح",
+    "REPORT_SUBMITTED_SUCCESSFULLY": "تم إرسال التقرير بنجاح",
+    "THANK_YOU_FOR_FEEDBACK": "شكراً لك على تقييمك",
+    "NO_SHOW_RESPONSE_RECORDED": "تم تسجيل ردك حول عدم الحضور",
+    "DONE": "تم"
+  },
+  "PROFILE_SCREEN": {
+    "MY_PROFILE": "ملفي الشخصي",
+    "VERIFIED_AGENT": "وكيل موثق",
+    "RATING": "التقييم",
+    "COMPLETED": "مكتمل",
+    "VIEWINGS": "المشاهدات",
+    "ACCOUNT_DETAILS": "تفاصيل الحساب",
+    "REVIEWS": "المراجعات",
+    "PROPERTY_VERIFICATION_REQUESTS": "طلبات التحقق من العقارات",
+    "SETTINGS": "الإعدادات",
+    "ACCOUNT_SETTINGS": "إعدادات الحساب",
+    "INFORMATION_ACCOUNT": "معلومات الحساب",
+    "NOTIFICATION_SOUND": "الإشعارات والصوت",
+    "MANAGE_ALERTS": "إدارة التنبيهات",
+    "LANGUAGE": "اللغة",
+    "ENGLISH_EN": "الإنجليزية (EN)",
+    "HELP": "المساعدة",
+    "HELP_CENTER": "مركز المساعدة",
+    "GET_SUPPORTS_FAQS": "الحصول على الدعم والأسئلة الشائعة",
+    "TERMS_CONDITIONS": "الشروط والأحكام",
+    "READ_TERMS_CONDITIONS": "اقرأ شروطنا وأحكامنا",
+    "PRIVACY_POLICY": "سياسة الخصوصية",
+    "OUR_PRIVACY_POLICY": "سياسة الخصوصية الخاصة بنا",
+    "LOGOUT": "تسجيل الخروج"
   }
 }
