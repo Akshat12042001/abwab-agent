@@ -14,7 +14,8 @@
     "GET_STARTED": "ابدأ الآن",
     "SEND_EMAIL": "إرسال البريد الإلكتروني",
     "VERIFY": "تحقق",
-    "CONFIRM": "تأكيد"
+    "CONFIRM": "تأكيد",
+    "CANCEL": "إلغاء"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "لنبدأ",
@@ -169,5 +170,47 @@
     "MASTER_COMMUNITIES": "مجتمعات رئيسية",
     "GREEN_LIVING": "المعيشة الخضراء",
     "MIXED_USE_DEVELOPMENTS": "تطويرات متعددة الاستخدام"
+  },
+  "APPOINTMENTS_SCREEN": {
+    "APPOINTMENTS": "المواعيد",
+    "TRACK_YOUR_UPCOMING_VIEWINGS_APPOINTMENTS": "تتبع مواعيدك القادمة.",
+    "TODAY_APPOINTMENTS": "مواعيد اليوم",
+    "EMPTY_STATE_TITLE": "جدولك فارغ",
+    "EMPTY_STATE_DESCRIPTION": "ستظهر المواعيد المحجوزة هنا مع جميع التفاصيل التي تحتاجها.",
+    "SELECT_DATE": "اختر التاريخ"
+  },
+  "APPOINTMENT_DETAIL_SCREEN": {
+    "TITLE": "تفاصيل الموعد",
+    "VISIT_INFORMATION": "معلومات الزيارة",
+    "APPOINTMENT_DATE": "تاريخ الموعد",
+    "APPOINTMENT_TIME": "وقت الموعد",
+    "CLIENT_INFORMATION": "معلومات العميل",
+    "VERIFIED_CLIENT": "عميل موثق",
+    "LOCATION_ON_MAPS": "الموقع على الخريطة",
+    "MEETING_LOCATION": "موقع الاجتماع",
+    "NOTES": "ملاحظات",
+    "MARK_AS_COMPLETED": "تمييز كمكتمل",
+    "CLIENT_WERE_A_NO_SHOW": "العميل لم يحضر"
+  },
+  "VISIT_FEEDBACK_MODAL": {
+    "TITLE": "تقييم الزيارة",
+    "VERIFIED_CLIENT": "عميل موثق",
+    "HOW_DID_THE_VISIT_GO": "كيف سارت الزيارة؟",
+    "CLIENT_INTERESTED": "العميل مهتم",
+    "UNDECIDED": "غير محدد",
+    "NOT_INTERESTED": "غير مهتم",
+    "NOTES_OPTIONAL": "ملاحظات (اختياري)",
+    "NOTES_PLACEHOLDER": "أخبرنا بما سار بشكل جيد أو ما يمكن تحسينه...",
+    "SUBMIT_FEEDBACK": "إرسال التقييم",
+    "CANCEL": "إلغاء"
+  },
+  "REPORT_NO_SHOW_MODAL": {
+    "TITLE": "الإبلاغ عن عدم الحضور",
+    "DESCRIPTION": "دعنا نسجل هذا ونخطط لخطوتك التالية. هذا يساعد في الحفاظ على دقة مؤشرات الأداء الرئيسية الخاصة بك.",
+    "VERIFIED_CLIENT": "عميل موثق",
+    "ADD_PRIVATE_NOTE": "إضافة ملاحظة خاصة (اختياري)",
+    "NOTE_PLACEHOLDER": "مثال: \"انتظرت 15 دقيقة.\"، \"اتصل العميل لإلغاء الموعد في اللحظة الأخيرة.\"، \"لا رد على المكالمات أو الرسائل.\"",
+    "CONFIRM_AND_LOG": "تأكيد وتسجيل عدم الحضور",
+    "CANCEL": "إلغاء"
   }
 }

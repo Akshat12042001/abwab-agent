@@ -9,6 +9,7 @@ import i18n from './src/translations/index';
 import {SplashScreen} from './src/screens/authentication';
 import ToastManager from 'toastify-react-native';
 import {reset} from './src/redux/auth/auth.reducer';
+import MapboxGL from '@rnmapbox/maps';
 
 const toastConfig = {
   customSuccess: ({text1, text2, hide}) => (
@@ -26,6 +27,10 @@ const App = () => {
 
   const onBeforeLift = () => {
     //Do some stuff that when redux has initialized
+
+    MapboxGL.setAccessToken(
+      '__REDACTED_MAPBOX_PK__',
+    );
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);

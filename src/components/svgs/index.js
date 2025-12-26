@@ -37,3 +37,4 @@ export {default as StarFilledIcon} from './starFilledIcon';
 export {default as StarHalfFilledIcon} from './starHalfFilledIcon';
 export {default as ClockIcon} from './clockIcon';
 export {default as AppartmentIcon} from './appartmentIcon';
+export {default as SettingsIcon} from './settingsIcon';

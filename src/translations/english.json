@@ -14,7 +14,8 @@
     "GET_STARTED": "Get started",
     "SEND_EMAIL": "Send Email",
     "VERIFY": "Verify",
-    "CONFIRM": "Confirm"
+    "CONFIRM": "Confirm",
+    "CANCEL": "Cancel"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "Let's Get Going",
@@ -169,5 +170,48 @@
     "MASTER_COMMUNITIES": "Master Communities",
     "GREEN_LIVING": "Green Living",
     "MIXED_USE_DEVELOPMENTS": "Mixed-use Developments"
+  },
+  "APPOINTMENTS_SCREEN": {
+    "APPOINTMENTS": "Appointments",
+    "TRACK_YOUR_UPCOMING_VIEWINGS_APPOINTMENTS": "Track your upcoming viewings & appointments.",
+    "TODAY_APPOINTMENTS": "Today's Appointments",
+    "VIEW_ALL": "View All",
+    "EMPTY_STATE_TITLE": "Your schedule is clear",
+    "EMPTY_STATE_DESCRIPTION": "Booked viewings will show up here with all the details you need.",
+    "SELECT_DATE": "Select Date"
+  },
+  "APPOINTMENT_DETAIL_SCREEN": {
+    "TITLE": "Appointment Detail",
+    "VISIT_INFORMATION": "Visit Information",
+    "APPOINTMENT_DATE": "Appointment Date",
+    "APPOINTMENT_TIME": "Appointment Time",
+    "CLIENT_INFORMATION": "Client Information",
+    "VERIFIED_CLIENT": "Verified Client",
+    "LOCATION_ON_MAPS": "Location on Maps",
+    "MEETING_LOCATION": "Meeting Location",
+    "NOTES": "Notes",
+    "MARK_AS_COMPLETED": "Mark as completed",
+    "CLIENT_WERE_A_NO_SHOW": "Client Were a No-Show"
+  },
+  "VISIT_FEEDBACK_MODAL": {
+    "TITLE": "Visit Feedback",
+    "VERIFIED_CLIENT": "Verified Client",
+    "HOW_DID_THE_VISIT_GO": "How did the visit go?",
+    "CLIENT_INTERESTED": "Client Interested",
+    "UNDECIDED": "Undecided",
+    "NOT_INTERESTED": "Not Interested",
+    "NOTES_OPTIONAL": "Notes (optional)",
+    "NOTES_PLACEHOLDER": "Tell us what went well or what could be improved...",
+    "SUBMIT_FEEDBACK": "Submit Feedback",
+    "CANCEL": "Cancel"
+  },
+  "REPORT_NO_SHOW_MODAL": {
+    "TITLE": "Report a No-Show",
+    "DESCRIPTION": "Let's log this and plan your next move. This helps keep your KPIs accurate.",
+    "VERIFIED_CLIENT": "Verified Client",
+    "ADD_PRIVATE_NOTE": "Add a private note (optional)",
+    "NOTE_PLACEHOLDER": "eg, \"Waited 15 minutes.\", \"Client called to cancel last minute.\", \"No answer to calls or messages.\"",
+    "CONFIRM_AND_LOG": "Confirm & Log No-Show",
+    "CANCEL": "Cancel"
   }
 }

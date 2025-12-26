@@ -27,5 +27,6 @@ export default {
     NOTIFICATIONS_SCREEN: 'Common-NotificationsScreen',
     PROPERTY_DETAIL_SCREEN: 'Common-PropertyDetailScreen',
     DEVELOPER_DETAIL_SCREEN: 'Common-DeveloperDetailScreen',
+    APPOINTMENT_DETAIL_SCREEN: 'Common-AppointmentDetailScreen',
   },
 };

@@ -7,6 +7,7 @@ import {
   NotificationsScreen,
   PropertyDetailScreen,
   DeveloperDetailScreen,
+  AppointmentDetailScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -26,9 +27,13 @@ export default () => {
         name={NAVIGATION.COMMON.PROPERTY_DETAIL_SCREEN}
         component={PropertyDetailScreen}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={NAVIGATION.COMMON.DEVELOPER_DETAIL_SCREEN}
         component={DeveloperDetailScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.APPOINTMENT_DETAIL_SCREEN}
+        component={AppointmentDetailScreen}
       />
     </Stack.Navigator>
   );
