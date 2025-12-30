@@ -249,7 +249,7 @@
     "MY_PROFILE": "My Profile",
     "VERIFIED_AGENT": "Verified Agent",
     "RATING": "Rating",
-    "COMPLETED": "Completed",
+    "COMPLETED": "COMPLETED",
     "VIEWINGS": "Viewings",
     "ACCOUNT_DETAILS": "Account Details",
     "REVIEWS": "Reviews",
@@ -269,5 +269,17 @@
     "PRIVACY_POLICY": "Privacy Policy",
     "OUR_PRIVACY_POLICY": "Our privacy policy",
     "LOGOUT": "Logout"
+  },
+  "SUPPORT_CENTER_SCREEN": {
+    "TITLE": "Support Center",
+    "GREETING": "Hi, how can we help?",
+    "LIVE_CHAT_TITLE": "Live Chat with Support",
+    "LIVE_CHAT_SUBTITLE": "Chat With Our Agents in Real-Time",
+    "CALL_CENTER_TITLE": "Call Center Hotline",
+    "CALL_CENTER_SUBTITLE": "Speak Directly With Our Team",
+    "EMAIL_SUPPORT_TITLE": "Email Support",
+    "EMAIL_SUPPORT_SUBTITLE": "Send Us a Detailed Message",
+    "FAQS_TITLE": "FAQs",
+    "FAQS_SUBTITLE": "Frequently Asked Question"
   }
 }

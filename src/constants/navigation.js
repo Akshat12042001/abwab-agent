@@ -31,5 +31,6 @@ export default {
     CALENDER_MANAGEMENT_SCREEN: 'Common-CalenderManagementScreen',
     SUCCESS_SCREEN: 'Common-SuccessScreen',
     CHAT_SCREEN: 'Common-ChatScreen',
+    SUPPORT_CENTER_SCREEN: 'Common-SupportCenterScreen',
   },
 };

@@ -11,6 +11,7 @@ import {
   CalenderManagementScreen,
   SuccessScreen,
   ChatScreen,
+  SupportCenterScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -46,9 +47,13 @@ export default () => {
         name={NAVIGATION.COMMON.SUCCESS_SCREEN}
         component={SuccessScreen}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={NAVIGATION.COMMON.CHAT_SCREEN}
         component={ChatScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.SUPPORT_CENTER_SCREEN}
+        component={SupportCenterScreen}
       />
     </Stack.Navigator>
   );

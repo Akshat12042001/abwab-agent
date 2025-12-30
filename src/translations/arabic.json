@@ -268,5 +268,17 @@
     "PRIVACY_POLICY": "سياسة الخصوصية",
     "OUR_PRIVACY_POLICY": "سياسة الخصوصية الخاصة بنا",
     "LOGOUT": "تسجيل الخروج"
+  },
+  "SUPPORT_CENTER_SCREEN": {
+    "TITLE": "مركز الدعم",
+    "GREETING": "مرحبًا، كيف يمكننا مساعدتك؟",
+    "LIVE_CHAT_TITLE": "الدردشة المباشرة مع الدعم",
+    "LIVE_CHAT_SUBTITLE": "الدردشة مع وكلائنا في الوقت الحقيقي",
+    "CALL_CENTER_TITLE": "خط ساخن لمركز الاتصال",
+    "CALL_CENTER_SUBTITLE": "تحدث مباشرة مع فريقنا",
+    "EMAIL_SUPPORT_TITLE": "دعم عبر البريد الإلكتروني",
+    "EMAIL_SUPPORT_SUBTITLE": "أرسل لنا رسالة مفصلة",
+    "FAQS_TITLE": "الأسئلة الشائعة",
+    "FAQS_SUBTITLE": "السؤال المتكرر"
   }
 }
