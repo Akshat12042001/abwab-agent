@@ -85,7 +85,7 @@ class AppointmentDetailScreen extends Component {
     return (
       <ScreenContainer
         backgroundColor={COLORS.WHITE}
-        paddingTop={insetTop + 30}>
+        paddingTop={insetTop + 20}>
         <CommonHeader title={t('APPOINTMENT_DETAIL_SCREEN.TITLE')} />
 
         <ScrollView

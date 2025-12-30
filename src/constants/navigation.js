@@ -36,5 +36,6 @@ export default {
     POLICY_SCREEN: 'Common-PolicyScreen',
     LANGUAGE_SCREEN: 'Common-LanguageScreen',
     CHANGE_PASSWORD_SCREEN: 'Common-ChangePasswordScreen',
+    ACCOUNT_SETTINGS_SCREEN: 'Common-AccountSettingsScreen',
   },
 };

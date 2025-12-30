@@ -308,5 +308,16 @@
     "ARABIC": "Arabic",
     "ENGLISH": "English",
     "SAVE_CHANGES": "Save Changes"
+  },
+  "ACCOUNT_SETTINGS_SCREEN": {
+    "TITLE": "Account Settings",
+    "EMAIL_ADDRESS": "Email Address",
+    "PHONE_NUMBER": "Phone Number",
+    "LOCATION": "Location",
+    "BIO": "Bio",
+    "SERVICE_AREA": "Service Area",
+    "LANGUAGES_SPOKEN": "Languages Spoken",
+    "EDIT_PROFILE": "Edit Profile",
+    "EDIT_PASSWORD": "Edit Password"
   }
 }

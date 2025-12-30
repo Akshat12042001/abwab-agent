@@ -307,5 +307,16 @@
     "ARABIC": "العربية",
     "ENGLISH": "الإنجليزية",
     "SAVE_CHANGES": "حفظ التغييرات"
+  },
+  "ACCOUNT_SETTINGS_SCREEN": {
+    "TITLE": "إعدادات الحساب",
+    "EMAIL_ADDRESS": "عنوان البريد الإلكتروني",
+    "PHONE_NUMBER": "رقم الهاتف",
+    "LOCATION": "الموقع",
+    "BIO": "نبذة",
+    "SERVICE_AREA": "منطقة الخدمة",
+    "LANGUAGES_SPOKEN": "اللغات المتحدثة",
+    "EDIT_PROFILE": "تعديل الملف الشخصي",
+    "EDIT_PASSWORD": "تعديل كلمة المرور"
   }
 }

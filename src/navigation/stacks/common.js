@@ -16,6 +16,7 @@ import {
   PolicyScreen,
   LanguageScreen,
   ChangePasswordScreen,
+  AccountSettingsScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -68,9 +69,13 @@ export default () => {
         name={NAVIGATION.COMMON.LANGUAGE_SCREEN}
         component={LanguageScreen}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN}
         component={ChangePasswordScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.ACCOUNT_SETTINGS_SCREEN}
+        component={AccountSettingsScreen}
       />
     </Stack.Navigator>
   );

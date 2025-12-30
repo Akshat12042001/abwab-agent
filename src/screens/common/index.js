@@ -11,3 +11,4 @@ export {default as FaqScreen} from './faqScreen';
 export {default as PolicyScreen} from './policyScreen';
 export {default as LanguageScreen} from './languageScreen';
 export {default as ChangePasswordScreen} from './changePasswordScreen';
+export {default as AccountSettingsScreen} from './accountSettingsScreen';
