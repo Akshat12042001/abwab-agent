@@ -51,3 +51,5 @@ export {default as ContractIcon} from './contractIcon';
 export {default as CoinIcon} from './coinIcon';
 export {default as DocumentIconCopy} from './documentIconCopy';
 export {default as DocumentFillIcon} from './documentFillIcon';
+export {default as ChevronDownIcon} from './chevronDownIcon';
+export {default as ChevronUpIcon} from './chevronUpIcon';

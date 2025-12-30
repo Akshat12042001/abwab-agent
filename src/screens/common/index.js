@@ -7,3 +7,4 @@ export {default as CalenderManagementScreen} from './calenderManagementScreen';
 export {default as SuccessScreen} from './successScreen';
 export {default as ChatScreen} from './chatScreen';
 export {default as SupportCenterScreen} from './supportCenterScreen';
+export {default as FaqScreen} from './faqScreen';

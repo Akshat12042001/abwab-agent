@@ -19,8 +19,10 @@ const styles = StyleSheet.create({
     marginHorizontal: SCREEN_PADDING,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 25,
+    // paddingBottom: 25,
     zIndex: 1,
+    // borderWidth: 1,
+    height: 44,
   },
 });
 

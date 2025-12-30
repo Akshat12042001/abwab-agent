@@ -515,6 +515,7 @@ class ChatScreen extends Component {
         backgroundColor={COLORS.WHITE}
         paddingTop={insetTop + 20}>
         <CommonHeader
+          containerStyle={{height: 54, paddingBottom: 20}}
           title={contactName}
           subTitle={contactLocation}
           rightComponent={

@@ -77,7 +77,7 @@ class SupportCenterScreen extends Component {
     return (
       <ScreenContainer
         backgroundColor={COLORS.LIGHT_GREY_BG}
-        paddingTop={insetTop + 30}>
+        paddingTop={insetTop + 20}>
         <CommonHeader title={t('SUPPORT_CENTER_SCREEN.TITLE')} />
         <StyledText
           size={32}

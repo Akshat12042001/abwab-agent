@@ -32,5 +32,6 @@ export default {
     SUCCESS_SCREEN: 'Common-SuccessScreen',
     CHAT_SCREEN: 'Common-ChatScreen',
     SUPPORT_CENTER_SCREEN: 'Common-SupportCenterScreen',
+    FAQ_SCREEN: 'Common-FaqScreen',
   },
 };

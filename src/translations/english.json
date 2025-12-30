@@ -281,5 +281,20 @@
     "EMAIL_SUPPORT_SUBTITLE": "Send Us a Detailed Message",
     "FAQS_TITLE": "FAQs",
     "FAQS_SUBTITLE": "Frequently Asked Question"
+  },
+  "FAQ_SCREEN": {
+    "TITLE": "FAQs",
+    "MAIN_TITLE": "Frequently Asked Question",
+    "SEARCH_PLACEHOLDER": "Search for answer",
+    "QUESTION_1": "What happens if I miss or don't respond to a viewing request?",
+    "ANSWER_1": "You have a limited time (e.g., 5 minutes) to respond. If you don't, the request will automatically be passed to another available broker to ensure the client is served quickly. This may affect your \"Lead Response Time\" KPI.",
+    "QUESTION_2": "My calendar isn't syncing with my phone's native calendar. What's wrong?",
+    "ANSWER_2": "Make sure you've granted calendar permissions to the app in your phone's settings. If the issue persists, try logging out and logging back in, or contact support for assistance.",
+    "QUESTION_3": "A client was a no-show for a viewing. How do I log this?",
+    "ANSWER_3": "After the scheduled viewing time, you can mark the appointment as \"No-Show\" in the appointment details screen. This helps maintain accurate records and may affect your performance metrics.",
+    "QUESTION_4": "Is my chat with clients and brokers secure?",
+    "ANSWER_4": "Yes, all communications are encrypted and secure. We use industry-standard security measures to protect your conversations and data.",
+    "QUESTION_5": "I need to change my working hours for a specific day. How?",
+    "ANSWER_5": "Go to Calendar Management in your profile settings. You can set different working hours for each day of the week, or modify specific dates as needed."
   }
 }

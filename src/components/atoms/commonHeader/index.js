@@ -15,6 +15,7 @@ const CommonHeader = ({
   backIconColor = COLORS.GREYSCALE_200,
   backIconBgColor = '',
   subTitle = '',
+  containerStyle = {},
 }) => {
   const navigation = useNavigation();
   const goBack = () => {
@@ -22,7 +23,7 @@ const CommonHeader = ({
     onBackPress?.();
   };
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <TouchableOpacity
         style={[
           styles.root,
@@ -35,6 +36,7 @@ const CommonHeader = ({
         <StyledText
           variant="bold"
           size={18}
+          numberOfLines={1}
           // containerStyle={SharedStyles.fullFlex}
           color={COLORS.GREYSCALE_900}
           textAlign="center">
@@ -43,6 +45,7 @@ const CommonHeader = ({
         {!!subTitle && (
           <StyledText
             variant="regular"
+            numberOfLines={1}
             size={14}
             // containerStyle={SharedStyles.fullFlex}
             color={COLORS.GREYSCALE_500}
