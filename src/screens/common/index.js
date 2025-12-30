@@ -5,3 +5,4 @@ export {default as DeveloperDetailScreen} from './developerDetailScreen';
 export {default as AppointmentDetailScreen} from './appointmentDetailScreen';
 export {default as CalenderManagementScreen} from './calenderManagementScreen';
 export {default as SuccessScreen} from './successScreen';
+export {default as ChatScreen} from './chatScreen';

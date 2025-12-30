@@ -15,10 +15,13 @@ const DropdownComponent = ({
   containerStyle = {},
   isSearchActive = false,
   label = '',
+  labelColor = COLORS.WHITE,
   ...props
 }) => {
   const renderLabel = () => {
-    return <Text style={styles.placeholder}>{label}</Text>;
+    return (
+      <Text style={[styles.placeholder, {color: labelColor}]}>{label}</Text>
+    );
   };
   return (
     <Fragment>
@@ -45,7 +48,7 @@ const DropdownComponent = ({
           autoScroll
           fontFamily={FONTS.regular}
           maxHeight={200}
-          activeColor={COLORS.ORANGE}
+          activeColor={COLORS.PRIMARY_400}
           containerStyle={styles.listContainerStyles}
           itemTextStyle={styles.itemTextStyle}
           search={isSearchActive}

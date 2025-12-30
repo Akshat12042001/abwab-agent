@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, TouchableOpacity} from 'react-native';
 import StyledText from '../styledText';
-import {COLORS} from '../../../constants';
+import {COLORS, SCREEN} from '../../../constants';
 import {ArrowRightIcon, LeftArrowIcon} from '../../svgs';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
@@ -14,6 +14,7 @@ const CommonHeader = ({
   onBackPress = () => {},
   backIconColor = COLORS.GREYSCALE_200,
   backIconBgColor = '',
+  subTitle = '',
 }) => {
   const navigation = useNavigation();
   const goBack = () => {
@@ -30,14 +31,26 @@ const CommonHeader = ({
         onPress={goBack}>
         {isRTLActive() ? <ArrowRightIcon /> : <LeftArrowIcon />}
       </TouchableOpacity>
-      <StyledText
-        variant="bold"
-        size={18}
-        containerStyle={SharedStyles.fullFlex}
-        color={COLORS.GREYSCALE_900}
-        textAlign="center">
-        {title}
-      </StyledText>
+      <View style={{flex: 1, maxWidth: SCREEN.WIDTH - 150, marginLeft: 50}}>
+        <StyledText
+          variant="bold"
+          size={18}
+          // containerStyle={SharedStyles.fullFlex}
+          color={COLORS.GREYSCALE_900}
+          textAlign="center">
+          {title}
+        </StyledText>
+        {!!subTitle && (
+          <StyledText
+            variant="regular"
+            size={14}
+            // containerStyle={SharedStyles.fullFlex}
+            color={COLORS.GREYSCALE_500}
+            textAlign="center">
+            {subTitle}
+          </StyledText>
+        )}
+      </View>
       {rightComponent}
     </View>
   );

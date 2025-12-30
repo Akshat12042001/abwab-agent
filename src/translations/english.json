@@ -180,6 +180,20 @@
     "EMPTY_STATE_DESCRIPTION": "Booked viewings will show up here with all the details you need.",
     "SELECT_DATE": "Select Date"
   },
+  "MESSAGES_SCREEN": {
+    "MESSAGES": "Messages",
+    "INBOX_SUBTITLE": "Your inbox for client chats.",
+    "SEARCH": "Search",
+    "NO_MESSAGES_YET": "No messages yet",
+    "EMPTY_STATE_DESCRIPTION": "Your conversations with clients and fellow brokers will appear here."
+  },
+  "CHAT_SCREEN": {
+    "TYPE_MESSAGE": "Type Message...",
+    "SEND_CONTRACT": "Send Contract",
+    "SEND_PAYMENT_REQUEST": "Send Payment Request",
+    "CONTRACTS": "Contracts",
+    "PAYMENT_REQUEST": "Payment Request"
+  },
   "APPOINTMENT_DETAIL_SCREEN": {
     "TITLE": "Appointment Detail",
     "VISIT_INFORMATION": "Visit Information",

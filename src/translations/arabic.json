@@ -179,6 +179,20 @@
     "EMPTY_STATE_DESCRIPTION": "ستظهر المواعيد المحجوزة هنا مع جميع التفاصيل التي تحتاجها.",
     "SELECT_DATE": "اختر التاريخ"
   },
+  "MESSAGES_SCREEN": {
+    "MESSAGES": "الرسائل",
+    "INBOX_SUBTITLE": "صندوق الوارد الخاص بك لمحادثات العملاء.",
+    "SEARCH": "بحث",
+    "NO_MESSAGES_YET": "لا توجد رسائل بعد",
+    "EMPTY_STATE_DESCRIPTION": "ستظهر محادثاتك مع العملاء والوسطاء الآخرين هنا."
+  },
+  "CHAT_SCREEN": {
+    "TYPE_MESSAGE": "اكتب رسالة...",
+    "SEND_CONTRACT": "إرسال العقد",
+    "SEND_PAYMENT_REQUEST": "إرسال طلب الدفع",
+    "CONTRACTS": "العقد",
+    "PAYMENT_REQUEST": "طلب الدفع"
+  },
   "APPOINTMENT_DETAIL_SCREEN": {
     "TITLE": "تفاصيل الموعد",
     "VISIT_INFORMATION": "معلومات الزيارة",

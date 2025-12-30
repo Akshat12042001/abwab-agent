@@ -30,5 +30,6 @@ export default {
     APPOINTMENT_DETAIL_SCREEN: 'Common-AppointmentDetailScreen',
     CALENDER_MANAGEMENT_SCREEN: 'Common-CalenderManagementScreen',
     SUCCESS_SCREEN: 'Common-SuccessScreen',
+    CHAT_SCREEN: 'Common-ChatScreen',
   },
 };

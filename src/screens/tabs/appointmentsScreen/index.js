@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ScreenContainer, StyledText} from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {withTranslation} from 'react-i18next';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
 import {
@@ -150,6 +150,11 @@ class AppointmentsScreen extends Component {
               <CalenderIcon size={24} color={COLORS.GREYSCALE_900} />
             </Pressable>
             <Pressable
+              onPress={() =>
+                this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+                  screen: NAVIGATION.COMMON.CALENDER_MANAGEMENT_SCREEN,
+                })
+              }
               style={[styles.headerIconBtn, styles.headerIconBtnSpacing]}>
               <SettingsIcon size={24} color={COLORS.GREYSCALE_900} />
             </Pressable>

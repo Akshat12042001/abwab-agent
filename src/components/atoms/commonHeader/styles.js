@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.GREYSCALE_200,
     position: 'absolute',
     left: 0,
-    top: -10,
+    top: 0,
     zIndex: 1,
   },
   container: {
