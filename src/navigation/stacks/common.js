@@ -13,6 +13,9 @@ import {
   ChatScreen,
   SupportCenterScreen,
   FaqScreen,
+  PolicyScreen,
+  LanguageScreen,
+  ChangePasswordScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -56,7 +59,19 @@ export default () => {
         name={NAVIGATION.COMMON.SUPPORT_CENTER_SCREEN}
         component={SupportCenterScreen}
       /> */}
-      <Stack.Screen name={NAVIGATION.COMMON.FAQ_SCREEN} component={FaqScreen} />
+      {/* <Stack.Screen name={NAVIGATION.COMMON.FAQ_SCREEN} component={FaqScreen} /> */}
+      {/* <Stack.Screen
+        name={NAVIGATION.COMMON.POLICY_SCREEN}
+        component={PolicyScreen}
+      /> */}
+      {/* <Stack.Screen
+        name={NAVIGATION.COMMON.LANGUAGE_SCREEN}
+        component={LanguageScreen}
+      /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN}
+        component={ChangePasswordScreen}
+      />
     </Stack.Navigator>
   );
 };

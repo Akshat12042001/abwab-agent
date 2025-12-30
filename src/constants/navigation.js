@@ -33,5 +33,8 @@ export default {
     CHAT_SCREEN: 'Common-ChatScreen',
     SUPPORT_CENTER_SCREEN: 'Common-SupportCenterScreen',
     FAQ_SCREEN: 'Common-FaqScreen',
+    POLICY_SCREEN: 'Common-PolicyScreen',
+    LANGUAGE_SCREEN: 'Common-LanguageScreen',
+    CHANGE_PASSWORD_SCREEN: 'Common-ChangePasswordScreen',
   },
 };

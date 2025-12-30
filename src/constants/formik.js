@@ -34,6 +34,12 @@ const fields = {
     type: 'confirmNewPassword',
     isPassword: true,
   },
+  currentPassword: {
+    label: 'LABELS.CURRENT_PASSWORD',
+    placeholder: 'PLACEHOLDERS.ENTER_YOUR_CURRENT_PASSWORD',
+    type: 'currentPassword',
+    isPassword: true,
+  },
 };
 
 const schemas = {
@@ -106,6 +112,18 @@ export default {
   RESET_PASSWORD: {
     fields: [fields.newPassword, fields.confirmNewPassword],
     schema: Yup.object().shape({
+      newPassword: schemas.newPassword,
+      confirmNewPassword: schemas.confirmNewPassword,
+    }),
+  },
+  CHANGE_PASSWORD: {
+    fields: [
+      fields.currentPassword,
+      fields.newPassword,
+      fields.confirmNewPassword,
+    ],
+    schema: Yup.object().shape({
+      currentPassword: schemas.currentPassword,
       newPassword: schemas.newPassword,
       confirmNewPassword: schemas.confirmNewPassword,
     }),

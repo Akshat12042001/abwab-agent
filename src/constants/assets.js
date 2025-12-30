@@ -10,5 +10,7 @@ export const ASSETS = {
     PERSON: require('../assets/images/person.png'),
     DUMMY_IMAGE: require('../assets/images/dummyImage.png'),
     BG_IMAGE: require('../assets/images/bgImage.png'),
+    ENG_IMAGE: require('../assets/images/eng.png'),
+    AR_IMAGE: require('../assets/images/arabic.png'),
   },
 };

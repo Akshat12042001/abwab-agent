@@ -8,3 +8,6 @@ export {default as SuccessScreen} from './successScreen';
 export {default as ChatScreen} from './chatScreen';
 export {default as SupportCenterScreen} from './supportCenterScreen';
 export {default as FaqScreen} from './faqScreen';
+export {default as PolicyScreen} from './policyScreen';
+export {default as LanguageScreen} from './languageScreen';
+export {default as ChangePasswordScreen} from './changePasswordScreen';

@@ -15,7 +15,8 @@
     "SEND_EMAIL": "Send Email",
     "VERIFY": "Verify",
     "CONFIRM": "Confirm",
-    "CANCEL": "Cancel"
+    "CANCEL": "Cancel",
+    "UPDATE_PASSWORD": "Update Password"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "Let's Get Going",
@@ -28,7 +29,8 @@
     "ENTER_YOUR_NAME": "Enter your name",
     "ENTER_YOUR_NUMBER": "Enter your number",
     "ENTER_YOUR_NEW_PASSWORD": "Enter your new password",
-    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "Enter your confirm new password"
+    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "Enter your confirm new password",
+    "ENTER_YOUR_CURRENT_PASSWORD": "Enter your current password"
   },
   "LABELS": {
     "EMAIL_ADDRESS": "Email Address",
@@ -37,7 +39,11 @@
     "PHONE_NUMBER": "Phone Number",
     "NEW_PASSWORD": "New Password",
     "CONFIRM_NEW_PASSWORD": "Confirm New Password",
-    "NOTIFICATIONS": "Notifications"
+    "NOTIFICATIONS": "Notifications",
+    "TERMS_AND_CONDITIONS": "Terms & Conditions",
+    "PRIVACY_POLICY": "Privacy Policy",
+    "CHANGE_PASSWORD": "Change Password",
+    "CURRENT_PASSWORD": "Current Password"
   },
   "ERRORS": {
     "REQUIRED": "Required",
@@ -296,5 +302,11 @@
     "ANSWER_4": "Yes, all communications are encrypted and secure. We use industry-standard security measures to protect your conversations and data.",
     "QUESTION_5": "I need to change my working hours for a specific day. How?",
     "ANSWER_5": "Go to Calendar Management in your profile settings. You can set different working hours for each day of the week, or modify specific dates as needed."
+  },
+  "LANGUAGE_SCREEN": {
+    "TITLE": "Language",
+    "ARABIC": "Arabic",
+    "ENGLISH": "English",
+    "SAVE_CHANGES": "Save Changes"
   }
 }

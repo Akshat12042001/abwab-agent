@@ -15,7 +15,8 @@
     "SEND_EMAIL": "إرسال البريد الإلكتروني",
     "VERIFY": "تحقق",
     "CONFIRM": "تأكيد",
-    "CANCEL": "إلغاء"
+    "CANCEL": "إلغاء",
+    "UPDATE_PASSWORD": "تحديث كلمة المرور"
   },
   "GET_STARTED_SCREEN": {
     "LETS_GET_GOING": "لنبدأ",
@@ -28,7 +29,8 @@
     "ENTER_YOUR_NAME": "كمال محمد|",
     "ENTER_YOUR_NUMBER": "أدخل رقمك",
     "ENTER_YOUR_NEW_PASSWORD": "أدخل كلمة المرور الجديدة",
-    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "أدخل تأكيد كلمة المرور الجديدة"
+    "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "أدخل تأكيد كلمة المرور الجديدة",
+    "ENTER_YOUR_CURRENT_PASSWORD": "أدخل كلمة المرور الحالية"
   },
   "LABELS": {
     "EMAIL_ADDRESS": "عنوان البريد الإلكتروني",
@@ -37,7 +39,11 @@
     "PHONE_NUMBER": "رقم الهاتف",
     "NEW_PASSWORD": "كلمة المرور الجديدة",
     "CONFIRM_NEW_PASSWORD": "تأكيد كلمة المرور الجديدة",
-    "NOTIFICATIONS": "الإشعارات"
+    "NOTIFICATIONS": "الإشعارات",
+    "TERMS_AND_CONDITIONS": "الشروط والأحكام",
+    "PRIVACY_POLICY": "سياسة الخصوصية",
+    "CHANGE_PASSWORD": "تغيير كلمة المرور",
+    "CURRENT_PASSWORD": "كلمة المرور الحالية"
   },
   "ERRORS": {
     "REQUIRED": "مطلوب",
@@ -295,5 +301,11 @@
     "ANSWER_4": "انتقل إلى إدارة التقويم في إعدادات ملفك الشخصي. يمكنك تعيين ساعات عمل مختلفة لكل يوم من أيام الأسبوع، أو تعديل تواريخ محددة حسب الحاجة.",
     "QUESTION_5": "كيف يمكنني إعادة جدولة عرض ؟",
     "ANSWER_5": "يمكنك إعادة جدولة العرض من خلال شاشة تفاصيل الموعد. اختر \"إعادة الجدولة\" وحدد التاريخ والوقت الجديدين المناسبين لك."
+  },
+  "LANGUAGE_SCREEN": {
+    "TITLE": "اللغة",
+    "ARABIC": "العربية",
+    "ENGLISH": "الإنجليزية",
+    "SAVE_CHANGES": "حفظ التغييرات"
   }
 }
