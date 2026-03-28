@@ -6,9 +6,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
-    padding: 12,
-    width: SCREEN.WIDTH - 60,
-    ...SharedStyles.shadow,
+    padding: 10,
+    width: SCREEN.WIDTH - 50,
+    ...SharedStyles.shadow,marginBottom:5,marginTop:5,
   },
   headerRow: {
     flexDirection: 'row',
@@ -111,6 +111,18 @@ const styles = StyleSheet.create({
   },
   acceptButtonText: {
     marginLeft: 6,
+  },
+  chatButton: {
+    marginTop: 16,
+    marginBottom: 10,
+    minHeight: 52,
+    borderRadius: 16,
+    backgroundColor: COLORS.PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chatButtonText: {
+    textAlign: 'center',
   },
 });
 

@@ -51,6 +51,28 @@ class AppointmentDetailScreen extends Component {
     };
   }
 
+  componentDidMount() {
+    const params = this.props?.route?.params || {};
+    this.setState(prev => ({
+      ...prev,
+      carouselImages: Array.isArray(params?.carouselImages) && params.carouselImages.length
+        ? params.carouselImages
+        : prev.carouselImages,
+      propertyTitle: params?.propertyTitle || prev.propertyTitle,
+      propertyLocation: params?.propertyLocation || prev.propertyLocation,
+      appointmentDate: params?.appointmentDate || prev.appointmentDate,
+      appointmentTime: params?.appointmentTime || prev.appointmentTime,
+      clientName: params?.clientName || prev.clientName,
+      clientImage: params?.clientImage || prev.clientImage,
+      isVerified:
+        typeof params?.isVerified === 'boolean'
+          ? params.isVerified
+          : prev.isVerified,
+      meetingLocation: params?.meetingLocation || prev.meetingLocation,
+      notes: params?.notes || prev.notes,
+    }));
+  }
+
   handleMarkCompleted = () => {
     console.log('Mark as completed');
     // Handle mark as completed

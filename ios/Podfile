@@ -25,6 +25,9 @@ target 'AbwabAgent' do
 
   post_install do |installer|
 
+      # Mapbox post_install
+    $RNMapboxMaps.post_install(installer)
+
     react_native_post_install(
       installer,
       config[:reactNativePath],

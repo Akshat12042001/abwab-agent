@@ -12,12 +12,8 @@ import {useTranslation} from 'react-i18next';
 import {
   HomeIcon,
   ProfileIcon,
-  HomeSelectedIcon,
-  ProfileSelectedIcon,
   CalenderIcon,
-  CalenderIconSelected,
   MessagesIcon,
-  MessagesIconSelected,
 } from '../../components/svgs';
 
 const BottomTabs = createBottomTabNavigator();
@@ -27,29 +23,21 @@ const TABS = [
     name: NAVIGATION.TABS.HOME,
     component: HomeScreen,
     title: 'TABS.HOME',
-    icon: <HomeIcon />,
-    selectedIcon: <HomeSelectedIcon />,
   },
   {
     name: NAVIGATION.TABS.APPOINTMENTS,
     component: AppointmentsScreen,
     title: 'TABS.APPOINTMENTS',
-    icon: <CalenderIcon />,
-    selectedIcon: <CalenderIconSelected />,
   },
   {
     name: NAVIGATION.TABS.MESSAGES,
     component: MessagesScreen,
     title: 'TABS.MESSAGES',
-    icon: <MessagesIcon />,
-    selectedIcon: <MessagesIconSelected />,
   },
   {
     name: NAVIGATION.TABS.PROFILE,
     component: ProfileScreen,
     title: 'TABS.PROFILE',
-    icon: <ProfileIcon />,
-    selectedIcon: <ProfileSelectedIcon />,
   },
 ];
 
@@ -71,8 +59,6 @@ export default () => {
             component={item.component}
             initialParams={{
               title: t(item.title),
-              icon: item.icon,
-              selectedIcon: item.selectedIcon,
             }}
           />
         );

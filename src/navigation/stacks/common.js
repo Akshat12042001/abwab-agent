@@ -24,14 +24,14 @@ const Stack = createStackNavigator();
 export default () => {
   return (
     <Stack.Navigator screenOptions={config}>
-      {/* <Stack.Screen
+      <Stack.Screen
         name={NAVIGATION.COMMON.VIEWING_REQUEST_SCREEN}
         component={ViewingRequestScreen}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={NAVIGATION.COMMON.NOTIFICATIONS_SCREEN}
         component={NotificationsScreen}
-      /> */}
+      />
       {/* <Stack.Screen
         name={NAVIGATION.COMMON.PROPERTY_DETAIL_SCREEN}
         component={PropertyDetailScreen}
@@ -40,14 +40,15 @@ export default () => {
         name={NAVIGATION.COMMON.DEVELOPER_DETAIL_SCREEN}
         component={DeveloperDetailScreen}
       /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name={NAVIGATION.COMMON.APPOINTMENT_DETAIL_SCREEN}
         component={AppointmentDetailScreen}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={NAVIGATION.COMMON.CALENDER_MANAGEMENT_SCREEN}
         component={CalenderManagementScreen}
       />
+      {/*
       <Stack.Screen
         name={NAVIGATION.COMMON.SUCCESS_SCREEN}
         component={SuccessScreen}
@@ -56,6 +57,10 @@ export default () => {
         name={NAVIGATION.COMMON.CHAT_SCREEN}
         component={ChatScreen}
       /> */}
+      <Stack.Screen
+        name={NAVIGATION.COMMON.CHAT_SCREEN}
+        component={ChatScreen}
+      />
       {/* <Stack.Screen
         name={NAVIGATION.COMMON.SUPPORT_CENTER_SCREEN}
         component={SupportCenterScreen}

@@ -87,6 +87,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 10,
   },
+  saveButton: {
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.PRIMARY,
+    marginHorizontal: SCREEN_PADDING,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
 });
 
 export default styles;

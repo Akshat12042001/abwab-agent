@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {TouchableOpacity, Platform, Keyboard, View} from 'react-native';
+import {TouchableOpacity, Platform, View} from 'react-native';
 import {
   GiftedChat,
   Bubble,
@@ -17,19 +17,19 @@ import {
 } from '../../../components/atoms';
 import {COLORS, FONTS} from '../../../constants';
 import {
-  LocationIcon,
-  PaperClickIcon,
   SendIcon,
-  DocumentFillIcon,
-  CloseIcon,
 } from '../../../components/svgs';
-import {
-  AttachmentOptionsModal,
-  SendPaymentRequestModal,
-  SendContractModal,
-} from '../../../components/modals';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
+import {connect} from 'react-redux';
+import {ChatSocketService} from '../../../services';
+import {
+  makeChatListRequest,
+  makeChatMarkReadRequest,
+  makeChatMessagesRequest,
+  makeChatSendMessageRequest,
+} from '../../../api/chat';
+import {errorToast} from '../../../utils/alerts';
 
 class ChatScreen extends Component {
   constructor(props) {
@@ -40,150 +40,383 @@ class ChatScreen extends Component {
     const contactLocation =
       route?.params?.contactLocation || 'Palm Hills Villa - New Cairo';
 
-    // Mock user ID - in real app, this would come from auth/state
-    this.userId = 'agent_1';
+    const {userData} = this.props;
+    this.userId =
+      userData?._id ||
+      userData?.id ||
+      userData?.agentId ||
+      userData?.user?._id ||
+      userData?.user?.id ||
+      'agent';
+
+    this.chatId = route?.params?.chatId || route?.params?.requestId || '';
+    this.otherUserId = route?.params?.userId || '';
+    this.socket = null;
+    this.typingTimeout = null;
 
     this.state = {
-      messages: [
-        {
-          _id: 1,
-          text: 'Perfect! See you tomorrow at 10 AM. Thank you!',
-          createdAt: new Date(Date.now() - 1000 * 60 * 1), // 1 minute ago
-          user: {
-            _id: 'client_1',
-            name: 'Ahmed Elghandour',
-          },
-        },
-        {
-          _id: 2,
-          text: 'Just bring a valid ID and any questions you might have about the property. All the necessary documents and keys will be ready.',
-          createdAt: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-          user: {
-            _id: this.userId,
-            name: 'Agent',
-          },
-        },
-        {
-          _id: 3,
-          text: 'At the villa directly. What should I bring?',
-          createdAt: new Date(Date.now() - 1000 * 60 * 1), // 1 minute ago
-          user: {
-            _id: 'client_1',
-            name: 'Ahmed Elghandour',
-          },
-        },
-        {
-          _id: 4,
-          text: '123 Palm Hills Drive, New Cairo. Would you like to meet there or at the office first?',
-          createdAt: new Date(Date.now() - 1000 * 60 * 2), // 2 minutes ago
-          user: {
-            _id: this.userId,
-            name: 'Agent',
-          },
-        },
-        {
-          _id: 5,
-          text: "Tomorrow at 10 AM. What's the exact address?",
-          createdAt: new Date(Date.now() - 1000 * 60 * 1), // 1 minute ago
-          user: {
-            _id: 'client_1',
-            name: 'Ahmed Elghandour',
-          },
-        },
-        {
-          _id: 6,
-          text: "I'm available this afternoon at 2 PM or tomorrow morning at 10 AM. Which works better for you?",
-          createdAt: new Date(Date.now() - 1000 * 60 * 0), // Just now
-          user: {
-            _id: this.userId,
-            name: 'Agent',
-          },
-        },
-        {
-          _id: 7,
-          text: "I'm interested in viewing the Palm Hills Villa. Can we schedule a visit?",
-          createdAt: new Date(Date.now() - 1000 * 60 * 1), // 1 minute ago
-          user: {
-            _id: 'client_1',
-            name: 'Ahmed Elghandour',
-          },
-        },
-      ],
+      messages: [],
       contactName,
       contactLocation,
-      showAttachmentModal: false,
-      showPaymentRequestModal: false,
-      showContractModal: false,
       selectedContracts: [],
+      isOtherUserTyping: false,
+      isLoadingMessages: false,
+      page: 1,
+      limit: 20,
+      hasMore: true,
     };
   }
+
+  componentDidMount() {
+    this.initializeChat();
+  }
+
+  componentWillUnmount() {
+    this.cleanupSocket();
+  }
+
+  initializeChat = async () => {
+    console.log('[Chat][Init] route params', this.props?.route?.params);
+    console.log('[Chat][Init] currentUserId', this.userId, 'otherUserId', this.otherUserId);
+    await this.resolveChatIdFromList();
+    console.log('[Chat][Init] resolved chatId', this.chatId || '(empty)');
+    this.setupSocket();
+    this.fetchMessages({reset: true});
+    this.markChatRead();
+  };
+
+  resolveChatIdFromList = async () => {
+    if (this.chatId || !this.otherUserId) {
+      return;
+    }
+
+    try {
+      const response = await makeChatListRequest({search: '', page: 1, limit: 50});
+      const list =
+        response?.data?.data ||
+        response?.data?.items ||
+        response?.data?.docs ||
+        response?.data?.list ||
+        response?.data ||
+        [];
+
+      if (!Array.isArray(list)) {
+        return;
+      }
+      console.log('[Chat][ResolveByList] list diagnostics', {
+        total: list.length,
+        firstItemKeys: list?.[0] ? Object.keys(list[0]) : [],
+      });
+
+      const matchedChat = list.find(chat => {
+        const members = Array.isArray(chat?.members) ? chat.members : [];
+        const candidateIds = [
+          chat?.other,
+          chat?.otherId,
+          chat?.userId,
+          chat?.clientId,
+          chat?.participantId,
+          chat?.receiverId,
+          chat?.senderId,
+          chat?.other?._id,
+          chat?.other?.id,
+          chat?.user?._id,
+          chat?.user?.id,
+          chat?.client?._id,
+          chat?.client?.id,
+          chat?.participant?._id,
+          chat?.participant?.id,
+          ...members.map(member => member?._id || member?.id || member),
+        ]
+          .filter(Boolean)
+          .map(String);
+        const otherAsString = String(this.otherUserId);
+        if (candidateIds.includes(otherAsString)) {
+          return true;
+        }
+        // Last-resort fallback when backend shape is unknown.
+        return JSON.stringify(chat).includes(otherAsString);
+      });
+
+      const resolvedId =
+        matchedChat?._id ||
+        matchedChat?.id ||
+        matchedChat?.chatId ||
+        matchedChat?.conversationId ||
+        matchedChat?.roomId ||
+        matchedChat?.chat?._id ||
+        matchedChat?.chat?.id ||
+        matchedChat?.conversation?._id ||
+        matchedChat?.conversation?.id ||
+        '';
+      this.chatId = String(resolvedId || '');
+      console.log('[Chat][ResolveByList] matched chat', {
+        otherUserId: this.otherUserId,
+        resolvedChatId: this.chatId,
+        matchedChatPreview: matchedChat
+          ? {
+              keys: Object.keys(matchedChat || {}),
+              idCandidates: {
+                _id: matchedChat?._id,
+                id: matchedChat?.id,
+                chatId: matchedChat?.chatId,
+                conversationId: matchedChat?.conversationId,
+                roomId: matchedChat?.roomId,
+                nestedChatId: matchedChat?.chat?._id || matchedChat?.chat?.id,
+                nestedConversationId:
+                  matchedChat?.conversation?._id || matchedChat?.conversation?.id,
+              },
+            }
+          : null,
+      });
+    } catch (e) {
+      console.log(
+        '[Chat][ResolveByList] failed',
+        e?.response?.data || e?.message || e,
+      );
+    }
+  };
+
+  getMessagesFromResponse = response => {
+    const candidates = [
+      response?.data?.data,
+      response?.data?.messages,
+      response?.data?.items,
+      response?.data?.docs,
+      response?.data?.list,
+      response?.data,
+      response?.items,
+      response?.results,
+      response,
+    ];
+    return candidates.find(Array.isArray) || [];
+  };
+
+  mapApiMessageToGifted = msg => {
+    const sender =
+      msg?.sender || msg?.user || msg?.from || msg?.createdBy || msg?.agent || {};
+    const senderId = sender?._id || sender?.id || msg?.senderId || msg?.userId;
+    const createdAt = new Date(msg?.createdAt || msg?.created_at || msg?.sentAt || Date.now());
+    return {
+      _id: msg?._id || msg?.id || msg?.messageId || Math.random().toString(16).slice(2),
+      text: msg?.content || msg?.text || '',
+      createdAt,
+      user: {
+        _id: senderId || 'unknown',
+        name: sender?.name || sender?.fullName || 'User',
+      },
+    };
+  };
+
+  fetchMessages = async ({reset = false} = {}) => {
+    const {t} = this.props?.i18n;
+    const {isLoadingMessages, hasMore, page, limit} = this.state;
+    if (!this.chatId) return;
+    if (!reset && (isLoadingMessages || !hasMore)) return;
+
+    const nextPage = reset ? 1 : page + 1;
+    this.setState({isLoadingMessages: true});
+    try {
+      const response = await makeChatMessagesRequest({
+        chatId: this.chatId,
+        page: nextPage,
+        limit,
+      });
+      console.log('[Chat][Messages] request payload', {
+        chatId: this.chatId,
+        page: nextPage,
+        limit,
+      });
+      console.log('[Chat][Messages] response', response);
+      const list = this.getMessagesFromResponse(response);
+      const mapped = list.map(this.mapApiMessageToGifted);
+      // GiftedChat expects newest first
+      mapped.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const pagination = response?.data?.pagination || response?.pagination;
+      const totalPages = Number(pagination?.totalPages) || 0;
+      const hasMoreFromPagination =
+        totalPages > 0 ? nextPage < totalPages : list.length >= limit;
+
+      this.setState(prev => ({
+        messages: reset ? mapped : GiftedChat.append(prev.messages, mapped),
+        page: nextPage,
+        hasMore: hasMoreFromPagination,
+      }));
+    } catch (e) {
+      console.log('[Chat][Messages] failed', e?.response?.data || e?.message || e);
+      errorToast(
+        t('CHAT_SCREEN.FAILED_TO_LOAD', {defaultValue: 'Failed to load messages'}),
+        t,
+      );
+    } finally {
+      this.setState({isLoadingMessages: false});
+    }
+  };
+
+  markChatRead = async () => {
+    try {
+      if (!this.chatId) return;
+      await makeChatMarkReadRequest({chatId: this.chatId});
+      console.log('[Chat][Read] marked read', {
+        chatId: this.chatId,
+      });
+    } catch (e) {
+      console.log('[Chat][Read] failed', e?.response?.data || e?.message || e);
+    }
+  };
+
+  getToken = () => {
+    const userData = this.props?.userData || {};
+    return userData?.token || userData?.data?.token || '';
+  };
+
+  setupSocket = () => {
+    const token = this.getToken();
+    if (!token || !this.chatId) {
+      console.log('[Chat][Socket] skip setup', {
+        hasToken: Boolean(token),
+        chatId: this.chatId,
+      });
+      return;
+    }
+    console.log('[Chat][Socket] setup', {
+      chatId: this.chatId,
+      userId: this.userId,
+      hasToken: Boolean(token),
+    });
+    if (!ChatSocketService.isConnected()) {
+      ChatSocketService.connect(token);
+    }
+
+    ChatSocketService.on('connect', this.onSocketConnect);
+    ChatSocketService.on('disconnect', this.onSocketDisconnect);
+    ChatSocketService.on('error', this.onSocketError);
+    ChatSocketService.on('auth:error', this.onSocketAuthError);
+
+    ChatSocketService.on('chat:userOnline', this.onUserOnline);
+    ChatSocketService.on('chat:userOffline', this.onUserOffline);
+    ChatSocketService.on('chat:userTyping', this.onUserTyping);
+    ChatSocketService.on('chat:messageDelivered', this.onMessageDelivered);
+    ChatSocketService.on('chat:messageRead', this.onMessageRead);
+
+    ChatSocketService.joinRoom({chatId: this.chatId, userId: this.userId});
+    console.log('[Chat][Socket] joinRoom', {
+      chatId: this.chatId,
+      userId: this.userId,
+    });
+  };
+
+  cleanupSocket = () => {
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+      this.typingTimeout = null;
+    }
+
+    if (this.chatId && this.userId) {
+      ChatSocketService.leaveRoom({chatId: this.chatId, userId: this.userId});
+    }
+
+    ChatSocketService.off('connect', this.onSocketConnect);
+    ChatSocketService.off('disconnect', this.onSocketDisconnect);
+    ChatSocketService.off('error', this.onSocketError);
+    ChatSocketService.off('auth:error', this.onSocketAuthError);
+
+    ChatSocketService.off('chat:userOnline', this.onUserOnline);
+    ChatSocketService.off('chat:userOffline', this.onUserOffline);
+    ChatSocketService.off('chat:userTyping', this.onUserTyping);
+    ChatSocketService.off('chat:messageDelivered', this.onMessageDelivered);
+    ChatSocketService.off('chat:messageRead', this.onMessageRead);
+  };
+
+  onSocketConnect = () => {
+    console.log('[Chat][Socket] connected');
+  };
+  onSocketDisconnect = reason => {
+    console.log('[Chat][Socket] disconnected', reason);
+  };
+  onSocketError = error => {
+    console.log('[Chat][Socket] error', error);
+  };
+  onSocketAuthError = error => {
+    console.log('[Chat][Socket] auth:error', error);
+  };
+
+  onUserOnline = data => {
+    console.log('[Chat][Socket] user online', data);
+  };
+  onUserOffline = data => {
+    console.log('[Chat][Socket] user offline', data);
+  };
+
+  onUserTyping = data => {
+    console.log('[Chat][Socket] user typing', data);
+    if (data?.userId && data.userId === this.userId) {
+      return;
+    }
+    this.setState({isOtherUserTyping: Boolean(data?.isTyping)});
+  };
+
+  onMessageDelivered = data => {
+    console.log('[Chat][Socket] message delivered', data);
+  };
+  onMessageRead = data => {
+    console.log('[Chat][Socket] message read', data);
+  };
+
+  emitTyping = isTyping => {
+    if (!this.chatId) {
+      return;
+    }
+    ChatSocketService.typing({chatId: this.chatId, userId: this.userId, isTyping});
+  };
+
+  handleInputTextChanged = text => {
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    const hasText = (text || '').trim().length > 0;
+    this.emitTyping(hasText);
+
+    // Stop typing after 1.2s of inactivity
+    this.typingTimeout = setTimeout(() => {
+      this.emitTyping(false);
+    }, 1200);
+  };
 
   onSend = (messages = []) => {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }));
+    this.emitTyping(false);
+    this.sendMessageToApi(messages?.[0]);
   };
 
-  handleLocationPress = () => {
-    console.log('Location pressed');
-    // Navigate to location/map screen
+  sendMessageToApi = async giftedMessage => {
+    const {t} = this.props?.i18n;
+    if (!this.chatId || !giftedMessage) {
+      errorToast('Chat is not ready yet', t);
+      return;
+    }
+    try {
+      const payload = {
+        chatId: this.chatId,
+        content: giftedMessage.text || '',
+        attachments: giftedMessage.attachments || [],
+      };
+      console.log('[Chat][Send] payload', payload);
+      const response = await makeChatSendMessageRequest(payload);
+      console.log('[Chat][Send] response', response);
+    } catch (e) {
+      console.log('[Chat][Send] failed', e?.response?.data || e?.message || e);
+      errorToast(
+        t('CHAT_SCREEN.FAILED_TO_SEND', {defaultValue: 'Failed to send message'}),
+        t,
+      );
+    }
   };
 
-  handleAttachmentPress = () => {
-    Keyboard.dismiss();
-    this.setState({showAttachmentModal: true});
-  };
-
-  handleCloseAttachmentModal = () => {
-    this.setState({showAttachmentModal: false});
-  };
-
-  handleSendContract = () => {
-    this.handleCloseAttachmentModal();
-    this.setState({showContractModal: true});
-  };
-
-  handleCloseContractModal = () => {
-    this.setState({showContractModal: false});
-  };
-
-  handleContractDone = selectedContractIds => {
-    // Map contract IDs to contract objects with labels
-    const defaultContracts = [
-      {id: 'noc_1', label: 'NOC Contract', type: 'noc'},
-      {id: 'cce_1', label: 'CCE Contract', type: 'cce'},
-      {id: 'ab_1', label: 'AB Contract', type: 'ab'},
-      {id: 'noc_2', label: 'NOC Contract', type: 'noc'},
-      {id: 'cce_2', label: 'CCE Contract', type: 'cce'},
-      {id: 'ab_2', label: 'AB Contract', type: 'ab'},
-      {id: 'noc_3', label: 'NOC Contract', type: 'noc'},
-      {id: 'cce_3', label: 'CCE Contract', type: 'cce'},
-      {id: 'ab_3', label: 'AB Contract', type: 'ab'},
-    ];
-
-    const contracts = selectedContractIds.map(id => {
-      const contract = defaultContracts.find(c => c.id === id);
-      return contract || {id, label: 'Contract'};
-    });
-
-    this.setState({selectedContracts: contracts});
-    this.handleCloseContractModal();
-  };
-
-  handleSendPaymentRequest = () => {
-    this.handleCloseAttachmentModal();
-    this.setState({showPaymentRequestModal: true});
-  };
-
-  handleClosePaymentRequestModal = () => {
-    this.setState({showPaymentRequestModal: false});
-  };
-
-  handlePaymentRequestDone = paymentType => {
-    console.log('Payment Request Done:', paymentType);
-    // Handle payment request submission
-    this.handleClosePaymentRequestModal();
-  };
+  // Attachments temporarily disabled
 
   renderBubble = props => {
     const {currentMessage} = props;
@@ -287,85 +520,23 @@ class ChatScreen extends Component {
   renderComposer = props => {
     const existingTextInputProps = props.textInputProps || {};
     const {t} = this.props?.i18n;
-    const {selectedContracts} = this.state;
-    const hasContracts = selectedContracts.length > 0;
     return (
       <>
-        {hasContracts ? (
-          <View style={styles.contractsContainer}>
-            <View style={styles.contractIconContainer}>
-              <DocumentFillIcon size={30} />
-              <View style={styles.contractBadge}>
-                <StyledText size={8} variant="bold" color={COLORS.WHITE}>
-                  {selectedContracts.length}
-                </StyledText>
-              </View>
-            </View>
-            <View style={styles.contractNamesContainer}>
-              {selectedContracts.map((contract, index) => (
-                <StyledText
-                  key={contract.id}
-                  size={12}
-                  variant="regular"
-                  color={COLORS.GREYSCALE_900}
-                  textStyle={styles.contractName}>
-                  {contract.label}.Pdf
-                  {index < selectedContracts.length - 1 ? ' ,' : ''}
-                </StyledText>
-              ))}
-            </View>
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                right: -8,
-                top: -8,
-                borderWidth: 1,
-                borderColor: COLORS.GREYSCALE_900,
-                width: 25,
-                height: 25,
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 15,
-              }}
-              hitSlop={SharedStyles.hitSlop10}
-              onPress={() => this.setState({selectedContracts: []})}>
-              <CloseIcon size={20} color={COLORS.GREYSCALE_900} />
-            </TouchableOpacity>
-          </View>
-        ) : (
+        <View style={styles.inputPill}>
           <Composer
             {...props}
-            multiline={true}
-            placeholderTextColor={COLORS.GRAY_TEXT}
+            placeholderTextColor={COLORS.GREYSCALE_400}
             textInputProps={{
               ...existingTextInputProps,
-              multiline: true,
+              multiline: false,
               blurOnSubmit: false,
-              numberOfLines: 2,
-              placeholder: t('CHAT_SCREEN.TYPE_MESSAGE'),
-              style: {
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingHorizontal: 16,
-                paddingTop: 12,
-                paddingBottom: 12,
-                fontSize: 14,
-                fontFamily: FONTS.regular,
-                color: COLORS.GREYSCALE_900,
-                borderColor: COLORS.GREYSCALE_400,
-                paddingRight: 40,
-              },
+              placeholder: t('CHAT_SCREEN.TYPE_MESSAGE', {
+                defaultValue: 'Type Message...',
+              }),
+              style: styles.composerTextInput,
             }}
           />
-        )}
-
-        <TouchableOpacity
-          hitSlop={SharedStyles.hitSlop10}
-          style={styles.sendButton}
-          onPress={this.handleAttachmentPress}
-          onStartShouldSetResponder={() => true}>
-          <PaperClickIcon size={20} color={COLORS.WHITE} />
-        </TouchableOpacity>
+        </View>
       </>
     );
   };
@@ -518,13 +689,6 @@ class ChatScreen extends Component {
           containerStyle={{height: 54, paddingBottom: 20}}
           title={contactName}
           subTitle={contactLocation}
-          rightComponent={
-            <TouchableOpacity
-              style={styles.rightComponent}
-              onPress={this.handleLocationPress}>
-              <LocationIcon size={24} color={COLORS.GREYSCALE_900} />
-            </TouchableOpacity>
-          }
         />
         <View style={{height: 1, backgroundColor: COLORS.GREYSCALE_100}} />
         <GiftedChat
@@ -555,39 +719,21 @@ class ChatScreen extends Component {
           // textInputProps={{
           //   style: styles.textInputInner,
           // }}
-          isTyping={false}
+          onInputTextChanged={this.handleInputTextChanged}
+          isTyping={this.state.isOtherUserTyping}
           infiniteScroll
-          loadEarlier={false}
-        />
-        <AttachmentOptionsModal
-          visible={this.state.showAttachmentModal}
-          onClose={this.handleCloseAttachmentModal}
-          onSendContract={this.handleSendContract}
-          onSendPaymentRequest={this.handleSendPaymentRequest}
-          bottomOffset={insetBottom}
-        />
-        <SendPaymentRequestModal
-          visible={this.state.showPaymentRequestModal}
-          onClose={this.handleClosePaymentRequestModal}
-          onDone={this.handlePaymentRequestDone}
-          bottomOffset={insetBottom}
-          paymentTypes={[
-            {label: 'Down Payment', value: 'down_payment'},
-            {label: 'Installment', value: 'installment'},
-            {label: 'Full Payment', value: 'full_payment'},
-            {label: 'Maintenance Fee', value: 'maintenance_fee'},
-          ]}
-        />
-        <SendContractModal
-          visible={this.state.showContractModal}
-          onClose={this.handleCloseContractModal}
-          onDone={this.handleContractDone}
-          bottomOffset={insetBottom}
-          selectedContracts={this.state.selectedContracts.map(c => c.id)}
+          loadEarlier={this.state.hasMore}
+          onLoadEarlier={() => this.fetchMessages()}
         />
       </ScreenContainer>
     );
   }
 }
 
-export default withTranslation()(withSafeAreaInsets(ChatScreen));
+const mapStateToProps = state => ({
+  userData: state?.auth?.userData,
+});
+
+export default connect(mapStateToProps)(
+  withTranslation()(withSafeAreaInsets(ChatScreen)),
+);

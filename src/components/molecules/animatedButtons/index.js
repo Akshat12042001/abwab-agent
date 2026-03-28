@@ -1,10 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, TouchableOpacity, I18nManager} from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
 import {StyledText} from '../../atoms';
 import {COLORS} from '../../../constants';
 import styles from './styles';
@@ -24,14 +19,6 @@ const AnimatedButtons = ({
   const {t} = useTranslation();
   const isRTL = I18nManager.isRTL;
   const [containerWidth, setContainerWidth] = useState(0);
-  const translateX = useSharedValue(selectedIndex);
-
-  useEffect(() => {
-    translateX.value = withSpring(selectedIndex, {
-      // damping: 15,
-      // stiffness: 150,
-    });
-  }, [selectedIndex, translateX]);
 
   const handleLayout = event => {
     const {width} = event.nativeEvent.layout;
@@ -40,30 +27,23 @@ const AnimatedButtons = ({
     }
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const getIndicatorStyle = () => {
     if (containerWidth === 0 || options.length === 0) {
       return {};
     }
 
-    const padding = 10; // Container padding
+    const padding = 10;
     const availableWidth = containerWidth - padding * 2;
     const buttonWidth = availableWidth / options.length;
-
-    // Calculate the position based on selected index
-    // In RTL, we need to reverse the direction
     const position = isRTL
-      ? (options.length - 1 - translateX.value) * buttonWidth
-      : translateX.value * buttonWidth;
+      ? (options.length - 1 - selectedIndex) * buttonWidth
+      : selectedIndex * buttonWidth;
 
     return {
       width: buttonWidth,
-      transform: [
-        {
-          translateX: position,
-        },
-      ],
+      transform: [{translateX: position}],
     };
-  });
+  };
 
   if (!options || options.length === 0) {
     return null;
@@ -78,11 +58,11 @@ const AnimatedButtons = ({
       ]}
       onLayout={handleLayout}>
       {containerWidth > 0 && (
-        <Animated.View
+        <View
           style={[
             styles.indicator,
             {backgroundColor: activeBackgroundColor},
-            animatedStyle,
+            getIndicatorStyle(),
           ]}
         />
       )}

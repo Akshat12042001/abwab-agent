@@ -89,6 +89,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     lineHeight: 20,
   },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
 });
 
 export default styles;

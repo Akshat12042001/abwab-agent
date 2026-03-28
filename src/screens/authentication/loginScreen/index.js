@@ -17,7 +17,7 @@ import styles from './styles';
 import {makeLoginRequest} from '../../../api/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {connect} from 'react-redux';
-import {setUserData} from '../../../redux/auth/auth.reducer';
+import {setRememberMe, setUserData} from '../../../redux/auth/auth.reducer';
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -25,43 +25,82 @@ class LoginScreen extends Component {
     this.form = FORM_SCHEMA.LOGIN;
     this.state = {
       isLoading: false,
-      isChecked: false,
-    };
-    this.initialValues = {
-      email: '',
-      password: '',
+      isChecked: true,
+      initialValues: {
+        email: '',
+        password: '',
+      },
     };
     this.formRef = null;
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = async values => {
-    this.setState({isLoading: true});
+  async componentDidMount() {
     try {
-      const params = {
-        email: values?.email,
-        password: values?.password,
-      };
+      const isRememberMe = await AsyncStorage.getItem('isRememberMe');
+      const savedEmail = await AsyncStorage.getItem('rememberedEmail');
+      const savedPassword = await AsyncStorage.getItem('rememberedPassword');
+      const shouldRemember = isRememberMe !== 'false';
 
-      const res = await makeLoginRequest(params);
+      this.setState({
+        isChecked: shouldRemember,
+        initialValues: shouldRemember
+          ? {
+              email: savedEmail || '',
+              password: savedPassword || '',
+            }
+          : {
+              email: '',
+              password: '',
+            },
+      });
+    } catch (e) {}
+  }
 
-      AsyncStorage.setItem(
-        'isRememberMe',
-        this.state.isChecked ? 'true' : 'false',
-      );
-      // if (!res?.data?.emailVerified) {
-      //   this.props.navigation.navigate(
-      //     NAVIGATION.AUTH.VERIFICATION_CODE_SCREEN,
-      //     {email: values?.email},
-      //   );
-      // } else {
-      this.props.setUserData(res?.data);
-      // }
-    } catch (error) {
-    } finally {
-      this.setState({isLoading: false});
+ onSubmit = async values => {
+  console.log("🟡 LOGIN BUTTON CLICKED");
+  console.log("🟡 FORM VALUES:", values);
+
+  this.setState({isLoading: true});
+
+  try {
+    const params = {
+      email: values?.email,
+      password: values?.password,
+    };
+
+    console.log("📤 FINAL PARAMS:", params);
+
+    const res = await makeLoginRequest(params);
+
+    console.log("🟢 FINAL RESPONSE:", res);
+    console.log("🟢 TOKEN:", res?.data?.token);
+
+    await AsyncStorage.setItem(
+      'isRememberMe',
+      this.state.isChecked ? 'true' : 'false',
+    );
+
+    if (this.state.isChecked) {
+      await AsyncStorage.setItem('rememberedEmail', values?.email || '');
+      await AsyncStorage.setItem('rememberedPassword', values?.password || '');
+    } else {
+      await AsyncStorage.removeItem('rememberedEmail');
+      await AsyncStorage.removeItem('rememberedPassword');
     }
-  };
+
+    this.props.setRememberMe(this.state.isChecked);
+
+    console.log("👤 USER DATA SET:", res?.data);
+
+    this.props.setUserData(res?.data);
+
+  } catch (error) {
+    console.log("🔴 LOGIN ERROR:", error);
+  } finally {
+    this.setState({isLoading: false});
+  }
+};
 
   render() {
     const {t} = this.props?.i18n;
@@ -106,9 +145,9 @@ class LoginScreen extends Component {
             <View style={styles.card}>
               <Formik
                 validateOnChange
-                enableReinitialize={false}
+                enableReinitialize={true}
                 onSubmit={this.onSubmit}
-                initialValues={this.initialValues}
+                initialValues={this.state.initialValues}
                 validationSchema={this.form.schema}
                 innerRef={formRef => (this.formRef = formRef)}>
                 {({
@@ -197,4 +236,6 @@ class LoginScreen extends Component {
     );
   }
 }
-export default withTranslation()(connect(null, {setUserData})(LoginScreen));
+export default withTranslation()(
+  connect(null, {setUserData, setRememberMe})(LoginScreen),
+);

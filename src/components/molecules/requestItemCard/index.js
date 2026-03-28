@@ -18,6 +18,9 @@ const RequestItemCard = ({
   onAccept,
   onDecline,
   showButtons = true,
+  showChatButton = false,
+  chatButtonTitle = 'Chat with Client',
+  onChatPress,
   containerStyle,
 }) => {
   return (
@@ -123,6 +126,21 @@ const RequestItemCard = ({
             </StyledText>
           </TouchableOpacity>
         </View>
+      )}
+
+      {showChatButton && (
+        <TouchableOpacity
+          style={styles.chatButton}
+          onPress={onChatPress}
+          activeOpacity={0.8}>
+          <StyledText
+            size={14}
+            variant="semiBold"
+            color={COLORS.WHITE}
+            textStyle={styles.chatButtonText}>
+            {chatButtonTitle}
+          </StyledText>
+        </TouchableOpacity>
       )}
     </View>
   );

@@ -5,6 +5,27 @@ import styles from './styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {COLORS, NAVIGATION} from '../../../constants';
 import {useTranslation} from 'react-i18next';
+import {
+  CalenderIcon,
+  HomeIcon,
+  MessagesIcon,
+  ProfileIcon,
+} from '../../svgs';
+
+const getRouteIcon = routeName => {
+  switch (routeName) {
+    case NAVIGATION.TABS.HOME:
+      return <HomeIcon />;
+    case NAVIGATION.TABS.APPOINTMENTS:
+      return <CalenderIcon />;
+    case NAVIGATION.TABS.MESSAGES:
+      return <MessagesIcon />;
+    case NAVIGATION.TABS.PROFILE:
+      return <ProfileIcon />;
+    default:
+      return null;
+  }
+};
 
 const CustomTabBar = ({state, navigation}) => {
   const {t} = useTranslation();
@@ -56,9 +77,7 @@ const CustomTabBar = ({state, navigation}) => {
               onLongPress={onLongPress.bind(this, route)}>
               <View style={styles.iconTopLabelBottom}>
                 {(() => {
-                  const iconNode = isFocused
-                    ? route.params?.selectedIcon
-                    : route.params?.icon;
+                  const iconNode = getRouteIcon(route?.name);
                   if (!iconNode) return null;
                   try {
                     return React.cloneElement(iconNode, {

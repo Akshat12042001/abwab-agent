@@ -1,5 +1,4 @@
 import {APIClient} from './client';
-import Config from 'react-native-config';
 
 const AUTH_ENDPOINTS = {
   LOGIN: '/agent/login',
@@ -7,6 +6,9 @@ const AUTH_ENDPOINTS = {
   FORGOT_PASSWORD: '/agent/forgot-password',
   CHANGE_PASSWORD: '/agent/change-password',
   RESEND_OTP: '/resend-otp',
+  REQUEST_VIEWING_LISTING: '/request-viewing/listing',
+  REQUEST_VIEWING_ACTION: '/request-viewing/action',
+  AGENT_PROFILE: '/agent',
 };
 
 export const makeLoginRequest = data => {
@@ -39,20 +41,55 @@ export const makeResendOtpRequest = data => {
     .then(res => res.data);
 };
 
-// export const makeUploadImageRequest = (data, token) => {
-//   const newData = {
-//     uri: data?.uri,
-//     name: !!data?.fileName ? data?.fileName : data?.name,
-//     type: data?.type,
-//   };
-//   const formData = new FormData();
-//   formData.append('file', newData);
-//   return fetch(`${Config.API_URL}${AUTH_ENDPOINTS.UPLOAD}`, {
-//     method: 'POST',
-//     body: formData,
-//     headers: {
-//       authorization: token,
-//       lan: 'en',
-//     },
-//   }).then(res => res?.json());
-// };
+export const makeRequestViewingListingRequest = (params = {}) => {
+  const {
+    page = 1,
+    limit = 10,
+    status = 'pending',
+    sort = [],
+  } = params;
+
+  return APIClient()
+    .post(AUTH_ENDPOINTS.REQUEST_VIEWING_LISTING, {
+      page,
+      limit,
+      status,
+      sort, 
+    })
+    .then(res => res.data);
+};
+export const makeRequestViewingActionRequest = ({
+  requestId,
+  status,
+  updateMessage = '',
+  rescheduleDate = '',
+} = {}) => {
+  const normalizedRequestId =
+    (typeof requestId === 'object'
+      ? requestId?._id || requestId?.id
+      : requestId) || '';
+
+  const payload = new URLSearchParams();
+  payload.append('requestId', String(normalizedRequestId));
+  payload.append('status', String(status || ''));
+  if (updateMessage) {
+    payload.append('updateMessage', updateMessage);
+  }
+  if (rescheduleDate) {
+    payload.append('rescheduleDate', rescheduleDate);
+  }
+
+  return APIClient()
+    .post(AUTH_ENDPOINTS.REQUEST_VIEWING_ACTION, payload.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    })
+    .then(res => res.data);
+};
+
+export const makeGetAgentProfileRequest = agentId => {
+  return APIClient()
+    .get(`${AUTH_ENDPOINTS.AGENT_PROFILE}/${agentId}`)
+    .then(res => res.data);
+};

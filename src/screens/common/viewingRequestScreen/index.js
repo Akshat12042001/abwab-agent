@@ -1,110 +1,459 @@
 import React, {Component} from 'react';
-import {View, FlatList} from 'react-native';
-import {CommonHeader, ScreenContainer} from '../../../components/atoms';
+import {ActivityIndicator, FlatList, View} from 'react-native';
+import {
+  CommonHeader,
+  ScreenContainer,
+  StyledText,
+} from '../../../components/atoms';
 import {RequestItemCard, AnimatedButtons} from '../../../components/molecules';
-import {COLORS, SCREEN} from '../../../constants';
+import {COLORS, NAVIGATION, SCREEN} from '../../../constants';
 import {withTranslation} from 'react-i18next';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
 import styles from './styles';
+import {
+  makeRequestViewingActionRequest,
+  makeRequestViewingListingRequest,
+} from '../../../api/auth';
+import {errorToast, successToast} from '../../../utils/alerts';
+
+const STATUS_TABS = ['pending', 'accepted', 'declined'];
+const PAGE_LIMIT = 10;
 
 class ViewingRequestScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedTabIndex: 0, // 0: Pending, 1: Accepted, 2: Declined
+      selectedTabIndex: 0,
+      requestsList: [],
+      page: 1,
+      hasMore: true,
+      isLoading: false,
+      isLoadingMore: false,
+      isRefreshing: false,
+      actionLoadingId: '',
     };
+    this.latestRequestId = 0;
   }
 
-  handleTabChange = (index, value) => {
-    this.setState({selectedTabIndex: index});
+  componentDidMount() {
+    this.fetchViewingRequests({reset: true});
+  }
+
+  getStatusFromTab = index => STATUS_TABS[index] || STATUS_TABS[0];
+
+  getRequestsListFromResponse = response => {
+    const candidates = [
+      response?.data?.data,
+      response?.data?.requests,
+      response?.data?.items,
+      response?.data?.docs,
+      response?.data?.list,
+      response?.data,
+      response?.items,
+      response?.results,
+      response,
+    ];
+    return candidates.find(Array.isArray) || [];
   };
 
-  handleAccept = item => {
-    // Handle accept logic
-    console.log('Accept:', item);
-  };
+  getHasMoreFromResponse = (response, fetchedItemsCount, currentPage) => {
+    const pagination = response?.data?.pagination || response?.pagination;
+    const hasNext =
+      pagination?.hasNextPage ??
+      pagination?.has_next_page ??
+      response?.data?.hasNextPage ??
+      response?.hasNextPage;
 
-  handleDecline = item => {
-    // Handle decline logic
-    console.log('Decline:', item);
-  };
-
-  getAppointmentsData = () => {
-    const {selectedTabIndex} = this.state;
-
-    // Sample data - replace with actual data fetching
-    const pendingData = [
-      {
-        id: '1',
-        propertyName: 'Mountain View Villa',
-        location: '5th Settlement, Katameya',
-        agentName: 'Ahmed Elghandour',
-        appointmentDate: 'Aug 6, 2023 • 4:30 PM',
-        appointmentType: 'In-person',
-        agentMessage:
-          'I will wait you at time, you can call me when you Arrived.',
-      },
-      {
-        id: '2',
-        propertyName: 'Mountain View Villa',
-        location: '5th Settlement, Katameya',
-        agentName: 'Ahmed Elghandour',
-        appointmentDate: 'Aug 6, 2023 • 4:30 PM',
-        appointmentType: 'In-person',
-        agentMessage: null,
-      },
-      {
-        id: '3',
-        propertyName: 'Mountain View Villa',
-        location: '5th Settlement, Katameya',
-        agentName: 'Ahmed Elghandour',
-        appointmentDate: 'Aug 6, 2023 • 4:30 PM',
-        appointmentType: 'Video',
-        agentMessage:
-          'I will wait you at time, you can call me when you Arrived.',
-      },
-    ];
-
-    const acceptedData = [
-      {
-        id: '4',
-        propertyName: 'Mountain View Villa',
-        location: '5th Settlement, Katameya',
-        agentName: 'Ahmed Elghandour',
-        appointmentDate: 'Aug 7, 2023 • 2:00 PM',
-        appointmentType: 'In-person',
-        agentMessage: null,
-      },
-    ];
-
-    const declinedData = [
-      {
-        id: '5',
-        propertyName: 'Mountain View Villa',
-        location: '5th Settlement, Katameya',
-        agentName: 'Ahmed Elghandour',
-        appointmentDate: 'Aug 8, 2023 • 10:00 AM',
-        appointmentType: 'Video',
-        agentMessage: null,
-      },
-    ];
-
-    switch (selectedTabIndex) {
-      case 0:
-        return pendingData;
-      case 1:
-        return acceptedData;
-      case 2:
-        return declinedData;
-      default:
-        return pendingData;
+    if (typeof hasNext === 'boolean') {
+      return hasNext;
     }
+
+    const totalPages =
+      Number(pagination?.totalPages) ||
+      Number(pagination?.lastPage) ||
+      Number(pagination?.last_page) ||
+      Number(response?.data?.totalPages) ||
+      Number(response?.totalPages) ||
+      0;
+
+    if (totalPages > 0) {
+      return currentPage < totalPages;
+    }
+
+    return fetchedItemsCount >= PAGE_LIMIT;
+  };
+
+  formatAppointmentDate = dateValue => {
+    if (!dateValue) {
+      return '-';
+    }
+
+    const parsedDate = new Date(dateValue);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return String(dateValue);
+    }
+
+    return parsedDate.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  mapRequestItemToCardProps = item => {
+    const request =
+      item?.requestViewing || item?.request || item?.viewingRequest || item;
+    const property =
+      request?.property ||
+      (typeof request?.propertyId === 'object' ? request?.propertyId : null) ||
+      request?.listing ||
+      request?.propertyDetails ||
+      request?.unit ||
+      {};
+    const client =
+      request?.client ||
+      request?.customer ||
+      request?.user ||
+      (typeof request?.userId === 'object' ? request?.userId : null) ||
+      request?.lead ||
+      request?.agent ||
+      {};
+
+    const pickFirst = (...values) => values.find(value => !!value);
+
+    const propertyImageUri = pickFirst(
+      property?.mainImage,
+      property?.image,
+      property?.imageUrl,
+      request?.propertyImage,
+      request?.listingImage,
+      request?.thumbnail,
+    );
+    const agentImageUri = pickFirst(
+      client?.avatar,
+      client?.image,
+      client?.profileImage,
+      request?.agentImage,
+    );
+
+    return {
+      propertyName: pickFirst(
+        property?.name,
+        property?.title,
+        request?.propertyName,
+        request?.listingTitle,
+        request?.title,
+        'Property',
+      ),
+      location: pickFirst(
+        property?.address,
+        property?.location,
+        [property?.area, property?.city].filter(Boolean).join(', '),
+        property?.area,
+        request?.location,
+        request?.address,
+        '-',
+      ),
+      agentName: pickFirst(
+        client?.name,
+        client?.fullName,
+        client?.full_name,
+        request?.agentName,
+        request?.clientName,
+        '-',
+      ),
+      propertyImage: propertyImageUri ? {uri: propertyImageUri} : undefined,
+      agentImage: agentImageUri ? {uri: agentImageUri} : undefined,
+      appointmentDate: this.formatAppointmentDate(
+        pickFirst(
+          request?.appointmentDate,
+          request?.appointment_date,
+          request?.appointmentAt,
+          request?.meetingDate,
+          request?.meeting_date,
+          request?.date,
+          request?.createdAt,
+        ),
+      ),
+      appointmentType: (() => {
+        const typeValue =
+          pickFirst(
+            request?.appointmentType,
+            request?.meetingType,
+            request?.type,
+          ) || (request?.isVirtual ? 'video_call' : 'in_person');
+
+        if (typeValue === 'in_person') {
+          return 'In-person';
+        }
+        if (typeValue === 'video_call') {
+          return 'Video';
+        }
+        return typeValue;
+      })(),
+      agentMessage: pickFirst(
+        request?.specialNotes,
+        request?.message,
+        request?.note,
+        request?.notes,
+        request?.comment,
+        '',
+      ),
+    };
+  };
+
+  fetchViewingRequests = async ({reset = false, fromRefresh = false} = {}) => {
+    const {selectedTabIndex, isLoading, isLoadingMore, hasMore, page, requestsList} =
+      this.state;
+    const {t} = this.props?.i18n;
+
+    if (!reset && (isLoading || isLoadingMore || !hasMore)) {
+      return;
+    }
+
+    // Avoid onEndReached firing page 2+ while list is still empty (e.g. first request failed).
+    if (!reset && !fromRefresh && requestsList.length === 0) {
+      return;
+    }
+
+    const nextPage = reset ? 1 : page + 1;
+    const requestId = this.latestRequestId + 1;
+    this.latestRequestId = requestId;
+
+    this.setState({
+      isLoading: reset && !fromRefresh,
+      isLoadingMore: !reset,
+      isRefreshing: fromRefresh,
+    });
+
+  const params = {
+  status: this.getStatusFromTab(selectedTabIndex),
+  page: nextPage,
+  limit: PAGE_LIMIT,
+  sort: [
+    {
+      field: 'createdAt',
+      order: -1,
+    },
+  ],
+};
+    try {
+      const response = await makeRequestViewingListingRequest(params);
+
+      if (requestId !== this.latestRequestId) {
+        return;
+      }
+
+      const fetchedItems = this.getRequestsListFromResponse(response);
+      const hasMoreItems = this.getHasMoreFromResponse(
+        response,
+        fetchedItems.length,
+        nextPage,
+      );
+
+      this.setState(prevState => ({
+        requestsList: reset
+          ? fetchedItems
+          : [...prevState.requestsList, ...fetchedItems],
+        page: nextPage,
+        hasMore: hasMoreItems,
+      }));
+    } catch (e) {
+      if (requestId === this.latestRequestId) {
+        errorToast(
+          t?.('HOME_SCREEM.FAILED_TO_LOAD_VIEWING_REQUESTS', {
+            defaultValue: 'Failed to load viewing requests',
+          }),
+          t,
+        );
+      }
+    } finally {
+      if (requestId === this.latestRequestId) {
+        this.setState({
+          isLoading: false,
+          isLoadingMore: false,
+          isRefreshing: false,
+        });
+      }
+    }
+  };
+
+  getRequestId = item => {
+    const request =
+      item?.requestViewing || item?.request || item?.viewingRequest || item || {};
+    const rawId =
+      request?._id ||
+      request?.id ||
+      request?.requestId ||
+      request?.request?._id ||
+      request?.request?.id;
+    if (typeof rawId === 'object') {
+      return String(rawId?._id || rawId?.id || '');
+    }
+    return String(rawId || '');
+  };
+
+  handleRequestAction = async (item, status) => {
+    const {t} = this.props?.i18n;
+    const requestId = this.getRequestId(item);
+    if (!requestId) {
+      errorToast('Invalid request id', t);
+      return;
+    }
+
+    this.setState({actionLoadingId: requestId});
+    try {
+      await makeRequestViewingActionRequest({
+        requestId,
+        status,
+      });
+      successToast(
+        status === 'accepted'
+          ? t?.('HOME_SCREEM.REQUEST_ACCEPTED', {
+              defaultValue: 'Request accepted',
+            })
+          : t?.('HOME_SCREEM.REQUEST_DECLINED', {
+              defaultValue: 'Request declined',
+            }),
+        t,
+      );
+
+      if (
+        status === 'accepted' &&
+        this.getStatusFromTab(this.state.selectedTabIndex) === 'accepted'
+      ) {
+        this.setState(prevState => ({
+          requestsList: prevState.requestsList.map(requestItem =>
+            this.getRequestId(requestItem) === requestId
+              ? {...requestItem, status: 'accepted'}
+              : requestItem,
+          ),
+        }));
+      } else if (
+        status === 'declined' &&
+        this.getStatusFromTab(this.state.selectedTabIndex) === 'declined'
+      ) {
+        this.setState(prevState => ({
+          requestsList: prevState.requestsList.map(requestItem =>
+            this.getRequestId(requestItem) === requestId
+              ? {...requestItem, status: 'declined'}
+              : requestItem,
+          ),
+        }));
+      } else {
+        this.setState(prevState => ({
+          requestsList: prevState.requestsList.filter(
+            requestItem => this.getRequestId(requestItem) !== requestId,
+          ),
+        }));
+      }
+    } catch (e) {
+      errorToast(
+        t?.('HOME_SCREEM.FAILED_TO_LOAD_VIEWING_REQUESTS', {
+          defaultValue: 'Failed to update request',
+        }),
+        t,
+      );
+    } finally {
+      this.setState({actionLoadingId: ''});
+    }
+  };
+
+  handleTabChange = index => {
+    this.setState(
+      {
+        selectedTabIndex: index,
+        requestsList: [],
+        page: 1,
+        hasMore: true,
+      },
+      () => this.fetchViewingRequests({reset: true}),
+    );
+  };
+
+  handleLoadMore = () => {
+    this.fetchViewingRequests();
+  };
+
+  handleRefresh = () => {
+    this.fetchViewingRequests({reset: true, fromRefresh: true});
+  };
+
+  handleChatWithClient = item => {
+    const request =
+      item?.requestViewing || item?.request || item?.viewingRequest || item;
+    const client =
+      (typeof request?.userId === 'object' ? request?.userId : null) ||
+      request?.client ||
+      request?.customer ||
+      request?.user ||
+      {};
+
+    const chatId =
+      request?.chatId || request?.chat?._id || request?.chat?.id || '';
+    const contactName =
+      client?.name ||
+      client?.fullName ||
+      [client?.firstName, client?.lastName].filter(Boolean).join(' ') ||
+      'Client';
+    const clientUserId =
+      (typeof request?.userId === 'string'
+        ? request?.userId
+        : request?.userId?._id) ||
+      client?._id ||
+      client?.id ||
+      '';
+
+    this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.CHAT_SCREEN,
+      params: {
+        chatId,
+        contactName,
+        userId: clientUserId,
+      },
+    });
+  };
+
+  renderListFooter = () => {
+    if (!this.state.isLoadingMore) {
+      return null;
+    }
+
+    return (
+      <View style={{paddingVertical: 16}}>
+        <ActivityIndicator color={COLORS.PRIMARY} size="small" />
+      </View>
+    );
+  };
+
+  renderListEmpty = () => {
+    const {t} = this.props?.i18n;
+    if (this.state.isLoading) {
+      return (
+        <View style={{paddingVertical: 24}}>
+          <ActivityIndicator color={COLORS.PRIMARY} size="small" />
+        </View>
+      );
+    }
+
+    return (
+      <View style={{paddingVertical: 16}}>
+        <StyledText size={14} variant="semiBold" color={COLORS.GREYSCALE_500}>
+          {t('HOME_SCREEM.NO_PENDING_VIEWING_REQUESTS', {
+            defaultValue: 'No requests found',
+          })}
+        </StyledText>
+      </View>
+    );
   };
 
   render() {
     const {t} = this.props?.i18n;
-    const {selectedTabIndex} = this.state;
-    const appointmentsData = this.getAppointmentsData();
+    const {selectedTabIndex, requestsList, isRefreshing, actionLoadingId} =
+      this.state;
 
     return (
       <ScreenContainer
@@ -124,25 +473,42 @@ class ViewingRequestScreen extends Component {
           />
         </View>
         <FlatList
-          data={appointmentsData}
-          keyExtractor={item => item.id}
+          data={requestsList}
+          keyExtractor={(item, index) =>
+            String(
+              item?.id ||
+                item?._id ||
+                item?.requestId ||
+                item?.appointmentId ||
+                index,
+            )
+          }
           contentContainerStyle={styles.listContainer}
           renderItem={({item}) => (
             <View style={styles.cardWrapper}>
               <RequestItemCard
                 containerStyle={{width: SCREEN.WIDTH - 40}}
-                propertyName={item.propertyName}
-                location={item.location}
-                agentName={item.agentName}
-                appointmentDate={item.appointmentDate}
-                appointmentType={item.appointmentType}
-                agentMessage={item.agentMessage}
-                onAccept={() => this.handleAccept(item)}
-                onDecline={() => this.handleDecline(item)}
-                showButtons={selectedTabIndex === 0}
+                {...this.mapRequestItemToCardProps(item)}
+                onAccept={() => this.handleRequestAction(item, 'accepted')}
+                onDecline={() => this.handleRequestAction(item, 'declined')}
+                showChatButton={selectedTabIndex === 1}
+                chatButtonTitle={t('HOME_SCREEM.CHAT_WITH_CLIENT', {
+                  defaultValue: 'Chat with Client',
+                })}
+                onChatPress={() => this.handleChatWithClient(item)}
+                showButtons={
+                  selectedTabIndex === 0 &&
+                  actionLoadingId !== this.getRequestId(item)
+                }
               />
             </View>
           )}
+          onEndReached={this.handleLoadMore}
+          onEndReachedThreshold={0.2}
+          refreshing={isRefreshing}
+          onRefresh={this.handleRefresh}
+          ListFooterComponent={this.renderListFooter}
+          ListEmptyComponent={this.renderListEmpty}
           showsVerticalScrollIndicator={false}
         />
       </ScreenContainer>

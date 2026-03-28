@@ -12,6 +12,9 @@ import {withTranslation} from 'react-i18next';
 import {PlusIcon, MinusIcon, CheckIcon} from '../../../components/svgs';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
+import {makeGetAvailabilityRequest, makeSetAvailabilityRequest} from '../../../api/availability';
+import {connect} from 'react-redux';
+import {errorToast, successToast} from '../../../utils/alerts';
 
 class CalenderManagementScreen extends Component {
   constructor(props) {
@@ -57,8 +60,18 @@ class CalenderManagementScreen extends Component {
       workingHours: initialWorkingHours,
       timePickerVisible: false,
       timePickerConfig: null, // {dayIndex, slotIndex, field: 'start' | 'end', date}
+      isLoadingAvailability: false,
+      isSavingAvailability: false,
     };
   }
+
+  componentDidMount() {
+    this.fetchAvailability();
+  }
+
+  logApi = (step, payload) => {
+    console.log(`[CalendarManagement][API] ${step}`, payload);
+  };
 
   // Parse time string (e.g., "08:00am") to Date object
   parseTimeString = timeString => {
@@ -100,6 +113,210 @@ class CalenderManagementScreen extends Component {
 
     const minutesStr = minutes.toString().padStart(2, '0');
     return `${hours}:${minutesStr}${period}`;
+  };
+
+  formatTo24h = timeString => {
+    if (!timeString) return '08:00';
+
+    const normalized = String(timeString).trim().toLowerCase();
+    const amPmMatch = normalized.match(/(\d{1,2}):(\d{2})(am|pm)/);
+    if (amPmMatch) {
+      let hours = Number(amPmMatch[1]);
+      const minutes = amPmMatch[2];
+      const period = amPmMatch[3];
+      if (period === 'pm' && hours !== 12) {
+        hours += 12;
+      }
+      if (period === 'am' && hours === 12) {
+        hours = 0;
+      }
+      return `${String(hours).padStart(2, '0')}:${minutes}`;
+    }
+
+    const hhmmMatch = normalized.match(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/);
+    if (hhmmMatch) {
+      const [hours, minutes] = normalized.split(':');
+      return `${String(Number(hours)).padStart(2, '0')}:${minutes}`;
+    }
+
+    return '08:00';
+  };
+
+  formatFrom24hToAmPm = hhmm => {
+    const match = String(hhmm || '').match(/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/);
+    if (!match) return '08:00am';
+
+    let hours = Number(match[1]);
+    const minutes = match[2];
+    const period = hours >= 12 ? 'pm' : 'am';
+
+    if (hours > 12) {
+      hours -= 12;
+    } else if (hours === 0) {
+      hours = 12;
+    }
+
+    return `${hours}:${minutes}${period}`;
+  };
+
+  getAgentId = () => {
+    const userData = this.props?.userData || {};
+    const userId = this.props?.userId || '';
+    const authRaw = this.props?.authRaw || {};
+    return (
+      userData?.agentId ||
+      userData?.agent?._id ||
+      userData?.agent?.id ||
+      userData?.agentProfileId ||
+      userData?.profile?._id ||
+      userData?.profile?.id ||
+      authRaw?.agentId ||
+      authRaw?.userData?.agentId ||
+      authRaw?.userData?.agent?._id ||
+      authRaw?.data?.agentId ||
+      authRaw?.data?.agent?._id ||
+      userId ||
+      userData?._id ||
+      userData?.id ||
+      userData?.user?._id ||
+      userData?.user?.id ||
+      ''
+    );
+  };
+
+  normalizeApiWorkingHours = payload => {
+    const order = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
+
+    const mapByDay = {};
+    (payload || []).forEach(item => {
+      if (!item?.day) return;
+      mapByDay[String(item.day).toLowerCase()] = item;
+    });
+
+    return order.map(dayKey => {
+      const apiDay = mapByDay[dayKey];
+      const label = `${dayKey.charAt(0).toUpperCase()}${dayKey.slice(1)}`;
+      return {
+        day: label,
+        isAvailable: Boolean(apiDay?.isAvailable),
+        timeSlots: [
+          {
+            id: `${label}-slot-0`,
+            start: this.formatFrom24hToAmPm(apiDay?.startTime || '08:00'),
+            end: this.formatFrom24hToAmPm(apiDay?.endTime || '10:00'),
+          },
+        ],
+      };
+    });
+  };
+
+  fetchAvailability = async () => {
+    const agentId = this.getAgentId();
+    this.logApi('GET_AVAILABILITY:INIT', {agentId});
+    if (!agentId) {
+      this.logApi('GET_AVAILABILITY:SKIP_NO_AGENT_ID', {});
+      return;
+    }
+
+    this.setState({isLoadingAvailability: true});
+    try {
+      this.logApi('GET_AVAILABILITY:REQUEST', {
+        endpoint: '/availability/get',
+        method: 'POST',
+        payload: {agentId},
+      });
+      const res = await makeGetAvailabilityRequest({agentId});
+      this.logApi('GET_AVAILABILITY:SUCCESS', res);
+      const payload =
+        res?.data?.workingHours ||
+        res?.data?.data?.workingHours ||
+        res?.workingHours ||
+        res?.data ||
+        [];
+      this.logApi('GET_AVAILABILITY:PARSED_WORKING_HOURS', {
+        count: Array.isArray(payload) ? payload.length : 0,
+        payload,
+      });
+      if (Array.isArray(payload) && payload.length) {
+        this.setState({
+          workingHours: this.normalizeApiWorkingHours(payload),
+        });
+      }
+    } catch (e) {
+      const rawErrorData = e?.response?.data;
+      const errorMessage =
+        rawErrorData?.message || rawErrorData?.error || e?.message || '';
+      this.logApi('GET_AVAILABILITY:ERROR', {
+        message: e?.message,
+        status: e?.response?.status,
+        data: rawErrorData,
+        dataString:
+          typeof rawErrorData === 'string'
+            ? rawErrorData
+            : JSON.stringify(rawErrorData || {}),
+      });
+      const isNoRecordCase =
+        e?.response?.status === 400 &&
+        String(errorMessage).toLowerCase().includes('no records found');
+
+      if (isNoRecordCase) {
+        this.logApi('GET_AVAILABILITY:NO_RECORDS_USING_DEFAULTS', {
+          agentId: this.getAgentId(),
+        });
+        return;
+      }
+
+      errorToast('Failed to load calendar');
+    } finally {
+      this.setState({isLoadingAvailability: false});
+    }
+  };
+
+  buildSetPayload = () => {
+    return (this.state.workingHours || []).map(dayData => {
+      const firstSlot = dayData?.timeSlots?.[0] || {};
+      return {
+        day: String(dayData?.day || '').toLowerCase(),
+        isAvailable: Boolean(dayData?.isAvailable),
+        startTime: this.formatTo24h(firstSlot?.start || '08:00am'),
+        endTime: this.formatTo24h(firstSlot?.end || '10:00pm'),
+      };
+    });
+  };
+
+  handleSaveAvailability = async () => {
+    if (this.state.isSavingAvailability) {
+      return;
+    }
+    this.setState({isSavingAvailability: true});
+    try {
+      const workingHours = this.buildSetPayload();
+      this.logApi('SET_AVAILABILITY:REQUEST', {
+        endpoint: '/availability/set',
+        method: 'POST',
+        payload: {workingHours},
+      });
+      await makeSetAvailabilityRequest({workingHours});
+      this.logApi('SET_AVAILABILITY:SUCCESS', {ok: true});
+      successToast('Calendar updated successfully');
+    } catch (e) {
+      this.logApi('SET_AVAILABILITY:ERROR', {
+        message: e?.message,
+        status: e?.response?.status,
+        data: e?.response?.data,
+      });
+      errorToast('Failed to update calendar');
+    } finally {
+      this.setState({isSavingAvailability: false});
+    }
   };
 
   handleOpenTimePicker = (dayIndex, slotIndex, field) => {
@@ -350,6 +567,20 @@ class CalenderManagementScreen extends Component {
           ))}
         </ScrollView>
 
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            this.state.isSavingAvailability && styles.saveButtonDisabled,
+          ]}
+          onPress={this.handleSaveAvailability}
+          activeOpacity={0.8}>
+          <StyledText variant="semiBold" color={COLORS.WHITE}>
+            {this.state.isSavingAvailability
+              ? 'Saving...'
+              : 'Save'}
+          </StyledText>
+        </TouchableOpacity>
+
         {/* Time Picker Modal */}
         {this.state.timePickerConfig && (
           <DatePicker
@@ -367,4 +598,12 @@ class CalenderManagementScreen extends Component {
   }
 }
 
-export default withTranslation()(withSafeAreaInsets(CalenderManagementScreen));
+const mapStateToProps = ({auth}) => ({
+  userData: auth?.userData,
+  userId: auth?.userId,
+  authRaw: auth,
+});
+
+export default connect(mapStateToProps)(
+  withTranslation()(withSafeAreaInsets(CalenderManagementScreen)),
+);

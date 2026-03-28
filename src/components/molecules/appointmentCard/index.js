@@ -17,6 +17,8 @@ const AppointmentCard = ({
   onCancel,
   onLocationPress,
   onMessagePress,
+  rescheduleTitle = 'Reschedule',
+  cancelTitle = 'Cancel',
   containerStyle,
 }) => {
   return (
@@ -89,7 +91,7 @@ const AppointmentCard = ({
           onPress={onReschedule}
           activeOpacity={0.8}>
           <StyledText size={14} variant="bold" color={COLORS.GREYSCALE_700}>
-            Reschedule
+            {rescheduleTitle}
           </StyledText>
         </TouchableOpacity>
         <TouchableOpacity
@@ -97,7 +99,7 @@ const AppointmentCard = ({
           onPress={onCancel}
           activeOpacity={0.8}>
           <StyledText size={14} variant="bold" color={COLORS.GREYSCALE_700}>
-            Cancel
+            {cancelTitle}
           </StyledText>
         </TouchableOpacity>
       </View>

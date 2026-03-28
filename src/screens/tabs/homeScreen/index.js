@@ -1,11 +1,18 @@
 import React from 'react';
 import {Component} from 'react';
 import {ScreenContainer, StyledText} from '../../../components/atoms';
-import {Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {ASSETS} from '../../../constants/assets';
-import {COLORS, SCREEN, SCREEN_PADDING} from '../../../constants';
+import {COLORS, NAVIGATION, SCREEN, SCREEN_PADDING} from '../../../constants';
 import {MedalIcon, NotificationIcon} from '../../../components/svgs';
-import Carousel from 'react-native-reanimated-carousel';
 import {
   RequestItemCard,
   AnimatedButtons,
@@ -17,6 +24,11 @@ import {NewRequestModal} from '../../../components/modals';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
 import {withTranslation} from 'react-i18next';
+import {
+  makeRequestViewingActionRequest,
+  makeRequestViewingListingRequest,
+} from '../../../api/auth';
+import {errorToast, successToast} from '../../../utils/alerts';
 
 const data = [
   {
@@ -37,8 +49,149 @@ class HomeScreen extends Component {
       selectedPeriodIndex: 0,
       showAllMonths: false,
       showNewRequestModal: false,
+      isRequestsLoading: false,
+      actionLoadingId: '',
+      requestsList: [],
     };
   }
+
+  componentDidMount() {
+    this.fetchViewingRequests();
+  }
+
+  getRequestsListFromResponse = response => {
+    const candidates = [
+      response?.data?.data?.data,
+      response?.data?.data,
+      response?.data?.requests,
+      response?.data?.items,
+      response?.data?.docs,
+      response?.data?.list,
+      response?.data,
+      response?.items,
+      response?.results,
+      response,
+    ];
+
+    return candidates.find(Array.isArray) || [];
+  };
+
+  formatAppointmentDate = dateValue => {
+    if (!dateValue) {
+      return '-';
+    }
+
+    const parsedDate = new Date(dateValue);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return String(dateValue);
+    }
+
+    return parsedDate.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  mapRequestItemToCardProps = item => {
+    const propertyData =
+      item?.property ||
+      (typeof item?.propertyId === 'object' ? item?.propertyId : null) ||
+      item?.listing;
+    const userData =
+      item?.client ||
+      item?.agent ||
+      (typeof item?.userId === 'object' ? item?.userId : null) ||
+      item?.user;
+    const propertyImageUri =
+      propertyData?.mainImage ||
+      propertyData?.image ||
+      propertyData?.coverImage ||
+      item?.propertyImage ||
+      item?.listing?.image;
+    const agentImageUri =
+      userData?.avatar || userData?.image || userData?.profileImage;
+    const appointmentTypeRaw =
+      item?.appointmentType || item?.meetingType || item?.type || 'in_person';
+
+    return {
+      propertyName:
+        propertyData?.name ||
+        propertyData?.title ||
+        propertyData?.projectName ||
+        item?.propertyName ||
+        'Property',
+      location:
+        propertyData?.address ||
+        propertyData?.location ||
+        [propertyData?.area, propertyData?.city].filter(Boolean).join(', ') ||
+        item?.location ||
+        '-',
+      agentName:
+        userData?.name ||
+        userData?.fullName ||
+        [userData?.firstName, userData?.lastName].filter(Boolean).join(' ') ||
+        item?.agentName ||
+        '-',
+      propertyImage: propertyImageUri
+        ? {uri: propertyImageUri}
+        : ASSETS.IMAGES.DUMMY_IMAGE,
+      agentImage: agentImageUri ? {uri: agentImageUri} : ASSETS.IMAGES.PERSON,
+      appointmentDate: this.formatAppointmentDate(
+        item?.appointmentDate ||
+          item?.appointment_date ||
+          item?.appointmentAt ||
+          item?.date,
+      ),
+      appointmentType:
+        appointmentTypeRaw === 'in_person'
+          ? 'In-person'
+          : appointmentTypeRaw === 'video_call'
+          ? 'Video'
+          : appointmentTypeRaw,
+      // Keep card layout same as provided design (no extra message block).
+      agentMessage: '',
+    };
+  };
+
+  getRequestId = item => {
+    const rawId =
+      item?._id ||
+      item?.id ||
+      item?.requestId ||
+      item?.request?._id ||
+      item?.request?.id;
+    if (typeof rawId === 'object') {
+      return String(rawId?._id || rawId?.id || '');
+    }
+    return String(rawId || '');
+  };
+
+  fetchViewingRequests = async () => {
+    const {t} = this.props?.i18n;
+    this.setState({isRequestsLoading: true});
+    try {
+      const response = await makeRequestViewingListingRequest({
+        page: 1,
+        limit: 10,
+        status: 'pending',
+      });
+      const requestsList = this.getRequestsListFromResponse(response);
+      this.setState({requestsList});
+    } catch (e) {
+      errorToast(
+        t?.('HOME_SCREEM.FAILED_TO_LOAD_VIEWING_REQUESTS', {
+          defaultValue: 'Failed to load viewing requests',
+        }),
+        t,
+      );
+    } finally {
+      this.setState({isRequestsLoading: false});
+    }
+  };
 
   handlePeriodChange = (index, value) => {
     this.setState({selectedPeriodIndex: index});
@@ -54,20 +207,72 @@ class HomeScreen extends Component {
     this.setState({showNewRequestModal: true});
   };
 
+  handleNotificationPress = () => {
+    this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.NOTIFICATIONS_SCREEN,
+    });
+  };
+
+  handleOpenViewingRequests = () => {
+    const parentNavigation = this.props.navigation?.getParent?.();
+    const navigator = parentNavigation || this.props.navigation;
+    navigator?.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.VIEWING_REQUEST_SCREEN,
+    });
+  };
+
   handleCloseNewRequestModal = () => {
     this.setState({showNewRequestModal: false});
   };
 
-  handleAcceptRequest = () => {
-    // Handle accept logic here
-    console.log('Request accepted');
-    this.handleCloseNewRequestModal();
+  handleAcceptRequest = item => {
+    this.handleRequestAction(item, 'accepted');
   };
 
-  handleDeclineRequest = () => {
-    // Handle decline logic here
-    console.log('Request declined');
-    this.handleCloseNewRequestModal();
+  handleDeclineRequest = item => {
+    this.handleRequestAction(item, 'declined');
+  };
+
+  handleRequestAction = async (item, status) => {
+    const {t} = this.props?.i18n;
+    const requestId = this.getRequestId(item);
+    if (!requestId) {
+      errorToast(
+        t?.('HOME_SCREEM.FAILED_TO_LOAD_VIEWING_REQUESTS', {
+          defaultValue: 'Something went wrong',
+        }),
+        t,
+      );
+      return;
+    }
+
+    this.setState({actionLoadingId: requestId});
+    try {
+      await makeRequestViewingActionRequest({
+        requestId,
+        status,
+      });
+      successToast(
+        status === 'accepted'
+          ? t?.('HOME_SCREEM.REQUEST_ACCEPTED', {defaultValue: 'Request accepted'})
+          : t?.('HOME_SCREEM.REQUEST_DECLINED', {defaultValue: 'Request declined'}),
+        t,
+      );
+      this.setState(prevState => ({
+        requestsList: prevState.requestsList.filter(
+          requestItem => this.getRequestId(requestItem) !== requestId,
+        ),
+      }));
+    } catch (e) {
+      errorToast(
+        t?.('HOME_SCREEM.FAILED_TO_LOAD_VIEWING_REQUESTS', {
+          defaultValue: 'Failed to update request',
+        }),
+        t,
+      );
+    } finally {
+      this.setState({actionLoadingId: ''});
+    }
   };
 
   render() {
@@ -96,7 +301,7 @@ class HomeScreen extends Component {
               </View>
               <TouchableOpacity
                 style={styles.notificationButton}
-                onPress={this.handleOpenNewRequestModal}>
+                onPress={this.handleNotificationPress}>
                 <NotificationIcon />
                 <View style={styles.notificationBadge} />
               </TouchableOpacity>
@@ -129,7 +334,9 @@ class HomeScreen extends Component {
             <StyledText size={18} variant="bold" color={COLORS.TEXT_PRIMARY}>
               {t('HOME_SCREEM.VIEWING_REQUESTS')}
             </StyledText>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={this.handleOpenViewingRequests}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
               <StyledText size={12} variant="bold" color={COLORS.PRIMARY}>
                 {t('HOME_SCREEM.SEE_ALL')}
               </StyledText>
@@ -137,19 +344,44 @@ class HomeScreen extends Component {
           </View>
 
           <View>
-            <Carousel
-              width={SCREEN.WIDTH}
-              onSnapToItem={index => this.setState({currentIndex: index})}
-              loop={false}
-              mode="parallax"
-              height={250}
-              modeConfig={{
-                parallaxScrollingScale: 0.9,
-                parallaxScrollingOffset: 90,
-              }}
-              data={[1, 2]}
-              renderItem={({item}) => <RequestItemCard />}
-            />
+            {this.state.isRequestsLoading ? (
+              <View style={{paddingVertical: 24}}>
+                <ActivityIndicator color={COLORS.PRIMARY} size="small" />
+              </View>
+            ) : this.state.requestsList.length ? (
+              <FlatList
+                horizontal
+                data={this.state.requestsList}
+                keyExtractor={(item, index) =>
+                  String(item?._id || item?.id || item?.requestId || index)
+                }
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{paddingHorizontal: SCREEN_PADDING}}
+                renderItem={({item}) => (
+                  <RequestItemCard
+                    containerStyle={{
+                      width: SCREEN.WIDTH - 40,
+                      marginRight: SCREEN_PADDING,
+                    }}
+                    {...this.mapRequestItemToCardProps(item)}
+                    onAccept={() => this.handleAcceptRequest(item)}
+                    onDecline={() => this.handleDeclineRequest(item)}
+                    showButtons={this.state.actionLoadingId !== this.getRequestId(item)}
+                  />
+                )}
+              />
+            ) : (
+              <View style={{paddingHorizontal: SCREEN_PADDING, paddingTop: 20}}>
+                <StyledText
+                  size={14}
+                  variant="semiBold"
+                  color={COLORS.GREYSCALE_500}>
+                  {t('HOME_SCREEM.NO_PENDING_VIEWING_REQUESTS', {
+                    defaultValue: 'No pending viewing requests',
+                  })}
+                </StyledText>
+              </View>
+            )}
           </View>
           <StyledText
             size={18}
@@ -174,6 +406,7 @@ class HomeScreen extends Component {
             {data.map(item => {
               return (
                 <View
+                  key={item.label}
                   style={{
                     padding: 12,
                     backgroundColor: COLORS.WHITE,

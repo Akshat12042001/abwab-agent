@@ -8,7 +8,7 @@ import {
   Pressable,
 } from 'react-native';
 import {ScreenContainer, StyledText} from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {withTranslation} from 'react-i18next';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
 import {
@@ -19,105 +19,163 @@ import {
 } from '../../../components/svgs';
 import styles from './styles';
 import {ASSETS} from '../../../constants/assets';
+import {makeChatListRequest} from '../../../api/chat';
+import {errorToast} from '../../../utils/alerts';
 
 class MessagesScreen extends Component {
   constructor(props) {
     super(props);
-    // Mock messages data - in real app, this would come from API/state management
-    const mockMessages = [
-      {
-        id: '1',
-        senderName: 'Ahmed Elghandour',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Thanks for sharing.',
-        timestamp: '2 min ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-      {
-        id: '2',
-        senderName: 'Sarah Ali',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Okay, got it.',
-        timestamp: '30 minute ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-      {
-        id: '3',
-        senderName: 'Robert Willions',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'We can schedule our home tour?',
-        timestamp: '2 hours ago',
-        unreadCount: 2,
-        isUnread: true,
-      },
-      {
-        id: '4',
-        senderName: 'Perry Mate',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Can we have call now?',
-        timestamp: '1 day ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-      {
-        id: '5',
-        senderName: 'Adam Mostafa',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Can you share your location details',
-        timestamp: '1 day ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-      {
-        id: '6',
-        senderName: 'Alexa Johnson',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Can you share your location details',
-        timestamp: '1 day ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-      {
-        id: '7',
-        senderName: 'Nancy Malak',
-        senderImage: ASSETS.IMAGES.PERSON,
-        location: 'Palm Hills Villa - New Cairo',
-        lastMessage: 'Thanks.',
-        timestamp: '3 day ago',
-        unreadCount: 0,
-        isUnread: false,
-      },
-    ];
-
     this.state = {
-      messages: mockMessages,
+      chats: [],
       searchQuery: '',
       isSearchFocused: false,
+      page: 1,
+      limit: 10,
+      hasMore: true,
+      isLoading: false,
+      isRefreshing: false,
+      isLoadingMore: false,
     };
   }
 
-  handleNotificationPress = () => {
-    console.log('Notification pressed');
-    // Navigate to notifications screen
+  componentDidMount() {
+    this.fetchChats({reset: true});
+  }
+
+  getChatsFromResponse = response => {
+    const candidates = [
+      response?.data?.data,
+      response?.data?.items,
+      response?.data?.docs,
+      response?.data?.list,
+      response?.data,
+      response?.items,
+      response?.results,
+      response,
+    ];
+    return candidates.find(Array.isArray) || [];
   };
 
-  handleMessagePress = messageId => {
-    console.log('Message pressed:', messageId);
-    // Navigate to chat screen
+  formatTimeAgo = dateValue => {
+    if (!dateValue) return '';
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return '';
+    const diffMs = Date.now() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'just now';
+    if (diffMin < 60) return `${diffMin} min ago`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `${diffH} hours ago`;
+    const diffD = Math.floor(diffH / 24);
+    return `${diffD} day ago`;
+  };
+
+  mapChatToRow = chat => {
+    const participant =
+      chat?.client || chat?.user || chat?.customer || chat?.participant || {};
+    const lastMessage = chat?.lastMessage || chat?.last_message || {};
+
+    const resolvedChatId =
+      chat?._id ||
+      chat?.id ||
+      chat?.chatId ||
+      chat?.conversationId ||
+      chat?.roomId ||
+      chat?.chat?._id ||
+      chat?.chat?.id ||
+      chat?.conversation?._id ||
+      chat?.conversation?.id ||
+      '';
+
+    return {
+      id: String(resolvedChatId || Math.random().toString(16).slice(2)),
+      chatId: String(resolvedChatId || ''),
+      senderName:
+        participant?.name ||
+        participant?.fullName ||
+        [participant?.firstName, participant?.lastName].filter(Boolean).join(' ') ||
+        'Client',
+      senderImage: participant?.image || participant?.avatar
+        ? {uri: participant?.image || participant?.avatar}
+        : ASSETS.IMAGES.PERSON,
+      location:
+        chat?.property?.name ||
+        chat?.property?.title ||
+        chat?.propertyName ||
+        chat?.location ||
+        '',
+      lastMessage: lastMessage?.content || lastMessage?.text || chat?.lastMessageContent || '',
+      timestamp: this.formatTimeAgo(lastMessage?.createdAt || chat?.updatedAt || chat?.createdAt),
+      unreadCount: Number(chat?.unreadCount || chat?.unread || 0),
+      isUnread: Number(chat?.unreadCount || chat?.unread || 0) > 0,
+    };
+  };
+
+  fetchChats = async ({reset = false, fromRefresh = false} = {}) => {
+    const {t} = this.props?.i18n;
+    const {isLoading, isLoadingMore, hasMore, page, limit, searchQuery} = this.state;
+
+    if (!reset && (isLoading || isLoadingMore || !hasMore)) return;
+
+    const nextPage = reset ? 1 : page + 1;
+    this.setState({
+      isLoading: reset && !fromRefresh,
+      isLoadingMore: !reset,
+      isRefreshing: fromRefresh,
+    });
+
+    try {
+      const response = await makeChatListRequest({
+        search: searchQuery,
+        page: nextPage,
+        limit,
+      });
+      const list = this.getChatsFromResponse(response);
+      const mapped = list.map(this.mapChatToRow);
+      const pagination = response?.data?.pagination || response?.pagination;
+      const totalPages = Number(pagination?.totalPages) || 0;
+      const hasMoreFromPagination =
+        totalPages > 0 ? nextPage < totalPages : list.length >= limit;
+
+      this.setState(prev => ({
+        chats: reset ? mapped : [...prev.chats, ...mapped],
+        page: nextPage,
+        hasMore: hasMoreFromPagination,
+      }));
+    } catch (e) {
+      errorToast(
+        t('MESSAGES_SCREEN.FAILED_TO_LOAD', {defaultValue: 'Failed to load chats'}),
+        t,
+      );
+    } finally {
+      this.setState({isLoading: false, isLoadingMore: false, isRefreshing: false});
+    }
+  };
+
+  handleNotificationPress = () => {
+    this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.NOTIFICATIONS_SCREEN,
+    });
+  };
+
+  handleMessagePress = item => {
+    this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.CHAT_SCREEN,
+      params: {
+        chatId: item.chatId,
+        contactName: item.senderName,
+        contactLocation: item.location,
+      },
+    });
   };
 
   handleSearchChange = text => {
     this.setState({searchQuery: text});
-    // Filter messages based on search query
-    // In real app, this would filter the messages array
+    // debounce can be added later; keep simple now
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => {
+      this.fetchChats({reset: true});
+    }, 300);
   };
 
   renderHeader = () => {
@@ -194,7 +252,7 @@ class MessagesScreen extends Component {
     return (
       <TouchableOpacity
         style={styles.messageItem}
-        onPress={() => this.handleMessagePress(item.id)}
+        onPress={() => this.handleMessagePress(item)}
         activeOpacity={0.7}>
         <Image
           source={item.senderImage}
@@ -278,24 +336,28 @@ class MessagesScreen extends Component {
 
   render() {
     const insetTop = this.props?.insets?.top || 0;
-    const {messages} = this.state;
+    const {chats, isRefreshing} = this.state;
 
     return (
       <ScreenContainer
         backgroundColor={COLORS.WHITE}
         paddingTop={insetTop + 30}>
         <FlatList
-          data={messages}
+          data={chats}
           keyExtractor={item => item.id}
           renderItem={this.renderMessageItem}
           ListHeaderComponent={this.renderHeader}
           ListEmptyComponent={this.renderEmptyState}
           contentContainerStyle={
-            messages.length === 0
+            chats.length === 0
               ? styles.emptyListContainer
               : styles.listContainer
           }
           showsVerticalScrollIndicator={false}
+          refreshing={isRefreshing}
+          onRefresh={() => this.fetchChats({reset: true, fromRefresh: true})}
+          onEndReached={() => this.fetchChats()}
+          onEndReachedThreshold={0.2}
         />
       </ScreenContainer>
     );

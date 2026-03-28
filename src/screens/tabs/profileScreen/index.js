@@ -8,9 +8,10 @@ import {
   Pressable,
 } from 'react-native';
 import {ScreenContainer, StyledText} from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
 import {withTranslation} from 'react-i18next';
+import {connect} from 'react-redux';
 import {
   NotificationIcon,
   ArrowRightIcon,
@@ -19,18 +20,123 @@ import {
 import {ASSETS} from '../../../constants/assets';
 import {PROFILE_MENU_CONFIG, PROFILE_STATS} from './config';
 import styles from './styles';
+import {makeGetAgentProfileRequest} from '../../../api/auth';
+import {errorToast} from '../../../utils/alerts';
 
 class ProfileScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoadingProfile: false,
       profileData: {
         name: 'Ahmed Hassan',
         image: ASSETS.IMAGES.PERSON,
         isVerified: true,
+        stats: PROFILE_STATS,
       },
     };
   }
+
+  componentDidMount() {
+    this.fetchAgentProfile();
+  }
+
+  getAgentIdFromState = () => {
+    const userData = this.props?.userData || {};
+    return (
+      userData?._id ||
+      userData?.id ||
+      userData?.agentId ||
+      userData?.user?._id ||
+      userData?.user?.id ||
+      ''
+    );
+  };
+
+  getProfilePayload = response => {
+    const candidates = [
+      response?.data?.agent,
+      response?.data?.data,
+      response?.data,
+      response?.agent,
+      response,
+    ];
+    return candidates.find(item => item && typeof item === 'object') || {};
+  };
+
+  buildProfileData = payload => {
+    const firstName = payload?.firstName || payload?.first_name || '';
+    const lastName = payload?.lastName || payload?.last_name || '';
+    const fallbackName = [firstName, lastName].filter(Boolean).join(' ').trim();
+    const name = payload?.name || payload?.fullName || fallbackName || 'Agent';
+    const imageUri =
+      payload?.image || payload?.avatar || payload?.profileImage || payload?.photo;
+    const isVerified =
+      payload?.isVerified ?? payload?.verified ?? payload?.verificationStatus === 'verified';
+
+    const profileStats = PROFILE_STATS.map(stat => {
+      if (stat.id === 'rating') {
+        return {
+          ...stat,
+          value: String(payload?.rating ?? payload?.averageRating ?? stat.value),
+        };
+      }
+      if (stat.id === 'completed') {
+        return {
+          ...stat,
+          value: String(
+            payload?.completedRequests ??
+              payload?.completedViewings ??
+              payload?.completed ??
+              stat.value,
+          ),
+        };
+      }
+      if (stat.id === 'viewings') {
+        return {
+          ...stat,
+          value: String(
+            payload?.viewingsCount ??
+              payload?.totalViewings ??
+              payload?.totalRequests ??
+              stat.value,
+          ),
+        };
+      }
+      return stat;
+    });
+
+    return {
+      name,
+      image: imageUri ? {uri: imageUri} : ASSETS.IMAGES.PERSON,
+      isVerified: Boolean(isVerified),
+      stats: profileStats,
+    };
+  };
+
+  fetchAgentProfile = async () => {
+    const agentId = this.getAgentIdFromState();
+    const {t} = this.props?.i18n;
+    if (!agentId) {
+      return;
+    }
+
+    this.setState({isLoadingProfile: true});
+    try {
+      const response = await makeGetAgentProfileRequest(agentId);
+      const payload = this.getProfilePayload(response);
+      this.setState({profileData: this.buildProfileData(payload)});
+    } catch (e) {
+      errorToast(
+        t('PROFILE_SCREEN.FAILED_TO_LOAD_PROFILE', {
+          defaultValue: 'Failed to load profile',
+        }),
+        t,
+      );
+    } finally {
+      this.setState({isLoadingProfile: false});
+    }
+  };
 
   handleMenuItemPress = itemId => {
     console.log('Menu item pressed:', itemId);
@@ -43,8 +149,9 @@ class ProfileScreen extends Component {
   };
 
   handleNotificationPress = () => {
-    console.log('Notification pressed');
-    // Navigate to notifications screen
+    this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.NOTIFICATIONS_SCREEN,
+    });
   };
 
   renderProfileCard = () => {
@@ -86,7 +193,7 @@ class ProfileScreen extends Component {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          {PROFILE_STATS.map(stat => (
+          {(profileData?.stats || PROFILE_STATS).map(stat => (
             <View key={stat.id} style={styles.statBox}>
               <StyledText
                 size={20}
@@ -227,4 +334,10 @@ class ProfileScreen extends Component {
   }
 }
 
-export default withTranslation()(withSafeAreaInsets(ProfileScreen));
+const mapStateToProps = state => ({
+  userData: state?.auth?.userData,
+});
+
+export default connect(mapStateToProps)(
+  withTranslation()(withSafeAreaInsets(ProfileScreen)),
+);

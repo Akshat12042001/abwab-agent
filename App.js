@@ -28,6 +28,9 @@ const App = () => {
   const onBeforeLift = () => {
     //Do some stuff that when redux has initialized
 
+    store.dispatch(reset());
+    // i18n.init();
+
     MapboxGL.setAccessToken(
       '__REDACTED_MAPBOX_PK__',
     );

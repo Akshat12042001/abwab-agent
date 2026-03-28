@@ -80,6 +80,7 @@ class VerificationCodeScreen extends Component {
         });
       }
     } catch (error) {
+      console.log(error,"error>>>>>>>")
     } finally {
       this.setState({isLoading: false});
     }
@@ -113,7 +114,7 @@ class VerificationCodeScreen extends Component {
           <View style={styles.otpWrap}>
             <OtpInput
               otp={this.state.otp}
-              length={5}
+              length={4}
               setOtp={text => this.setState({otp: text, error: ''})}
               onSubmit={() => {}}
               error={this.state.error}
@@ -121,7 +122,7 @@ class VerificationCodeScreen extends Component {
           </View>
           <CustomButton
             title={t('BUTTONS.VERIFY')}
-            isDisabled={this.state.otp.length !== 5}
+            isDisabled={this.state.otp.length !== 4}
             isLoading={this.state.isLoading}
             onPress={this.handleVerify}
           />

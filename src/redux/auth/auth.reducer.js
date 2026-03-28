@@ -4,6 +4,9 @@ import {loginRequest, logoutRequest} from './auth.action';
 const INITIAL_STATE = {
   isLoading: false,
   isLoggedIn: false,
+  userData: {},
+  userId: '',
+  rememberMe: true,
 };
 
 const authSlice = createSlice({
@@ -13,9 +16,17 @@ const authSlice = createSlice({
     reset: state => {
       state.isLoading = false;
       state.isLoggedIn = false;
+      state.userData = {};
+      state.userId = '';
+    },
+    setRememberMe: (state, action) => {
+      state.rememberMe = Boolean(action.payload);
     },
     setUserData: (state, action) => {
-      state.userData = action.payload;
+      const payload = action.payload || {};
+      state.userData = payload;
+      state.userId =
+        payload?._id || payload?.id || payload?.user?._id || payload?.user?.id || '';
       state.isLoggedIn = true;
     },
   },
@@ -42,6 +53,6 @@ const authSlice = createSlice({
   },
 });
 
-export const {reset, setUserData} = authSlice.actions;
+export const {reset, setUserData, setRememberMe} = authSlice.actions;
 
 export default authSlice.reducer;

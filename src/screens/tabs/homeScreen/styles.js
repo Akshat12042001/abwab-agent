@@ -5,7 +5,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: COLORS.PRIMARY,
     paddingBottom: 40,
-    paddingTop: 20,
+    paddingTop: 60,
     borderBottomLeftRadius: 20,
     overflow: 'hidden',
     paddingHorizontal: SCREEN_PADDING,
