@@ -29,7 +29,7 @@ const defaultOptions = (tokenFromParams = '') => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      authorization: normalizedToken ? `Bearer ${normalizedToken}` : '',
+      authorization: normalizedToken || '',
       Authorization: normalizedToken ? `Bearer ${normalizedToken}` : '',
       token: normalizedToken || '',
       access_token: normalizedToken || '',

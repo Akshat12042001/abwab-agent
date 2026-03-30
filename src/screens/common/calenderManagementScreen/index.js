@@ -184,58 +184,114 @@ class CalenderManagementScreen extends Component {
     );
   };
 
-  normalizeApiWorkingHours = payload => {
-    const order = [
-      'sunday',
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-    ];
+  // normalizeApiWorkingHours = payload => {
+  //   const order = [
+  //     'sunday',
+  //     'monday',
+  //     'tuesday',
+  //     'wednesday',
+  //     'thursday',
+  //     'friday',
+  //     'saturday',
+  //   ];
 
-    /** Multiple API rows can share the same `day` (one row per slot). */
-    const slotsByDay = {};
-    (payload || []).forEach(item => {
-      if (!item?.day) return;
-      const key = String(item.day).toLowerCase();
-      if (!slotsByDay[key]) {
-        slotsByDay[key] = [];
-      }
-      slotsByDay[key].push(item);
-    });
+  //   /** Multiple API rows can share the same `day` (one row per slot). */
+  //   const slotsByDay = {};
+  //   (payload || []).forEach(item => {
+  //     if (!item?.day) return;
+  //     const key = String(item.day).toLowerCase();
+  //     if (!slotsByDay[key]) {
+  //       slotsByDay[key] = [];
+  //     }
+  //     slotsByDay[key].push(item);
+  //   });
 
-    return order.map(dayKey => {
-      const label = `${dayKey.charAt(0).toUpperCase()}${dayKey.slice(1)}`;
-      const rows = slotsByDay[dayKey] || [];
-      if (!rows.length) {
-        return {
-          day: label,
-          isAvailable: false,
-          timeSlots: [
-            {
-              id: `${label}-slot-0`,
-              start: this.formatFrom24hToAmPm('08:00'),
-              end: this.formatFrom24hToAmPm('22:00'),
-            },
-          ],
-        };
-      }
-      const isAvailable = rows.some(r => r?.isAvailable);
-      const timeSlots = rows.map((row, idx) => ({
-        id: `${label}-slot-${idx}`,
-        start: this.formatFrom24hToAmPm(row?.startTime || '08:00'),
-        end: this.formatFrom24hToAmPm(row?.endTime || '22:00'),
-      }));
+  //   return order.map(dayKey => {
+  //     const label = `${dayKey.charAt(0).toUpperCase()}${dayKey.slice(1)}`;
+  //     const rows = slotsByDay[dayKey] || [];
+  //     if (!rows.length) {
+  //       return {
+  //         day: label,
+  //         isAvailable: false,
+  //         timeSlots: [
+  //           {
+  //             id: `${label}-slot-0`,
+  //             start: this.formatFrom24hToAmPm('08:00'),
+  //             end: this.formatFrom24hToAmPm('22:00'),
+  //           },
+  //         ],
+  //       };
+  //     }
+  //     const isAvailable = rows.some(r => r?.isAvailable);
+  //     const timeSlots = rows.map((row, idx) => ({
+  //       id: `${label}-slot-${idx}`,
+  //       start: this.formatFrom24hToAmPm(row?.startTime || '08:00'),
+  //       end: this.formatFrom24hToAmPm(row?.endTime || '22:00'),
+  //     }));
+  //     return {
+  //       day: label,
+  //       isAvailable: Boolean(isAvailable),
+  //       timeSlots,
+  //     };
+  //   });
+  // };
+normalizeApiWorkingHours = payload => {
+  const order = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+  ];
+
+  const map = {};
+  (payload || []).forEach(item => {
+    if (!item?.day) return;
+    map[item.day.toLowerCase()] = item;
+  });
+
+  return order.map(dayKey => {
+    const label = `${dayKey.charAt(0).toUpperCase()}${dayKey.slice(1)}`;
+    const dayData = map[dayKey];
+
+    if (!dayData) {
       return {
         day: label,
-        isAvailable: Boolean(isAvailable),
-        timeSlots,
+        isAvailable: false,
+        timeSlots: [
+          {
+            id: `${label}-slot-0`,
+            start: '08:00am',
+            end: '10:00pm',
+          },
+        ],
       };
-    });
-  };
+    }
 
+    const slots = dayData?.slots || [];
+
+    return {
+      day: label,
+      isAvailable: Boolean(dayData.isAvailable),
+      timeSlots:
+        slots.length > 0
+          ? slots.map((slot, idx) => ({
+              id: `${label}-slot-${idx}`,
+              start: this.formatFrom24hToAmPm(slot.startTime),
+              end: this.formatFrom24hToAmPm(slot.endTime),
+            }))
+          : [
+              {
+                id: `${label}-slot-0`,
+                start: '08:00am',
+                end: '10:00pm',
+              },
+            ],
+    };
+  });
+};
   fetchAvailability = async () => {
     const agentId = this.getAgentId();
     this.logApi('GET_AVAILABILITY:INIT', {agentId});
@@ -315,42 +371,56 @@ class CalenderManagementScreen extends Component {
     return (h || 0) * 60 + (m || 0);
   };
 
-  /**
-   * API requires exactly 7 `workingHours` rows (one per weekday). Extra UI slots
-   * for the same day are merged into one interval: earliest start → latest end.
-   * (Gaps between slots are not preserved — backend needs a richer schema for that.)
-   */
-  buildSetPayload = () => {
-    return (this.state.workingHours || []).map(dayData => {
-      const day = String(dayData?.day || '').toLowerCase();
-      const isAvailable = Boolean(dayData?.isAvailable);
-      const slots =
-        dayData?.timeSlots?.length > 0
-          ? dayData.timeSlots
-          : [{start: '08:00am', end: '10:00pm'}];
-      const ranges = slots.map(s => ({
-        start: this.formatTo24h(s?.start || '08:00am'),
-        end: this.formatTo24h(s?.end || '10:00pm'),
-      }));
-      let minStart = ranges[0].start;
-      let maxEnd = ranges[0].end;
-      ranges.forEach(({start, end}) => {
-        if (this.hhmmToMinutes(start) < this.hhmmToMinutes(minStart)) {
-          minStart = start;
-        }
-        if (this.hhmmToMinutes(end) > this.hhmmToMinutes(maxEnd)) {
-          maxEnd = end;
-        }
-      });
-      return {
-        day,
-        isAvailable,
-        startTime: minStart,
-        endTime: maxEnd,
-      };
-    });
-  };
+  // buildSetPayload = () => {
+  //   return (this.state.workingHours || []).map(dayData => {
+  //     const day = String(dayData?.day || '').toLowerCase();
+  //     const isAvailable = Boolean(dayData?.isAvailable);
+  //     const slots =
+  //       dayData?.timeSlots?.length > 0
+  //         ? dayData.timeSlots
+  //         : [{start: '08:00am', end: '10:00pm'}];
+  //     const ranges = slots.map(s => ({
+  //       start: this.formatTo24h(s?.start || '08:00am'),
+  //       end: this.formatTo24h(s?.end || '10:00pm'),
+  //     }));
+  //     let minStart = ranges[0].start;
+  //     let maxEnd = ranges[0].end;
+  //     ranges.forEach(({start, end}) => {
+  //       if (this.hhmmToMinutes(start) < this.hhmmToMinutes(minStart)) {
+  //         minStart = start;
+  //       }
+  //       if (this.hhmmToMinutes(end) > this.hhmmToMinutes(maxEnd)) {
+  //         maxEnd = end;
+  //       }
+  //     });
+  //     return {
+  //       day,
+  //       isAvailable,
+  //       startTime: minStart,
+  //       endTime: maxEnd,
+  //     };
+  //   });
+  // };
+buildSetPayload = () => {
+  return (this.state.workingHours || []).map(dayData => {
+    const day = String(dayData?.day || '').toLowerCase();
+    const isAvailable = Boolean(dayData?.isAvailable);
 
+    const slots =
+      dayData?.timeSlots?.length > 0
+        ? dayData.timeSlots
+        : [{start: '08:00am', end: '10:00pm'}];
+
+    return {
+      day,
+      isAvailable,
+      slots: slots.map(slot => ({
+        startTime: this.formatTo24h(slot?.start),
+        endTime: this.formatTo24h(slot?.end),
+      })),
+    };
+  });
+};
   handleSaveAvailability = async () => {
     if (this.state.isSavingAvailability) {
       return;
@@ -363,6 +433,7 @@ class CalenderManagementScreen extends Component {
         method: 'POST',
         payload: {workingHours},
       });
+      console.log(workingHours,"workingHours>>>>")
       await makeSetAvailabilityRequest({workingHours});
       this.logApi('SET_AVAILABILITY:SUCCESS', {ok: true});
       successToast('Calendar updated successfully');

@@ -1,5 +1,6 @@
 import Config from 'react-native-config';
 import {APIClient} from './client';
+import {getState} from '../redux';
 
 const AUTH_ENDPOINTS = {
   LOGIN: '/agent/login',
@@ -54,11 +55,20 @@ export const makeChangePasswordRequest = (data = {}, tokenOverride = '') => {
 
 
 export const makeUpdateAgentProfileRequest = (payload = {}) => {
-  return APIClient()
-    .put(AUTH_ENDPOINTS.AGENT_PROFILE, payload)
+  const authState = getState()?.auth || {};
+
+  const token =
+    authState?.userData?.token || authState?.data?.token || '';
+
+  const cleanToken = token.replace(/^Bearer\s+/i, '').trim();
+
+  const finalPayload = {...payload};
+  // delete finalPayload._id;
+
+  return APIClient('', cleanToken) // 🔥 CLEAN TOKEN
+    .put(AUTH_ENDPOINTS.AGENT_PROFILE, finalPayload)
     .then(res => res.data);
 };
-
 export const makeResendOtpRequest = data => {
   return APIClient()
     .post(AUTH_ENDPOINTS.RESEND_OTP, data)

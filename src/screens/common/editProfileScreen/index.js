@@ -21,6 +21,7 @@ import styles from './styles';
 
 const getAgentFromRoute = route => {
   const a = route?.params?.agent;
+  console.log(a,"user data>>>>>")
   return a && typeof a === 'object' ? a : {};
 };
 
@@ -64,18 +65,18 @@ const buildInitialValues = agent => {
 
 const buildPutBody = (agent, values) => {
   const id = agent?._id || agent?.id || '';
-  const name = `${values.firstName} ${values.lastName}`.trim();
+
   return {
-    _id: String(id),
-    name,
+    _id: id,
+    name: `${values.firstName} ${values.lastName}`.trim(),
     email: values.email.trim(),
     phoneNo: values.phoneNumber.trim(),
     experience: values.experience?.trim() || '',
     address: values.address?.trim() || '',
     specialization: values.specialization?.trim() || '',
     bio: values.bio?.trim() || '',
-    isActive: agent?.isActive !== undefined ? Boolean(agent.isActive) : true,
-    inActiveReason: String(agent?.inActiveReason || agent?.inactiveReason || ''),
+    isActive: agent?.isActive ?? true,
+    inActiveReason: agent?.inActiveReason ?? '',
   };
 };
 

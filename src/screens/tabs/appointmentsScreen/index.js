@@ -728,7 +728,7 @@ class AppointmentsScreen extends Component {
     } else {
       anchor = new Date(s);
       if (Number.isNaN(anchor.getTime())) {
-        this.setState({showDatePickerModal: false});
+    this.setState({showDatePickerModal: false});
         return;
       }
       selectedDateString = toLocalDateString(anchor);
