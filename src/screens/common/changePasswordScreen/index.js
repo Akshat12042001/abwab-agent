@@ -11,6 +11,8 @@ import {withSafeAreaInsets} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {View} from 'react-native';
 import {Formik} from 'formik';
+import {makeChangePasswordRequest} from '../../../api/auth';
+import {errorToast, successToast} from '../../../utils/alerts';
 import styles from './styles';
 
 class ChangePasswordScreen extends React.Component {
@@ -29,7 +31,32 @@ class ChangePasswordScreen extends React.Component {
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = async values => {};
+  onSubmit = async values => {
+    const {t, i18n, navigation} = this.props;
+    const tr = t || i18n?.t;
+    this.setState({isLoading: true});
+    try {
+      await makeChangePasswordRequest({
+        password: values.newPassword,
+      });
+      successToast(
+        tr?.('CHANGE_PASSWORD_SCREEN.SUCCESS', {
+          defaultValue: 'Password updated',
+        }),
+        tr,
+      );
+      navigation.goBack();
+    } catch (e) {
+      const msg =
+        e?.response?.data?.message ||
+        tr?.('CHANGE_PASSWORD_SCREEN.FAILED', {
+          defaultValue: 'Could not update password',
+        });
+      errorToast(msg, tr);
+    } finally {
+      this.setState({isLoading: false});
+    }
+  };
 
   render() {
     const insetTop = this.props?.insets?.top || 0;
@@ -38,7 +65,7 @@ class ChangePasswordScreen extends React.Component {
       <ScreenContainer
         backgroundColor={COLORS.WHITE}
         paddingTop={insetTop + 20}>
-        <CommonHeader title={t('LABELS.CHANGE_PASSWORD')} />
+        <CommonHeader title={t('CHANGE_PASSWORD_SCREEN.TITLE')} />
         <KeyboardAwareScrollView
           enableOnAndroid={true}
           keyboardShouldPersistTaps="handled"
@@ -97,6 +124,7 @@ class ChangePasswordScreen extends React.Component {
                       isLoading={this.state.isLoading}
                       containerStyle={{marginTop: 25}}
                       isDisabled={
+                        values?.currentPassword?.length === 0 ||
                         values?.newPassword?.length === 0 ||
                         values?.confirmNewPassword?.length === 0
                       }

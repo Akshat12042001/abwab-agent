@@ -108,7 +108,13 @@ class AppointmentsScreen extends Component {
   }
 
   componentDidMount() {
-    this.fetchAppointments({reset: true});
+    this.focusUnsubscribe = this.props.navigation.addListener('focus', () => {
+      this.fetchAppointments({reset: true});
+    });
+  }
+
+  componentWillUnmount() {
+    this.focusUnsubscribe?.();
   }
 
   logApi = (step, payload) => {
@@ -722,7 +728,7 @@ class AppointmentsScreen extends Component {
     } else {
       anchor = new Date(s);
       if (Number.isNaN(anchor.getTime())) {
-        this.setState({showDatePickerModal: false});
+    this.setState({showDatePickerModal: false});
         return;
       }
       selectedDateString = toLocalDateString(anchor);

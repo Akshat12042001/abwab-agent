@@ -32,19 +32,18 @@ const VisitFeedbackModal = ({
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
-    let shouldClose = true;
-    if (onSubmitFeedback) {
-      const result = await onSubmitFeedback({
-        feedback: selectedFeedback,
-        notes: notes.trim(),
-      });
-      if (result === false) {
-        shouldClose = false;
-      }
-    }
-    if (shouldClose) {
+    if (!onSubmitFeedback) {
       onCloseModal();
+      return;
     }
+    const result = await onSubmitFeedback({
+      feedback: selectedFeedback,
+      notes: notes.trim(),
+    });
+    if (result === false) return;
+    // `true`: parent navigated away (e.g. success screen); avoid onCloseModal on unmounted tree.
+    if (result === true) return;
+    onCloseModal();
   };
 
   const feedbackOptions = [

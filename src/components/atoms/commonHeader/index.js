@@ -12,6 +12,8 @@ const CommonHeader = ({
   title = '',
   rightComponent = null,
   onBackPress = () => {},
+  /** If set, called instead of `navigation.goBack()` (e.g. async work then navigate). */
+  customBackHandler = null,
   backIconColor = COLORS.GREYSCALE_200,
   backIconBgColor = '',
   subTitle = '',
@@ -19,6 +21,10 @@ const CommonHeader = ({
 }) => {
   const navigation = useNavigation();
   const goBack = () => {
+    if (typeof customBackHandler === 'function') {
+      customBackHandler();
+      return;
+    }
     navigation.goBack();
     onBackPress?.();
   };

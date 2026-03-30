@@ -30,7 +30,13 @@
     "ENTER_YOUR_NUMBER": "Enter your number",
     "ENTER_YOUR_NEW_PASSWORD": "Enter your new password",
     "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "Enter your confirm new password",
-    "ENTER_YOUR_CURRENT_PASSWORD": "Enter your current password"
+    "ENTER_YOUR_CURRENT_PASSWORD": "Enter your current password",
+    "FIRST_NAME": "First name",
+    "LAST_NAME": "Last name",
+    "BIO": "Tell clients about your experience...",
+    "LOCATION": "City, area",
+    "SERVICE_AREA": "Areas you cover",
+    "EXPERIENCE": "Years or summary (optional)"
   },
   "LABELS": {
     "EMAIL_ADDRESS": "Email Address",
@@ -43,7 +49,13 @@
     "TERMS_AND_CONDITIONS": "Terms & Conditions",
     "PRIVACY_POLICY": "Privacy Policy",
     "CHANGE_PASSWORD": "Change Password",
-    "CURRENT_PASSWORD": "Current Password"
+    "CURRENT_PASSWORD": "Current Password",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "BIO": "Bio",
+    "LOCATION": "Location",
+    "SERVICE_AREA": "Service Area",
+    "EXPERIENCE": "Experience"
   },
   "ERRORS": {
     "REQUIRED": "Required",
@@ -239,7 +251,10 @@
     "MEETING_LOCATION": "Meeting Location",
     "NOTES": "Notes",
     "MARK_AS_COMPLETED": "Mark as completed",
-    "CLIENT_WERE_A_NO_SHOW": "Client Were a No-Show"
+    "CLIENT_WERE_A_NO_SHOW": "Client Were a No-Show",
+    "MISSING_REQUEST_ID": "Missing viewing request reference",
+    "FEEDBACK_SUBMIT_FAILED": "Could not submit feedback",
+    "NO_SHOW_SUBMIT_FAILED": "Could not log no-show"
   },
   "VISIT_FEEDBACK_MODAL": {
     "TITLE": "Visit Feedback",
@@ -278,7 +293,8 @@
     "REPORT_SUBMITTED_SUCCESSFULLY": "Report submitted successfully",
     "THANK_YOU_FOR_FEEDBACK": "Thank you for your feedback",
     "NO_SHOW_RESPONSE_RECORDED": "Your No-Show response has been recorded",
-    "DONE": "Done"
+    "DONE": "Done",
+    "COMPLETE_VISIT_FAILED": "Could not mark visit as completed"
   },
   "PROFILE_SCREEN": {
     "MY_PROFILE": "My Profile",
@@ -347,6 +363,19 @@
     "SERVICE_AREA": "Service Area",
     "LANGUAGES_SPOKEN": "Languages Spoken",
     "EDIT_PROFILE": "Edit Profile",
-    "EDIT_PASSWORD": "Edit Password"
+    "EDIT_PASSWORD": "Edit Password",
+    "LOAD_FAILED": "Could not load account details"
+  },
+  "EDIT_PROFILE_SCREEN": {
+    "TITLE": "Edit Profile",
+    "SAVE_CHANGES": "Save Changes",
+    "SAVED": "Profile updated",
+    "SAVE_FAILED": "Could not save profile",
+    "MISSING_AGENT": "Profile data missing. Open Account Settings again."
+  },
+  "CHANGE_PASSWORD_SCREEN": {
+    "TITLE": "Change Password",
+    "SUCCESS": "Password updated",
+    "FAILED": "Could not update password"
   }
 }

@@ -30,18 +30,16 @@ const ReportNoShowModal = ({
 
   const handleConfirm = async () => {
     if (isSubmitting) return;
-    let shouldClose = true;
-    if (onConfirmNoShow) {
-      const result = await onConfirmNoShow({
-        note: privateNote.trim(),
-      });
-      if (result === false) {
-        shouldClose = false;
-      }
-    }
-    if (shouldClose) {
+    if (!onConfirmNoShow) {
       onCloseModal();
+      return;
     }
+    const result = await onConfirmNoShow({
+      note: privateNote.trim(),
+    });
+    if (result === false) return;
+    if (result === true) return;
+    onCloseModal();
   };
 
   return (
