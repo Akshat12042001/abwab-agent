@@ -4,6 +4,12 @@ import {errorToast} from '../utils/alerts';
 import {getState, getStore} from '../redux';
 import {reset} from '../redux/auth/auth.reducer';
 
+const normalizeToken = value =>
+  String(value || '')
+    .trim()
+    .replace(/^bearer\s+/i, '')
+    .trim();
+
 const defaultOptions = (tokenFromParams = '') => {
   const authState = getState()?.auth || {};
   const onboardingState = getState()?.onboarding || {};
@@ -13,16 +19,20 @@ const defaultOptions = (tokenFromParams = '') => {
     authState?.userData?.token ||
     authState?.data?.token ||
     '';
+  const normalizedToken = normalizeToken(token);
 
   const language = onboardingState?.language || 'en';
 
-  console.log('🔥 TOKEN:', token);
+  console.log('🔥 TOKEN:', normalizedToken);
 
   return {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      authorization: token ? `Bearer ${token}` : '',
+      authorization: normalizedToken ? `Bearer ${normalizedToken}` : '',
+      Authorization: normalizedToken ? `Bearer ${normalizedToken}` : '',
+      token: normalizedToken || '',
+      access_token: normalizedToken || '',
       lan: language,
     },
   };

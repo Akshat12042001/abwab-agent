@@ -37,5 +37,6 @@ export default {
     LANGUAGE_SCREEN: 'Common-LanguageScreen',
     CHANGE_PASSWORD_SCREEN: 'Common-ChangePasswordScreen',
     ACCOUNT_SETTINGS_SCREEN: 'Common-AccountSettingsScreen',
+    EDIT_PROFILE_SCREEN: 'Common-EditProfileScreen',
   },
 };

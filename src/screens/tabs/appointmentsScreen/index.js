@@ -108,7 +108,13 @@ class AppointmentsScreen extends Component {
   }
 
   componentDidMount() {
-    this.fetchAppointments({reset: true});
+    this.focusUnsubscribe = this.props.navigation.addListener('focus', () => {
+      this.fetchAppointments({reset: true});
+    });
+  }
+
+  componentWillUnmount() {
+    this.focusUnsubscribe?.();
   }
 
   logApi = (step, payload) => {

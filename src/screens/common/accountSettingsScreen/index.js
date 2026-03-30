@@ -1,62 +1,184 @@
 import React, {Component} from 'react';
-import {View, Image, ScrollView, TouchableOpacity} from 'react-native';
+import {View, Image, ScrollView, TouchableOpacity, ActivityIndicator} from 'react-native';
 import {
   ScreenContainer,
   CommonHeader,
   StyledText,
   CustomButton,
 } from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {withTranslation} from 'react-i18next';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
-import {NAVIGATION} from '../../../constants';
+import {connect} from 'react-redux';
 import styles from './styles';
 import {ASSETS} from '../../../constants/assets';
+import {makeGetAgentProfileRequest} from '../../../api/auth';
+import {errorToast} from '../../../utils/alerts';
 
 class AccountSettingsScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
       showFullBio: false,
+      isLoading: true,
+      rawAgent: null,
       profileData: {
-        name: 'Ahmed Hassan',
-        email: 'hello@kamaluiux.com',
-        phone: '+201012346663',
-        location: 'Zamalek, Egypt',
-        bio: 'Experienced real estate broker specializing in luxury villas and family communities in New Cairo. With over 10 years in the industry, I help clients find their perfect home.',
-        serviceArea: 'New Cairo, Sheikh Zayed, Zamalek, Giza, 6th October',
-        languages: 'English, Arabic',
+        name: '',
+        email: '',
+        phone: '',
+        location: '',
+        bio: '',
+        serviceArea: '',
+        languages: '',
         image: ASSETS.IMAGES.PERSON,
       },
     };
   }
 
+  componentDidMount() {
+    this.loadAgent();
+    this.focusUnsub = this.props.navigation.addListener('focus', () => {
+      this.loadAgent();
+    });
+  }
+
+  componentWillUnmount() {
+    this.focusUnsub?.();
+  }
+
+  getAgentId = () => {
+    const userData = this.props.userData || {};
+    return (
+      userData?._id ||
+      userData?.id ||
+      userData?.agentId ||
+      userData?.user?._id ||
+      userData?.user?.id ||
+      ''
+    );
+  };
+
+  getRawPayload = response => {
+    const candidates = [
+      response?.data?.agent,
+      response?.data?.data,
+      response?.data,
+      response?.agent,
+      response,
+    ];
+    return (
+      candidates.find(
+        x => x && typeof x === 'object' && !Array.isArray(x),
+      ) || {}
+    );
+  };
+
+  normalizeDisplay = agent => {
+    const name = agent?.name || agent?.fullName || '';
+    const email = agent?.email || '';
+    const phone =
+      agent?.phoneNo || agent?.phone || agent?.phoneNumber || '';
+    const location = agent?.address || agent?.location || '';
+    const bio = agent?.bio || '';
+    const serviceArea =
+      agent?.specialization || agent?.serviceArea || '';
+    const languagesRaw =
+      agent?.languages || agent?.language || agent?.spokenLanguages;
+    const languages = Array.isArray(languagesRaw)
+      ? languagesRaw.filter(Boolean).join(', ')
+      : String(languagesRaw || '').trim();
+    const imageUri =
+      agent?.image ||
+      agent?.avatar ||
+      agent?.profileImage ||
+      agent?.photo;
+
+    return {
+      name: name || '-',
+      email: email || '-',
+      phone: phone || '-',
+      location: location || '-',
+      bio: bio || '-',
+      serviceArea: serviceArea || '-',
+      languages: languages || '-',
+      image: imageUri ? {uri: imageUri} : ASSETS.IMAGES.PERSON,
+    };
+  };
+
+  loadAgent = async () => {
+    const agentId = this.getAgentId();
+    const {t, i18n} = this.props;
+    const tr = t || i18n?.t;
+    if (!agentId) {
+      this.setState({isLoading: false});
+      errorToast(
+        tr?.('ACCOUNT_SETTINGS_SCREEN.LOAD_FAILED', {
+          defaultValue: 'Could not load account',
+        }),
+        tr,
+      );
+      return;
+    }
+
+    this.setState({isLoading: true});
+    try {
+      const response = await makeGetAgentProfileRequest(agentId);
+      const raw = this.getRawPayload(response);
+      this.setState({
+        rawAgent: raw,
+        profileData: this.normalizeDisplay(raw),
+        isLoading: false,
+      });
+    } catch (e) {
+      errorToast(
+        e?.response?.data?.message ||
+          tr?.('ACCOUNT_SETTINGS_SCREEN.LOAD_FAILED', {
+            defaultValue: 'Could not load account',
+          }),
+        tr,
+      );
+      this.setState({isLoading: false});
+    }
+  };
+
   toggleBio = () => {
-    this.setState(prevState => ({
-      showFullBio: !prevState.showFullBio,
-    }));
+    this.setState(prev => ({showFullBio: !prev.showFullBio}));
   };
 
   handleEditProfile = () => {
-    // Navigate to edit profile screen
-    console.log('Edit Profile pressed');
+    const {navigation} = this.props;
+    const {rawAgent} = this.state;
+    const tr = this.props.t || this.props.i18n?.t;
+    const id = rawAgent?._id || rawAgent?.id || this.getAgentId();
+    if (!rawAgent || !id) {
+      errorToast(
+        tr?.('ACCOUNT_SETTINGS_SCREEN.LOAD_FAILED', {
+          defaultValue: 'Profile is still loading. Try again.',
+        }),
+        tr,
+      );
+      return;
+    }
+    navigation.navigate(NAVIGATION.COMMON.EDIT_PROFILE_SCREEN, {
+      agent: {...rawAgent, _id: rawAgent._id || rawAgent.id || id, id},
+    });
   };
 
   handleEditPassword = () => {
-    const {navigation} = this.props;
-    navigation?.navigate(NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN);
+    this.props.navigation?.navigate(NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN);
   };
 
   renderInfoRow = (label, value, isBio = false) => {
-    const {t} = this.props?.i18n;
+    const {t, i18n} = this.props;
+    const tr = t || i18n?.t;
     const {showFullBio} = this.state;
     const {bio} = this.state.profileData;
 
     let displayValue = value;
-    if (isBio) {
+    if (isBio && typeof value === 'string') {
       const maxLength = 100;
       if (!showFullBio && value.length > maxLength) {
-        displayValue = value.substring(0, maxLength) + '...';
+        displayValue = `${value.substring(0, maxLength)}...`;
       }
     }
 
@@ -77,7 +199,7 @@ class AccountSettingsScreen extends Component {
             textStyle={styles.infoValue}>
             {displayValue}
           </StyledText>
-          {isBio && bio.length > 100 && (
+          {isBio && typeof bio === 'string' && bio.length > 100 && (
             <TouchableOpacity onPress={this.toggleBio} activeOpacity={0.7}>
               <StyledText
                 size={14}
@@ -85,8 +207,8 @@ class AccountSettingsScreen extends Component {
                 color={COLORS.PRIMARY_400}
                 textStyle={styles.readMoreText}>
                 {showFullBio
-                  ? t('DEVELOPER_SCREEN.READ_LESS')
-                  : t('DEVELOPER_SCREEN.READ_MORE')}
+                  ? tr('DEVELOPER_SCREEN.READ_LESS')
+                  : tr('DEVELOPER_SCREEN.READ_MORE')}
               </StyledText>
             </TouchableOpacity>
           )}
@@ -99,74 +221,79 @@ class AccountSettingsScreen extends Component {
   render() {
     const insetTop = this.props?.insets?.top || 0;
     const insetBottom = this.props?.insets?.bottom || 0;
-    const {t} = this.props?.i18n;
-    const {profileData} = this.state;
+    const {t, i18n} = this.props;
+    const tr = t || i18n?.t;
+    const {profileData, isLoading} = this.state;
 
     return (
       <ScreenContainer
         backgroundColor={COLORS.WHITE}
         paddingTop={insetTop + 20}>
-        <CommonHeader title={t('ACCOUNT_SETTINGS_SCREEN.TITLE')} />
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {paddingBottom: insetBottom + 100},
-          ]}
-          showsVerticalScrollIndicator={false}>
-          {/* Profile Picture and Name */}
-          <View style={styles.profileSection}>
-            <Image
-              source={profileData.image}
-              style={styles.profileImage}
-              resizeMode="cover"
-            />
-            <StyledText
-              size={18}
-              variant="semiBold"
-              color={COLORS.GREYSCALE_900}
-              textStyle={styles.profileName}>
-              {profileData.name}
-            </StyledText>
+        <CommonHeader title={tr('ACCOUNT_SETTINGS_SCREEN.TITLE')} />
+        {isLoading ? (
+          <View style={{paddingTop: 48, alignItems: 'center'}}>
+            <ActivityIndicator size="large" color={COLORS.PRIMARY} />
           </View>
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={[
+              styles.scrollContent,
+              {paddingBottom: insetBottom + 100},
+            ]}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.profileSection}>
+              <Image
+                source={profileData.image}
+                style={styles.profileImage}
+                resizeMode="cover"
+              />
+              <StyledText
+                size={18}
+                variant="semiBold"
+                color={COLORS.GREYSCALE_900}
+                textStyle={styles.profileName}>
+                {profileData.name}
+              </StyledText>
+            </View>
 
-          {/* Account Details */}
-          <View style={styles.detailsContainer}>
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.EMAIL_ADDRESS'),
-              profileData.email,
-            )}
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.PHONE_NUMBER'),
-              profileData.phone,
-            )}
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.LOCATION'),
-              profileData.location,
-            )}
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.BIO'),
-              profileData.bio,
-              true,
-            )}
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.SERVICE_AREA'),
-              profileData.serviceArea,
-            )}
-            {this.renderInfoRow(
-              t('ACCOUNT_SETTINGS_SCREEN.LANGUAGES_SPOKEN'),
-              profileData.languages,
-            )}
-          </View>
-        </ScrollView>
+            <View style={styles.detailsContainer}>
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.EMAIL_ADDRESS'),
+                profileData.email,
+              )}
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.PHONE_NUMBER'),
+                profileData.phone,
+              )}
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.LOCATION'),
+                profileData.location,
+              )}
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.BIO'),
+                profileData.bio,
+                true,
+              )}
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.SERVICE_AREA'),
+                profileData.serviceArea,
+              )}
+              {this.renderInfoRow(
+                tr('ACCOUNT_SETTINGS_SCREEN.LANGUAGES_SPOKEN'),
+                profileData.languages,
+              )}
+            </View>
+          </ScrollView>
+        )}
 
-        {/* Action Buttons */}
         <View
           style={[styles.buttonsContainer, {paddingBottom: insetBottom + 20}]}>
           <CustomButton
-            title={t('ACCOUNT_SETTINGS_SCREEN.EDIT_PROFILE')}
+            title={tr('ACCOUNT_SETTINGS_SCREEN.EDIT_PROFILE')}
             onPress={this.handleEditProfile}
             containerStyle={styles.editProfileButton}
+            isDisabled={isLoading}
           />
           <TouchableOpacity
             style={styles.editPasswordButton}
@@ -177,7 +304,7 @@ class AccountSettingsScreen extends Component {
               variant="bold"
               color={COLORS.GREYSCALE_900}
               textStyle={styles.editPasswordText}>
-              {t('ACCOUNT_SETTINGS_SCREEN.EDIT_PASSWORD')}
+              {tr('ACCOUNT_SETTINGS_SCREEN.EDIT_PASSWORD')}
             </StyledText>
           </TouchableOpacity>
         </View>
@@ -186,4 +313,10 @@ class AccountSettingsScreen extends Component {
   }
 }
 
-export default withTranslation()(withSafeAreaInsets(AccountSettingsScreen));
+const mapStateToProps = state => ({
+  userData: state?.auth?.userData,
+});
+
+export default connect(mapStateToProps)(
+  withTranslation()(withSafeAreaInsets(AccountSettingsScreen)),
+);

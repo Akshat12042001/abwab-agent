@@ -12,3 +12,4 @@ export {default as PolicyScreen} from './policyScreen';
 export {default as LanguageScreen} from './languageScreen';
 export {default as ChangePasswordScreen} from './changePasswordScreen';
 export {default as AccountSettingsScreen} from './accountSettingsScreen';
+export {default as EditProfileScreen} from './editProfileScreen';

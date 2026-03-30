@@ -16,15 +16,18 @@ import {
 } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import MapboxGL from '@rnmapbox/maps';
-import {COLORS, SCREEN, SCREEN_PADDING} from '../../../constants';
+import {COLORS, NAVIGATION, SCREEN, SCREEN_PADDING} from '../../../constants';
 import {ASSETS} from '../../../constants/assets';
 import styles from './styles';
 import {
   ReportNoShowModal,
   VisitFeedbackModal,
 } from '../../../components/modals';
-import {makeRequestViewingActionRequest} from '../../../api/auth';
-import {errorToast, successToast} from '../../../utils/alerts';
+import {
+  makeRequestViewingActionRequest,
+  makeRequestViewingFeedbackRequest,
+} from '../../../api/auth';
+import {errorToast} from '../../../utils/alerts';
 
 
 const STATUS_COMPLETED = 'completed';
@@ -87,43 +90,54 @@ class AppointmentDetailScreen extends Component {
 
   handleSubmitFeedback = async ({feedback, notes}) => {
     const {requestId} = this.state;
+    const {t} = this.props?.i18n || {};
     if (!requestId) {
-      errorToast('Missing viewing request reference');
+      errorToast(
+        t?.('APPOINTMENT_DETAIL_SCREEN.MISSING_REQUEST_ID', {
+          defaultValue: 'Missing viewing request reference',
+        }),
+        t,
+      );
       return false;
     }
     this.setState({feedbackSubmitting: true});
     try {
-      const updateMessage = JSON.stringify({
-        visitOutcome: feedback,
-        notes: notes || '',
-      });
-      await makeRequestViewingActionRequest({
+      await makeRequestViewingFeedbackRequest({
         requestId,
-        status: STATUS_COMPLETED,
-        updateMessage,
+        clientInterest: feedback,
+        agentFeedbackNote: notes,
       });
-      const {t} = this.props?.i18n || {};
-      const successMsg = t?.('SUCCESS_SCREEN.FEEDBACK_SUBMITTED_SUCCESSFULLY', {
-        defaultValue: 'Visit marked as completed',
+      this.setState({
+        feedbackSubmitting: false,
+        isVisitFeedbackModalVisible: false,
       });
-      this.setState({isVisitFeedbackModalVisible: false});
-      setTimeout(() => {
-        successToast(successMsg, t);
-        setTimeout(() => this.props.navigation.goBack(), 700);
-      }, 400);
+      this.props.navigation.replace(NAVIGATION.COMMON.SUCCESS_SCREEN, {
+        variant: 'visitFeedback',
+        requestId: String(requestId),
+      });
       return true;
     } catch (e) {
-      errorToast('Could not update appointment');
-      return false;
-    } finally {
+      const msg =
+        e?.response?.data?.message ||
+        t?.('APPOINTMENT_DETAIL_SCREEN.FEEDBACK_SUBMIT_FAILED', {
+          defaultValue: 'Could not submit feedback',
+        });
+      errorToast(msg, t);
       this.setState({feedbackSubmitting: false});
+      return false;
     }
   };
 
   handleConfirmNoShow = async ({note}) => {
     const {requestId} = this.state;
+    const {t} = this.props?.i18n || {};
     if (!requestId) {
-      errorToast('Missing viewing request reference');
+      errorToast(
+        t?.('APPOINTMENT_DETAIL_SCREEN.MISSING_REQUEST_ID', {
+          defaultValue: 'Missing viewing request reference',
+        }),
+        t,
+      );
       return false;
     }
     this.setState({noShowSubmitting: true});
@@ -133,21 +147,23 @@ class AppointmentDetailScreen extends Component {
         status: STATUS_CLIENT_NO_SHOW,
         updateMessage: note || 'Client no-show',
       });
-      const {t} = this.props?.i18n || {};
-      const successMsg = t?.('REPORT_NO_SHOW_MODAL.SUCCESS_TOAST', {
-        defaultValue: 'No-show logged successfully',
+      this.setState({
+        noShowSubmitting: false,
+        isReportNoShowModalVisible: false,
       });
-      this.setState({isReportNoShowModalVisible: false});
-      setTimeout(() => {
-        successToast(successMsg, t);
-        setTimeout(() => this.props.navigation.goBack(), 700);
-      }, 400);
+      this.props.navigation.replace(NAVIGATION.COMMON.SUCCESS_SCREEN, {
+        variant: 'noShow',
+      });
       return true;
     } catch (e) {
-      errorToast('Could not log no-show');
-      return false;
-    } finally {
+      const msg =
+        e?.response?.data?.message ||
+        t?.('APPOINTMENT_DETAIL_SCREEN.NO_SHOW_SUBMIT_FAILED', {
+          defaultValue: 'Could not log no-show',
+        });
+      errorToast(msg, t);
       this.setState({noShowSubmitting: false});
+      return false;
     }
   };
 

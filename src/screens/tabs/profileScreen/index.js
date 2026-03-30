@@ -141,8 +141,12 @@ class ProfileScreen extends Component {
   };
 
   handleMenuItemPress = itemId => {
-    console.log('Menu item pressed:', itemId);
-    // Handle navigation to respective screens
+    if (itemId === 'account-settings') {
+      this.props.navigation.navigate(NAVIGATION.STACKS.COMMON, {
+        screen: NAVIGATION.COMMON.ACCOUNT_SETTINGS_SCREEN,
+      });
+      return;
+    }
   };
 
   handleLogout = () => {

@@ -17,6 +17,7 @@ import {
   LanguageScreen,
   ChangePasswordScreen,
   AccountSettingsScreen,
+  EditProfileScreen,
 } from '../../screens/common';
 
 const Stack = createStackNavigator();
@@ -48,11 +49,10 @@ export default () => {
         name={NAVIGATION.COMMON.CALENDER_MANAGEMENT_SCREEN}
         component={CalenderManagementScreen}
       />
-      {/*
       <Stack.Screen
         name={NAVIGATION.COMMON.SUCCESS_SCREEN}
         component={SuccessScreen}
-      /> */}
+      />
       {/* <Stack.Screen
         name={NAVIGATION.COMMON.CHAT_SCREEN}
         component={ChatScreen}
@@ -74,13 +74,17 @@ export default () => {
         name={NAVIGATION.COMMON.LANGUAGE_SCREEN}
         component={LanguageScreen}
       /> */}
-      {/* <Stack.Screen
-        name={NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN}
-        component={ChangePasswordScreen}
-      /> */}
       <Stack.Screen
         name={NAVIGATION.COMMON.ACCOUNT_SETTINGS_SCREEN}
         component={AccountSettingsScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.EDIT_PROFILE_SCREEN}
+        component={EditProfileScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.CHANGE_PASSWORD_SCREEN}
+        component={ChangePasswordScreen}
       />
     </Stack.Navigator>
   );

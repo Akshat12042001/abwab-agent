@@ -30,7 +30,13 @@
     "ENTER_YOUR_NUMBER": "أدخل رقمك",
     "ENTER_YOUR_NEW_PASSWORD": "أدخل كلمة المرور الجديدة",
     "ENTER_YOUR_CONFIRM_NEW_PASSWORD": "أدخل تأكيد كلمة المرور الجديدة",
-    "ENTER_YOUR_CURRENT_PASSWORD": "أدخل كلمة المرور الحالية"
+    "ENTER_YOUR_CURRENT_PASSWORD": "أدخل كلمة المرور الحالية",
+    "FIRST_NAME": "الاسم الأول",
+    "LAST_NAME": "اسم العائلة",
+    "BIO": "أخبر العملاء عن خبرتك...",
+    "LOCATION": "المدينة، المنطقة",
+    "SERVICE_AREA": "المناطق التي تغطيها",
+    "EXPERIENCE": "الخبرة (اختياري)"
   },
   "LABELS": {
     "EMAIL_ADDRESS": "عنوان البريد الإلكتروني",
@@ -43,7 +49,13 @@
     "TERMS_AND_CONDITIONS": "الشروط والأحكام",
     "PRIVACY_POLICY": "سياسة الخصوصية",
     "CHANGE_PASSWORD": "تغيير كلمة المرور",
-    "CURRENT_PASSWORD": "كلمة المرور الحالية"
+    "CURRENT_PASSWORD": "كلمة المرور الحالية",
+    "FIRST_NAME": "الاسم الأول",
+    "LAST_NAME": "اسم العائلة",
+    "BIO": "نبذة",
+    "LOCATION": "الموقع",
+    "SERVICE_AREA": "منطقة الخدمة",
+    "EXPERIENCE": "الخبرة"
   },
   "ERRORS": {
     "REQUIRED": "مطلوب",
@@ -238,7 +250,10 @@
     "MEETING_LOCATION": "موقع الاجتماع",
     "NOTES": "ملاحظات",
     "MARK_AS_COMPLETED": "تمييز كمكتمل",
-    "CLIENT_WERE_A_NO_SHOW": "العميل لم يحضر"
+    "CLIENT_WERE_A_NO_SHOW": "العميل لم يحضر",
+    "MISSING_REQUEST_ID": "مرجع طلب المعاينة مفقود",
+    "FEEDBACK_SUBMIT_FAILED": "تعذّر إرسال التقييم",
+    "NO_SHOW_SUBMIT_FAILED": "تعذّر تسجيل عدم الحضور"
   },
   "VISIT_FEEDBACK_MODAL": {
     "TITLE": "تقييم الزيارة",
@@ -277,7 +292,8 @@
     "REPORT_SUBMITTED_SUCCESSFULLY": "تم إرسال التقرير بنجاح",
     "THANK_YOU_FOR_FEEDBACK": "شكراً لك على تقييمك",
     "NO_SHOW_RESPONSE_RECORDED": "تم تسجيل ردك حول عدم الحضور",
-    "DONE": "تم"
+    "DONE": "تم",
+    "COMPLETE_VISIT_FAILED": "تعذّر تمييز الزيارة كمكتملة"
   },
   "PROFILE_SCREEN": {
     "MY_PROFILE": "ملفي الشخصي",
@@ -346,6 +362,19 @@
     "SERVICE_AREA": "منطقة الخدمة",
     "LANGUAGES_SPOKEN": "اللغات المتحدثة",
     "EDIT_PROFILE": "تعديل الملف الشخصي",
-    "EDIT_PASSWORD": "تعديل كلمة المرور"
+    "EDIT_PASSWORD": "تعديل كلمة المرور",
+    "LOAD_FAILED": "تعذّر تحميل تفاصيل الحساب"
+  },
+  "EDIT_PROFILE_SCREEN": {
+    "TITLE": "تعديل الملف الشخصي",
+    "SAVE_CHANGES": "حفظ التغييرات",
+    "SAVED": "تم تحديث الملف",
+    "SAVE_FAILED": "تعذّر حفظ الملف",
+    "MISSING_AGENT": "بيانات الملف غير متوفرة. افتح إعدادات الحساب مرة أخرى."
+  },
+  "CHANGE_PASSWORD_SCREEN": {
+    "TITLE": "تغيير كلمة المرور",
+    "SUCCESS": "تم تحديث كلمة المرور",
+    "FAILED": "تعذّر تحديث كلمة المرور"
   }
 }

@@ -13,9 +13,9 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   iconContainer: {
-    height: 70,
-    width: 70,
-    borderRadius: 100,
+    height: 88,
+    width: 88,
+    borderRadius: 44,
     backgroundColor: COLORS.PRIMARY,
     justifyContent: 'center',
     alignItems: 'center',
@@ -29,8 +29,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonContainer: {
-    marginTop: 20,
-    width: '50%',
+    marginTop: 28,
+    width: '88%',
+    maxWidth: 400,
+    alignSelf: 'center',
   },
 });
 
