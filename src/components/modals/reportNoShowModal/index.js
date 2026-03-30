@@ -18,6 +18,7 @@ const ReportNoShowModal = ({
   isVisible,
   onCloseModal,
   onConfirmNoShow,
+  isSubmitting = false,
   propertyTitle = '2 Bedroom Apartment in NewKairo',
   developer = 'SODIC',
   location = 'New Cairo',
@@ -27,13 +28,20 @@ const ReportNoShowModal = ({
   const {t} = useTranslation();
   const [privateNote, setPrivateNote] = useState('');
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (isSubmitting) return;
+    let shouldClose = true;
     if (onConfirmNoShow) {
-      onConfirmNoShow({
+      const result = await onConfirmNoShow({
         note: privateNote.trim(),
       });
+      if (result === false) {
+        shouldClose = false;
+      }
     }
-    onCloseModal();
+    if (shouldClose) {
+      onCloseModal();
+    }
   };
 
   return (
@@ -137,8 +145,9 @@ const ReportNoShowModal = ({
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
-            style={styles.confirmButton}
+            style={[styles.confirmButton, isSubmitting && {opacity: 0.6}]}
             onPress={handleConfirm}
+            disabled={isSubmitting}
             activeOpacity={0.8}>
             <StyledText size={14} variant="bold" color={COLORS.WHITE}>
               {t('REPORT_NO_SHOW_MODAL.CONFIRM_AND_LOG')}

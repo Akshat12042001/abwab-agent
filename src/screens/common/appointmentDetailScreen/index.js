@@ -23,11 +23,18 @@ import {
   ReportNoShowModal,
   VisitFeedbackModal,
 } from '../../../components/modals';
+import {makeRequestViewingActionRequest} from '../../../api/auth';
+import {errorToast, successToast} from '../../../utils/alerts';
+
+
+const STATUS_COMPLETED = 'completed';
+
+const STATUS_CLIENT_NO_SHOW = 'no-show';
 
 class AppointmentDetailScreen extends Component {
   constructor(props) {
     super(props);
-    // Static dummy data
+   
     this.state = {
       currentImageIndex: 0,
       carouselImages: [
@@ -44,10 +51,13 @@ class AppointmentDetailScreen extends Component {
       isVerified: true,
       meetingLocation: 'Gate B - Palm Hills Compound, New Cairo',
       notes: 'Client prefers morning slots for future appointments',
-      // Map coordinates (Cairo, Egypt)
       mapCenter: [31.2357, 30.0444],
       isVisitFeedbackModalVisible: false,
       isReportNoShowModalVisible: false,
+      requestId: '',
+      developer: 'Developer',
+      feedbackSubmitting: false,
+      noShowSubmitting: false,
     };
   }
 
@@ -70,17 +80,79 @@ class AppointmentDetailScreen extends Component {
           : prev.isVerified,
       meetingLocation: params?.meetingLocation || prev.meetingLocation,
       notes: params?.notes || prev.notes,
+      requestId: params?.requestId ? String(params.requestId) : prev.requestId,
+      developer: params?.developer || prev.developer,
     }));
   }
 
-  handleMarkCompleted = () => {
-    console.log('Mark as completed');
-    // Handle mark as completed
+  handleSubmitFeedback = async ({feedback, notes}) => {
+    const {requestId} = this.state;
+    if (!requestId) {
+      errorToast('Missing viewing request reference');
+      return false;
+    }
+    this.setState({feedbackSubmitting: true});
+    try {
+      const updateMessage = JSON.stringify({
+        visitOutcome: feedback,
+        notes: notes || '',
+      });
+      await makeRequestViewingActionRequest({
+        requestId,
+        status: STATUS_COMPLETED,
+        updateMessage,
+      });
+      const {t} = this.props?.i18n || {};
+      const successMsg = t?.('SUCCESS_SCREEN.FEEDBACK_SUBMITTED_SUCCESSFULLY', {
+        defaultValue: 'Visit marked as completed',
+      });
+      this.setState({isVisitFeedbackModalVisible: false});
+      setTimeout(() => {
+        successToast(successMsg, t);
+        setTimeout(() => this.props.navigation.goBack(), 700);
+      }, 400);
+      return true;
+    } catch (e) {
+      errorToast('Could not update appointment');
+      return false;
+    } finally {
+      this.setState({feedbackSubmitting: false});
+    }
+  };
+
+  handleConfirmNoShow = async ({note}) => {
+    const {requestId} = this.state;
+    if (!requestId) {
+      errorToast('Missing viewing request reference');
+      return false;
+    }
+    this.setState({noShowSubmitting: true});
+    try {
+      await makeRequestViewingActionRequest({
+        requestId,
+        status: STATUS_CLIENT_NO_SHOW,
+        updateMessage: note || 'Client no-show',
+      });
+      const {t} = this.props?.i18n || {};
+      const successMsg = t?.('REPORT_NO_SHOW_MODAL.SUCCESS_TOAST', {
+        defaultValue: 'No-show logged successfully',
+      });
+      this.setState({isReportNoShowModalVisible: false});
+      setTimeout(() => {
+        successToast(successMsg, t);
+        setTimeout(() => this.props.navigation.goBack(), 700);
+      }, 400);
+      return true;
+    } catch (e) {
+      errorToast('Could not log no-show');
+      return false;
+    } finally {
+      this.setState({noShowSubmitting: false});
+    }
   };
 
   handleNoShow = () => {
     this.setState({isReportNoShowModalVisible: true});
-    // Handle no-show
   };
 
   render() {
@@ -102,7 +174,13 @@ class AppointmentDetailScreen extends Component {
       mapCenter,
       isVisitFeedbackModalVisible,
       isReportNoShowModalVisible,
+      requestId,
+      developer,
+      feedbackSubmitting,
+      noShowSubmitting,
     } = this.state;
+
+    const actionsLocked = !requestId || feedbackSubmitting || noShowSubmitting;
 
     return (
       <ScreenContainer
@@ -322,10 +400,12 @@ class AppointmentDetailScreen extends Component {
             title={t('APPOINTMENT_DETAIL_SCREEN.MARK_AS_COMPLETED')}
             onPress={() => this.setState({isVisitFeedbackModalVisible: true})}
             containerStyle={styles.completedButton}
+            isDisabled={actionsLocked}
           />
           <TouchableOpacity
-            style={styles.noShowButton}
+            style={[styles.noShowButton, actionsLocked && {opacity: 0.5}]}
             onPress={this.handleNoShow}
+            disabled={actionsLocked}
             activeOpacity={0.8}>
             <StyledText size={14} variant="bold" color={COLORS.GREYSCALE_700}>
               {t('APPOINTMENT_DETAIL_SCREEN.CLIENT_WERE_A_NO_SHOW')}
@@ -335,12 +415,25 @@ class AppointmentDetailScreen extends Component {
         <VisitFeedbackModal
           isVisible={isVisitFeedbackModalVisible}
           onSubmitFeedback={this.handleSubmitFeedback}
+          isSubmitting={feedbackSubmitting}
+          propertyTitle={propertyTitle}
+          developer={developer}
+          location={propertyLocation}
+          clientName={clientName}
+          clientImage={clientImage}
           onCloseModal={() =>
             this.setState({isVisitFeedbackModalVisible: false})
           }
         />
         <ReportNoShowModal
           isVisible={isReportNoShowModalVisible}
+          onConfirmNoShow={this.handleConfirmNoShow}
+          isSubmitting={noShowSubmitting}
+          propertyTitle={propertyTitle}
+          developer={developer}
+          location={propertyLocation}
+          clientName={clientName}
+          clientImage={clientImage}
           onCloseModal={() =>
             this.setState({isReportNoShowModalVisible: false})
           }

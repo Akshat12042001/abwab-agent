@@ -10,13 +10,13 @@ PODS:
   - hermes-engine (0.82.0):
     - hermes-engine/Pre-built (= 0.82.0)
   - hermes-engine/Pre-built (0.82.0)
-  - MapboxCommon (24.18.2):
+  - MapboxCommon (24.18.3):
     - Turf (= 4.0.0)
-  - MapboxCoreMaps (11.18.2):
-    - MapboxCommon (= 24.18.2)
-  - MapboxMaps (11.18.2):
-    - MapboxCommon (= 24.18.2)
-    - MapboxCoreMaps (= 11.18.2)
+  - MapboxCoreMaps (11.18.3):
+    - MapboxCommon (= 24.18.3)
+  - MapboxMaps (11.18.3):
+    - MapboxCommon (= 24.18.3)
+    - MapboxCoreMaps (= 11.18.3)
     - Turf (= 4.0.0)
   - RCT-Folly (2024.11.18.00):
     - boost
@@ -1850,7 +1850,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-keyboard-controller (1.21.0):
+  - react-native-keyboard-controller (1.21.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -1868,7 +1868,7 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-keyboard-controller/common (= 1.21.0)
+    - react-native-keyboard-controller/common (= 1.21.2)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1879,7 +1879,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-keyboard-controller/common (1.21.0):
+  - react-native-keyboard-controller/common (1.21.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2565,7 +2565,7 @@ PODS:
     - Yoga
   - RNDeviceInfo (14.1.1):
     - React-Core
-  - RNGestureHandler (2.29.0):
+  - RNGestureHandler (2.30.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2717,7 +2717,7 @@ PODS:
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNScreens (4.18.0):
+  - RNScreens (4.24.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2744,10 +2744,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.18.0)
+    - RNScreens/common (= 4.24.0)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.18.0):
+  - RNScreens/common (4.24.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -3211,9 +3211,9 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 8642d8f14a548ab718ec112e9bebdfdd154138b5
-  MapboxCommon: c9dc807d8fefcdc2ed15b8a14c68109db74ac4f5
-  MapboxCoreMaps: 2f3f01c611d2375dd3e678384d6edf39102c5194
-  MapboxMaps: bd0a24605ad74a3dd140ef7bce64f96c056fda0b
+  MapboxCommon: 371fd6db596531464b6fd751ae7daa382fe2da2b
+  MapboxCoreMaps: 811c4196843f5554b10a807d1231270d372ff148
+  MapboxMaps: 0e8fdc25eb3b1c2ff5cf9317266fe984eeb0e18f
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: 22bf66112da540a7d40e536366ddd8557934fca1
   RCTRequired: a0ed4dc41b35f79fbb6d8ba320e06882a8c792cf
@@ -3249,7 +3249,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 9b52faf56750d7e3c67d9cf96b650f14c31524c2
   react-native-config: d11015cb98b2973fec0e49407181720225733567
   react-native-date-picker: 8191d29ff17772c771a9a69efc0c4c47a7affeef
-  react-native-keyboard-controller: 74069b8a1829a135eaa13093fd77a608fdf5ee00
+  react-native-keyboard-controller: e75b99b02192234dde588cd3043e02c58a920a99
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
   react-native-safe-area-context: 5d8c627bc6296d018625948364c1a02d50d11bd4
   React-NativeModulesApple: 1b4d9722d8df62e881684abadf320e7a8fa1b7f6
@@ -3286,16 +3286,16 @@ SPEC CHECKSUMS:
   ReactCommon: 17f21c8e189e290113e40fd8652758ec9694897b
   RNCAsyncStorage: 302f2fac014fd450046c120567ca364632da682b
   RNDeviceInfo: 8b6fa8379062949dd79a009cf3d6b02a9c03ca59
-  RNGestureHandler: 4fd2c1c449479d982116e0336513fc0f2e4b4617
+  RNGestureHandler: 4f0b1db8f3214e548119f071517638c627efdd7b
   rnmapbox-maps: 89c584c5acb06c305c8939367ec33b1ae94712aa
   RNReanimated: c76d99de4022813a27dc3745d8d2de4230ac5fef
-  RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
+  RNScreens: 7179cc1ba31b4e18ed29f10abf20c24a7961cf4c
   RNSVG: 963192f99dc2014b9aef2aa4f0ae621cb92fbe5e
   RNWorklets: daa0a3e7946a9c4042f3a962c87a12dc5bc0badd
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
   Yoga: edeb9900b9e5bb5b27b9a6a2d5914e4fe4033c1b
 
-PODFILE CHECKSUM: b3bbcbaf9dea35a412872aa00d995b691ecafa0c
+PODFILE CHECKSUM: c65e57c1e87ae5d3697970110724c4dacfa21e81
 
 COCOAPODS: 1.16.2

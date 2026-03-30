@@ -22,6 +22,8 @@ import {PROFILE_MENU_CONFIG, PROFILE_STATS} from './config';
 import styles from './styles';
 import {makeGetAgentProfileRequest} from '../../../api/auth';
 import {errorToast} from '../../../utils/alerts';
+import {reset} from '../../../redux/auth/auth.reducer';
+import {ChatSocketService} from '../../../services';
 
 class ProfileScreen extends Component {
   constructor(props) {
@@ -144,8 +146,8 @@ class ProfileScreen extends Component {
   };
 
   handleLogout = () => {
-    console.log('Logout pressed');
-    // Handle logout
+    ChatSocketService.disconnect();
+    this.props.reset();
   };
 
   handleNotificationPress = () => {
@@ -338,6 +340,6 @@ const mapStateToProps = state => ({
   userData: state?.auth?.userData,
 });
 
-export default connect(mapStateToProps)(
+export default connect(mapStateToProps, {reset})(
   withTranslation()(withSafeAreaInsets(ProfileScreen)),
 );

@@ -99,7 +99,8 @@
     "COMMISSION_TRACKING": "Commission Tracking",
     "PENDING": "Pending",
     "ACCEPTED": "Accepted",
-    "DECLINED": "Declined"
+    "DECLINED": "Declined",
+    "AGENT_NAME_FALLBACK": "Agent"
   },
   "MODALS": {
     "NEW_VIEWING_REQUEST": {
@@ -184,7 +185,28 @@
     "VIEW_ALL": "View All",
     "EMPTY_STATE_TITLE": "Your schedule is clear",
     "EMPTY_STATE_DESCRIPTION": "Booked viewings will show up here with all the details you need.",
-    "SELECT_DATE": "Select Date"
+    "SELECT_DATE": "Select Date",
+    "RESCHEDULE_TITLE": "Reschedule Appointments",
+    "APPOINTMENT_DETAILS": "Appointment Details",
+    "APPOINTMENT_DATE": "Appointment Date",
+    "APPOINTMENT_TIME": "Appointment Time",
+    "SELECT_NEW_DATE": "Select New Date",
+    "SELECT_NEW_TIME": "Select New Time",
+    "RESCHEDULE_REASON_LABEL": "Reason for rescheduling (optional)",
+    "RESCHEDULE_REASON_PLACEHOLDER": "Let us know why you need to reschedule...",
+    "CONFIRM_RESCHEDULE": "Confirm & Reschedule",
+    "CANCEL_CONFIRM_TITLE": "Are you sure you want to cancel?",
+    "CANCEL_CONFIRM_SUBTITLE": "This will notify the provider with the appointment cancelation and release your time slot.",
+    "CANCEL_REASON_LABEL": "Tell us why (optional)",
+    "CANCEL_REASON_PLACEHOLDER": "Schedule conflict, changed my mind, found another provider...",
+    "CANCEL_BOOKING": "Cancel Booking",
+    "RESCHEDULE_CTA": "Reschedule",
+    "CANCEL_CTA": "Cancel",
+    "RESCHEDULE_SUCCESS": "Appointment rescheduled",
+    "RESCHEDULE_FAILED": "Failed to reschedule appointment",
+    "CANCEL_SUCCESS": "Appointment cancelled",
+    "CANCEL_FAILED": "Failed to cancel appointment",
+    "RESCHEDULE_DATE_REQUIRED": "Please select a valid date and time"
   },
   "MESSAGES_SCREEN": {
     "MESSAGES": "Messages",
@@ -198,7 +220,13 @@
     "SEND_CONTRACT": "Send Contract",
     "SEND_PAYMENT_REQUEST": "Send Payment Request",
     "CONTRACTS": "Contracts",
-    "PAYMENT_REQUEST": "Payment Request"
+    "PAYMENT_REQUEST": "Payment Request",
+    "SELECT": "Select",
+    "PAYMENT_OPTION_BOOKING": "Booking fee",
+    "PAYMENT_OPTION_DOWN": "Down payment",
+    "PAYMENT_OPTION_COMMISSION": "Commission",
+    "PAYMENT_SENT_PREFIX": "Payment request",
+    "ATTACHMENT_FILE_URL_MISSING": "Attachment needs a file link. Set CHAT_DEFAULT_CONTRACT_FILE_URL (or per-type CHAT_CONTRACT_URL_*) in .env, or pass fileUrl from your API."
   },
   "APPOINTMENT_DETAIL_SCREEN": {
     "TITLE": "Appointment Detail",
@@ -232,7 +260,8 @@
     "ADD_PRIVATE_NOTE": "Add a private note (optional)",
     "NOTE_PLACEHOLDER": "eg, \"Waited 15 minutes.\", \"Client called to cancel last minute.\", \"No answer to calls or messages.\"",
     "CONFIRM_AND_LOG": "Confirm & Log No-Show",
-    "CANCEL": "Cancel"
+    "CANCEL": "Cancel",
+    "SUCCESS_TOAST": "No-show logged successfully"
   },
   "CALENDAR_MANAGEMENT_SCREEN": {
     "TITLE": "Calendar management",

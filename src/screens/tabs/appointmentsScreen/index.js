@@ -14,7 +14,11 @@ import {
 import {CalenderIcon, SettingsIcon} from '../../../components/svgs';
 import {ASSETS} from '../../../constants/assets';
 import {AppointmentCard} from '../../../components/molecules';
-import {DatePickerModal} from '../../../components/modals';
+import {
+  DatePickerModal,
+  RescheduleAppointmentModal,
+  CancelAppointmentModal,
+} from '../../../components/modals';
 import styles from './styles';
 import {
   makeRequestViewingActionRequest,
@@ -24,16 +28,66 @@ import {errorToast, successToast} from '../../../utils/alerts';
 
 const PAGE_LIMIT = 10;
 
+/** Local calendar YYYY-MM-DD — module scope so constructor never calls `this` before fields init. */
+const toLocalDateString = value => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const buildDateStripFromCenter = centerDate => {
+  const dates = [];
+  const base = new Date(centerDate);
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(base);
+    date.setDate(base.getDate() + i);
+    dates.push({
+      id: `${date.getTime()}-${i}`,
+      day: date.getDate(),
+      dayName: date.toLocaleDateString('en-US', {weekday: 'short'}),
+      date,
+      dateString: toLocalDateString(date),
+    });
+  }
+  return dates;
+};
+
+/**
+ * Compare API / ISO strings to date chips without UTC shifting date-only values.
+ * e.g. "2026-03-29" or "2026-03-29T13:02:00.000Z" → "2026-03-29" (calendar prefix).
+ */
+const appointmentDayKey = value => {
+  if (value == null || value === '') {
+    return '';
+  }
+  const s = String(value).trim();
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (m) {
+    return m[1];
+  }
+  const date = new Date(s);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  return toLocalDateString(date);
+};
+
 class AppointmentsScreen extends Component {
   constructor(props) {
     super(props);
 
-    const selectedDateString = this.toDateString(new Date());
+    const dates = buildDateStripFromCenter(new Date());
+    const selectedDateString = dates[0]?.dateString || '';
 
     this.state = {
       selectedDateString,
       selectedDateIndex: 0,
-      dates: this.buildDateStrip(new Date()),
+      dates,
       appointments: [],
       filteredAppointments: [],
       showDatePickerModal: false,
@@ -44,8 +98,13 @@ class AppointmentsScreen extends Component {
       page: 1,
       actionLoadingId: '',
       actionType: '',
+      actionTargetItem: null,
+      showRescheduleModal: false,
+      showCancelModal: false,
     };
     this.latestRequestId = 0;
+    /** Auto-fetch next listing pages when selected day has no rows yet (appointment may be on page 2+). */
+    this.chainedEmptyFilterLoads = 0;
   }
 
   componentDidMount() {
@@ -56,30 +115,9 @@ class AppointmentsScreen extends Component {
     console.log(`[Appointments][API] ${step}`, payload);
   };
 
-  toDateString = value => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    return date.toISOString().split('T')[0];
-  };
+  toDateString = value => toLocalDateString(value);
 
-  buildDateStrip = centerDate => {
-    const dates = [];
-    const base = new Date(centerDate);
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(base);
-      date.setDate(base.getDate() + i);
-      dates.push({
-        id: `${date.getTime()}-${i}`,
-        day: date.getDate(),
-        dayName: date.toLocaleDateString('en-US', {weekday: 'short'}),
-        date,
-        dateString: this.toDateString(date),
-      });
-    }
-    return dates;
-  };
+  buildDateStrip = centerDate => buildDateStripFromCenter(centerDate);
 
   getRequestsListFromResponse = response => {
     const candidates = [
@@ -138,6 +176,10 @@ class AppointmentsScreen extends Component {
   getAppointmentDateValue = item => {
     const request = this.getRequest(item);
     return (
+      request?.rescheduleDate ||
+      request?.rescheduledDate ||
+      request?.newAppointmentDate ||
+      request?.updatedAppointmentDate ||
       request?.appointmentDate ||
       request?.appointment_date ||
       request?.appointmentAt ||
@@ -245,7 +287,21 @@ class AppointmentsScreen extends Component {
       ? imageCandidates.map(uri => ({uri}))
       : [ASSETS.IMAGES.DUMMY_IMAGE];
 
+    const developerLabel =
+      property?.developerName ||
+      property?.developer ||
+      request?.developer ||
+      'Developer';
+    const locationLine =
+      property?.location ||
+      property?.address ||
+      [property?.area, property?.city].filter(Boolean).join(', ') ||
+      request?.location ||
+      '-';
+
     return {
+      requestId: this.getRequestId(item),
+      developer: developerLabel,
       propertyTitle:
         property?.name ||
         property?.title ||
@@ -253,12 +309,7 @@ class AppointmentsScreen extends Component {
         request?.listingTitle ||
         request?.title ||
         'Property',
-      propertyLocation:
-        property?.location ||
-        property?.address ||
-        [property?.area, property?.city].filter(Boolean).join(', ') ||
-        request?.location ||
-        '-',
+      propertyLocation: locationLine,
       appointmentDate: isValidDate
         ? date.toLocaleDateString('en-US', {
             month: 'short',
@@ -301,20 +352,97 @@ class AppointmentsScreen extends Component {
     };
   };
 
+  mapAppointmentModalSummary = item => {
+    const request = this.getRequest(item);
+    const card = this.mapAppointmentCardProps(item);
+    const appointmentValue = this.getAppointmentDateValue(item);
+    const d = new Date(appointmentValue);
+    const isValid = !Number.isNaN(d.getTime());
+    const currentDateLabel = isValid
+      ? d.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : '-';
+    const currentTimeLabel = isValid
+      ? d.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      : '-';
+    const initialDateString = isValid
+      ? this.toDateString(appointmentValue)
+      : this.toDateString(new Date());
+    const requestId = this.getRequestId(item);
+    const referenceLabel =
+      request?.referenceCode ||
+      request?.code ||
+      request?.displayId ||
+      (requestId ? `#D-${String(requestId).slice(-6)}` : '');
+    return {
+      propertyTitle: card.propertyTitle,
+      statusLabel: 'Confirmed',
+      referenceLabel,
+      currentDateLabel,
+      currentTimeLabel,
+      viewingTypeLabel:
+        request?.viewingTypeLabel ||
+        request?.viewingType ||
+        request?.appointmentTypeLabel ||
+        'In-Person Viewing',
+      initialDateString,
+      initialTimeLabel: currentTimeLabel,
+    };
+  };
+
   filterAppointmentsBySelectedDate = appointments => {
     const selectedDate = this.state.selectedDateString;
+    if (!selectedDate) {
+      this.setState({filteredAppointments: []});
+      return;
+    }
     const filtered = (appointments || []).filter(item => {
       const dateValue = this.getAppointmentDateValue(item);
-      if (!dateValue) return false;
-      return this.toDateString(dateValue) === selectedDate;
+      if (!dateValue) {
+        return false;
+      }
+      return appointmentDayKey(dateValue) === selectedDate;
     });
-    this.setState({filteredAppointments: filtered});
+    if (filtered.length > 0) {
+      this.chainedEmptyFilterLoads = 0;
+    }
+    this.setState({filteredAppointments: filtered}, () => {
+      setTimeout(() => {
+        if (filtered.length > 0) {
+          return;
+        }
+        const {hasMore, isLoading, isLoadingMore, selectedDateString} = this.state;
+        if (
+          !hasMore ||
+          isLoading ||
+          isLoadingMore ||
+          !selectedDateString ||
+          !(appointments || []).length ||
+          this.chainedEmptyFilterLoads >= 40
+        ) {
+          return;
+        }
+        this.chainedEmptyFilterLoads += 1;
+        this.fetchAppointments();
+      }, 0);
+    });
   };
 
   fetchAppointments = async ({reset = false, fromRefresh = false} = {}) => {
     const {isLoading, isLoadingMore, hasMore, page} = this.state;
     if (!reset && (isLoading || isLoadingMore || !hasMore)) {
       return;
+    }
+
+    if (reset) {
+      this.chainedEmptyFilterLoads = 0;
     }
 
     const nextPage = reset ? 1 : page + 1;
@@ -381,27 +509,72 @@ class AppointmentsScreen extends Component {
   };
 
   handleDateSelect = index => {
+    this.chainedEmptyFilterLoads = 0;
     const selectedDateString = this.state?.dates?.[index]?.dateString || '';
     this.setState({selectedDateIndex: index, selectedDateString}, () =>
       this.filterAppointmentsBySelectedDate(this.state.appointments),
     );
   };
 
-  handleReschedule = async appointment => {
+  handleReschedule = appointment => {
     const requestId = this.getRequestId(appointment);
     if (!requestId) {
       errorToast('Invalid appointment');
       return;
     }
+    this.setState({
+      actionTargetItem: appointment,
+      showRescheduleModal: true,
+      showCancelModal: false,
+    });
+  };
 
-    const selectedDate = this.state.selectedDateString;
+  handleCancel = appointment => {
+    const requestId = this.getRequestId(appointment);
+    if (!requestId) {
+      errorToast('Invalid appointment');
+      return;
+    }
+    this.setState({
+      actionTargetItem: appointment,
+      showCancelModal: true,
+      showRescheduleModal: false,
+    });
+  };
+
+  closeActionModals = () => {
+    this.setState({
+      showRescheduleModal: false,
+      showCancelModal: false,
+      actionTargetItem: null,
+    });
+  };
+
+  submitRescheduleFromModal = async ({rescheduleDate, updateMessage}) => {
+    const appointment = this.state.actionTargetItem;
+    const t = this.props.t || this.props.i18n?.t;
+    const requestId = appointment ? this.getRequestId(appointment) : '';
+    if (!requestId) {
+      errorToast('Invalid appointment');
+      return;
+    }
+    if (!rescheduleDate || !String(rescheduleDate).trim()) {
+      errorToast(
+        t('APPOINTMENTS_SCREEN.RESCHEDULE_DATE_REQUIRED', {
+          defaultValue: 'Please select a valid date and time',
+        }),
+        t,
+      );
+      return;
+    }
+
     this.setState({actionLoadingId: requestId, actionType: 'reschedule'});
     try {
       const payload = {
         requestId,
-        status: 'accepted',
-        rescheduleDate: selectedDate,
-        updateMessage: 'Rescheduled by agent',
+        status: 'rescheduled',
+        rescheduleDate: String(rescheduleDate).trim(),
+        updateMessage: updateMessage || '',
       };
       this.logApi('RESCHEDULE:REQUEST', {
         endpoint: '/request-viewing/action',
@@ -410,7 +583,13 @@ class AppointmentsScreen extends Component {
       });
       const response = await makeRequestViewingActionRequest(payload);
       this.logApi('RESCHEDULE:SUCCESS', response);
-      successToast('Appointment rescheduled');
+      successToast(
+        t('APPOINTMENTS_SCREEN.RESCHEDULE_SUCCESS', {
+          defaultValue: 'Appointment rescheduled',
+        }),
+        t,
+      );
+      this.closeActionModals();
       this.fetchAppointments({reset: true});
     } catch (e) {
       this.logApi('RESCHEDULE:ERROR', {
@@ -418,14 +597,21 @@ class AppointmentsScreen extends Component {
         status: e?.response?.status,
         data: e?.response?.data,
       });
-      errorToast('Failed to reschedule appointment');
+      errorToast(
+        t('APPOINTMENTS_SCREEN.RESCHEDULE_FAILED', {
+          defaultValue: 'Failed to reschedule appointment',
+        }),
+        t,
+      );
     } finally {
       this.setState({actionLoadingId: '', actionType: ''});
     }
   };
 
-  handleCancel = async appointment => {
-    const requestId = this.getRequestId(appointment);
+  submitCancelFromModal = async ({updateMessage}) => {
+    const appointment = this.state.actionTargetItem;
+    const t = this.props.t || this.props.i18n?.t;
+    const requestId = appointment ? this.getRequestId(appointment) : '';
     if (!requestId) {
       errorToast('Invalid appointment');
       return;
@@ -435,8 +621,8 @@ class AppointmentsScreen extends Component {
     try {
       const payload = {
         requestId,
-        status: 'declined',
-        updateMessage: 'Cancelled by agent',
+        status: 'cancelled',
+        updateMessage: updateMessage || '',
       };
       this.logApi('CANCEL:REQUEST', {
         endpoint: '/request-viewing/action',
@@ -445,11 +631,17 @@ class AppointmentsScreen extends Component {
       });
       const response = await makeRequestViewingActionRequest(payload);
       this.logApi('CANCEL:SUCCESS', response);
-      successToast('Appointment cancelled');
+      successToast(
+        t('APPOINTMENTS_SCREEN.CANCEL_SUCCESS', {
+          defaultValue: 'Appointment cancelled',
+        }),
+        t,
+      );
+      this.closeActionModals();
       this.setState(
         prev => ({
           appointments: prev.appointments.filter(
-            item => this.getRequestId(item) !== requestId,
+            row => this.getRequestId(row) !== requestId,
           ),
         }),
         () => this.filterAppointmentsBySelectedDate(this.state.appointments),
@@ -460,7 +652,12 @@ class AppointmentsScreen extends Component {
         status: e?.response?.status,
         data: e?.response?.data,
       });
-      errorToast('Failed to cancel appointment');
+      errorToast(
+        t('APPOINTMENTS_SCREEN.CANCEL_FAILED', {
+          defaultValue: 'Failed to cancel appointment',
+        }),
+        t,
+      );
     } finally {
       this.setState({actionLoadingId: '', actionType: ''});
     }
@@ -511,13 +708,26 @@ class AppointmentsScreen extends Component {
   };
 
   handleDateConfirm = selectedDate => {
-    const parsedDate = new Date(selectedDate);
-    if (Number.isNaN(parsedDate.getTime())) {
-      this.setState({showDatePickerModal: false});
-      return;
+    this.chainedEmptyFilterLoads = 0;
+    const s = String(selectedDate || '').trim();
+    const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    let anchor;
+    let selectedDateString;
+    if (ymd) {
+      const y = Number(ymd[1]);
+      const mo = Number(ymd[2]) - 1;
+      const d = Number(ymd[3]);
+      anchor = new Date(y, mo, d, 12, 0, 0, 0);
+      selectedDateString = `${ymd[1]}-${ymd[2]}-${ymd[3]}`;
+    } else {
+      anchor = new Date(s);
+      if (Number.isNaN(anchor.getTime())) {
+        this.setState({showDatePickerModal: false});
+        return;
+      }
+      selectedDateString = toLocalDateString(anchor);
     }
-    const dates = this.buildDateStrip(parsedDate);
-    const selectedDateString = this.toDateString(parsedDate);
+    const dates = this.buildDateStrip(anchor);
     const selectedDateIndex = dates.findIndex(
       item => item.dateString === selectedDateString,
     );
@@ -630,7 +840,7 @@ class AppointmentsScreen extends Component {
 
   renderAppointmentCard = ({item}) => {
     const card = this.mapAppointmentCardProps(item);
-    const isActionLoading = this.state.actionLoadingId === card.id;
+    const t = this.props.t || this.props.i18n?.t;
     return (
       <AppointmentCard
         propertyTitle={card.propertyTitle}
@@ -644,16 +854,12 @@ class AppointmentsScreen extends Component {
         onCancel={() => this.handleCancel(item)}
         onLocationPress={() => this.handleLocationPress(item)}
         onMessagePress={() => this.handleMessagePress(item)}
-        cancelTitle={
-          isActionLoading && this.state.actionType === 'cancel'
-            ? 'Cancelling...'
-            : 'Cancel'
-        }
-        rescheduleTitle={
-          isActionLoading && this.state.actionType === 'reschedule'
-            ? 'Rescheduling...'
-            : 'Reschedule'
-        }
+        rescheduleTitle={t('APPOINTMENTS_SCREEN.RESCHEDULE_CTA', {
+          defaultValue: 'Reschedule',
+        })}
+        cancelTitle={t('APPOINTMENTS_SCREEN.CANCEL_CTA', {
+          defaultValue: 'Cancel',
+        })}
       />
     );
   };
@@ -685,7 +891,24 @@ class AppointmentsScreen extends Component {
 
   render() {
     const insetTop = this.props?.insets?.top || 0;
-    const {filteredAppointments, isLoading, isRefreshing} = this.state;
+    const insetBottom = this.props?.insets?.bottom || 0;
+    const {
+      filteredAppointments,
+      isLoading,
+      isRefreshing,
+      actionTargetItem,
+      showRescheduleModal,
+      showCancelModal,
+      actionLoadingId,
+      actionType,
+    } = this.state;
+
+    const modalSummary = actionTargetItem
+      ? this.mapAppointmentModalSummary(actionTargetItem)
+      : null;
+    const modalRequestId = actionTargetItem
+      ? this.getRequestId(actionTargetItem)
+      : '';
 
     return (
       <ScreenContainer
@@ -723,9 +946,33 @@ class AppointmentsScreen extends Component {
           onClose={this.handleCloseDatePicker}
           onConfirm={this.handleDateConfirm}
           initialDate={
-            this.state.dates[this.state.selectedDateIndex]?.date
-              ?.toISOString()
-              .split('T')[0]
+            this.state.dates[this.state.selectedDateIndex]?.dateString ||
+            toLocalDateString(new Date())
+          }
+        />
+
+        <RescheduleAppointmentModal
+          visible={showRescheduleModal}
+          onClose={this.closeActionModals}
+          onConfirm={this.submitRescheduleFromModal}
+          summary={modalSummary}
+          bottomOffset={insetBottom}
+          isSubmitting={
+            !!modalRequestId &&
+            actionLoadingId === modalRequestId &&
+            actionType === 'reschedule'
+          }
+        />
+        <CancelAppointmentModal
+          visible={showCancelModal}
+          onClose={this.closeActionModals}
+          onConfirmCancel={this.submitCancelFromModal}
+          summary={modalSummary}
+          bottomOffset={insetBottom}
+          isSubmitting={
+            !!modalRequestId &&
+            actionLoadingId === modalRequestId &&
+            actionType === 'cancel'
           }
         />
       </ScreenContainer>

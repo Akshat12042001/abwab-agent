@@ -1,3 +1,4 @@
+import Config from 'react-native-config';
 import {APIClient} from './client';
 
 const AUTH_ENDPOINTS = {
@@ -6,6 +7,7 @@ const AUTH_ENDPOINTS = {
   FORGOT_PASSWORD: '/agent/forgot-password',
   CHANGE_PASSWORD: '/agent/change-password',
   RESEND_OTP: '/resend-otp',
+  UPLOAD: '/upload',
   REQUEST_VIEWING_LISTING: '/request-viewing/listing',
   REQUEST_VIEWING_ACTION: '/request-viewing/action',
   AGENT_PROFILE: '/agent',
@@ -39,6 +41,24 @@ export const makeResendOtpRequest = data => {
   return APIClient()
     .post(AUTH_ENDPOINTS.RESEND_OTP, data)
     .then(res => res.data);
+};
+
+export const makeUploadImageRequest = (data, token) => {
+  const newData = {
+    uri: data?.uri,
+    name: !!data?.fileName ? data?.fileName : data?.name,
+    type: data?.type,
+  };
+  const formData = new FormData();
+  formData.append('file', newData);
+  return fetch(`${Config.API_URL}${AUTH_ENDPOINTS.UPLOAD}`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      authorization: token,
+      lan: 'en',
+    },
+  }).then(res => res?.json());
 };
 
 export const makeRequestViewingListingRequest = (params = {}) => {

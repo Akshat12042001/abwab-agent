@@ -15,9 +15,22 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, FONTS} from '../../../constants';
+import {
+  AttachmentOptionsModal,
+  SendPaymentRequestModal,
+  SendContractModal,
+  DEFAULT_CHAT_CONTRACT_CATALOG,
+} from '../../../components/modals';
+import {
+  COLORS,
+  resolveContractAttachmentFileUrl,
+  resolvePaymentRequestAttachmentFileUrl,
+} from '../../../constants';
 import {
   SendIcon,
+  PaperClickIcon,
+  DocumentFillIcon,
+  CoinIcon,
 } from '../../../components/svgs';
 import styles from './styles';
 import {SharedStyles} from '../../../shared';
@@ -53,12 +66,21 @@ class ChatScreen extends Component {
     this.otherUserId = route?.params?.userId || '';
     this.socket = null;
     this.typingTimeout = null;
+    this._paymentOptionsCache = null;
+    this._paymentOptionsLang = null;
 
     this.state = {
       messages: [],
       contactName,
       contactLocation,
-      selectedContracts: [],
+      contractCatalog: Array.isArray(route?.params?.contractCatalog)
+        ? route.params.contractCatalog
+        : [],
+      showAttachmentOptions: false,
+      showPaymentModal: false,
+      showContractModal: false,
+      /** Open payment/contract modal only after attachment sheet finishes hiding (avoids RN modal conflict). */
+      pendingAfterAttach: null,
       isOtherUserTyping: false,
       isLoadingMessages: false,
       page: 1,
@@ -197,7 +219,45 @@ class ChatScreen extends Component {
       msg?.sender || msg?.user || msg?.from || msg?.createdBy || msg?.agent || {};
     const senderId = sender?._id || sender?.id || msg?.senderId || msg?.userId;
     const createdAt = new Date(msg?.createdAt || msg?.created_at || msg?.sentAt || Date.now());
-    return {
+    const rawAtt =
+      msg?.attachments ||
+      msg?.attachmentList ||
+      (Array.isArray(msg?.attachment) ? msg.attachment : []);
+    const attachments = Array.isArray(rawAtt) ? rawAtt : [];
+
+    const contracts = [];
+    let paymentRequest;
+
+    attachments.forEach(a => {
+      const k = `${a?.kind || a?.type || ''}`.toLowerCase();
+      const contractId = a?.contractId || a?.id;
+      if ((k === 'contract' || a?.contractId) && contractId) {
+        contracts.push({
+          id: contractId,
+          label: a.label || 'Contract',
+          type: a.contractType || a.contract_type || 'contract',
+          fileUrl: a.fileUrl || a.file_url,
+        });
+      } else if (k === 'payment_request' || a?.paymentType || a?.payment_type) {
+        paymentRequest = {
+          type: a.paymentType || a.payment_type || a.value,
+          label: a.label,
+        };
+      }
+    });
+
+    const legacy = msg?.contracts;
+    if (Array.isArray(legacy) && legacy.length) {
+      legacy.forEach(c => {
+        contracts.push({
+          id: c.id || c._id,
+          label: c.label || c.name || 'Contract',
+          type: c.type || 'contract',
+        });
+      });
+    }
+
+    const row = {
       _id: msg?._id || msg?.id || msg?.messageId || Math.random().toString(16).slice(2),
       text: msg?.content || msg?.text || '',
       createdAt,
@@ -206,6 +266,176 @@ class ChatScreen extends Component {
         name: sender?.name || sender?.fullName || 'User',
       },
     };
+    if (contracts.length) {
+      row.contracts = contracts;
+    }
+    if (paymentRequest?.type) {
+      row.paymentRequest = paymentRequest;
+    }
+    return row;
+  };
+
+  sanitizeAttachmentFileBase = name => {
+    return String(name || 'file')
+      .replace(/[/\\?%*:|"<>]/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120);
+  };
+
+  /** API requires `fileName` on each attachment (see send-message validation). */
+  ensurePdfFileName = base => {
+    const b = this.sanitizeAttachmentFileBase(base);
+    return /\.(pdf)$/i.test(b) ? b : `${b}.pdf`;
+  };
+
+  buildSendMessageAttachments = giftedMessage => {
+    if (giftedMessage.contracts?.length) {
+      return giftedMessage.contracts.map(c => {
+        const label = c.label || 'Contract';
+        const fileUrl = resolveContractAttachmentFileUrl(c);
+        return {
+          kind: 'contract',
+          contractId: c.id,
+          label,
+          contractType: c.type,
+          fileName: this.ensurePdfFileName(label),
+          mimeType: 'application/pdf',
+          fileUrl,
+        };
+      });
+    }
+    if (giftedMessage.paymentRequest?.type) {
+      const pr = giftedMessage.paymentRequest;
+      const base =
+        pr.label && String(pr.label).trim()
+          ? pr.label
+          : `PaymentRequest_${pr.type}`;
+      const fileUrl = resolvePaymentRequestAttachmentFileUrl(pr);
+      return [
+        {
+          kind: 'payment_request',
+          paymentType: pr.type,
+          label: pr.label,
+          fileName: this.ensurePdfFileName(base),
+          mimeType: 'application/pdf',
+          fileUrl,
+        },
+      ];
+    }
+    if (giftedMessage.attachments?.length) {
+      return giftedMessage.attachments.map(a => ({
+        ...a,
+        fileName:
+          a.fileName ||
+          a.name ||
+          this.ensurePdfFileName(a.label || a.kind || 'attachment'),
+        mimeType: a.mimeType || 'application/pdf',
+        fileUrl: a.fileUrl || a.file_url || '',
+      }));
+    }
+    return [];
+  };
+
+  handleAttachmentModalHide = () => {
+    const {pendingAfterAttach} = this.state;
+    if (pendingAfterAttach === 'payment') {
+      this.setState({
+        pendingAfterAttach: null,
+        showPaymentModal: true,
+      });
+      return;
+    }
+    if (pendingAfterAttach === 'contract') {
+      this.setState({
+        pendingAfterAttach: null,
+        showContractModal: true,
+      });
+    }
+  };
+
+  getPaymentRequestOptions = () => {
+    const lang =
+      this.props.i18n?.language ||
+      this.props.i18n?.resolvedLanguage ||
+      '';
+    if (
+      this._paymentOptionsCache &&
+      this._paymentOptionsLang === lang
+    ) {
+      return this._paymentOptionsCache;
+    }
+    const t = this.props.t || this.props.i18n?.t;
+    const label = (key, def) => (t ? t(key, {defaultValue: def}) : def);
+    this._paymentOptionsCache = [
+      {
+        label: label('CHAT_SCREEN.PAYMENT_OPTION_BOOKING', 'Booking fee'),
+        value: 'booking_fee',
+      },
+      {
+        label: label('CHAT_SCREEN.PAYMENT_OPTION_DOWN', 'Down payment'),
+        value: 'down_payment',
+      },
+      {
+        label: label('CHAT_SCREEN.PAYMENT_OPTION_COMMISSION', 'Commission'),
+        value: 'commission',
+      },
+    ];
+    this._paymentOptionsLang = lang;
+    return this._paymentOptionsCache;
+  };
+
+  handlePaymentRequestDone = async paymentTypeValue => {
+    const t = this.props.t || this.props.i18n?.t;
+    const options = this.getPaymentRequestOptions();
+    const meta = options.find(o => o.value === paymentTypeValue);
+    const message = {
+      _id: String(Math.round(Math.random() * 1e9)),
+      text: '',
+      createdAt: new Date(),
+      user: {_id: this.userId},
+      paymentRequest: {
+        type: paymentTypeValue,
+        label:
+          meta?.label ||
+          (t
+            ? t('CHAT_SCREEN.PAYMENT_SENT_PREFIX', {defaultValue: 'Payment request'})
+            : 'Payment request'),
+      },
+    };
+    this.setState(prev => ({
+      messages: GiftedChat.append(prev.messages, [message]),
+    }));
+    this.emitTyping(false);
+    await this.sendMessageToApi(message);
+  };
+
+  handleContractsDone = async selectedIds => {
+    if (!Array.isArray(selectedIds) || !selectedIds.length) {
+      return;
+    }
+    const catalog =
+      this.state.contractCatalog?.length > 0
+        ? this.state.contractCatalog
+        : DEFAULT_CHAT_CONTRACT_CATALOG;
+    const contracts = selectedIds
+      .map(id => catalog.find(c => c.id === id))
+      .filter(Boolean);
+    if (!contracts.length) {
+      return;
+    }
+    const message = {
+      _id: String(Math.round(Math.random() * 1e9)),
+      text: '',
+      createdAt: new Date(),
+      user: {_id: this.userId},
+      contracts,
+    };
+    this.setState(prev => ({
+      messages: GiftedChat.append(prev.messages, [message]),
+    }));
+    this.emitTyping(false);
+    await this.sendMessageToApi(message);
   };
 
   fetchMessages = async ({reset = false} = {}) => {
@@ -267,7 +497,24 @@ class ChatScreen extends Component {
 
   getToken = () => {
     const userData = this.props?.userData || {};
-    return userData?.token || userData?.data?.token || '';
+    return (
+      userData?.token ||
+      userData?.accessToken ||
+      userData?.data?.token ||
+      userData?.user?.token ||
+      ''
+    );
+  };
+
+  joinChatSocketRoom = () => {
+    if (!this.chatId || !this.userId) {
+      return;
+    }
+    ChatSocketService.joinRoom({chatId: this.chatId, userId: this.userId});
+    console.log('[Chat][Socket] joinRoom', {
+      chatId: this.chatId,
+      userId: this.userId,
+    });
   };
 
   setupSocket = () => {
@@ -284,26 +531,35 @@ class ChatScreen extends Component {
       userId: this.userId,
       hasToken: Boolean(token),
     });
-    if (!ChatSocketService.isConnected()) {
-      ChatSocketService.connect(token);
-    }
+
+    // Register listeners before connect so we never miss `connect` (join only after authenticated).
+    ChatSocketService.off('connect', this.onSocketConnect);
+    ChatSocketService.off('disconnect', this.onSocketDisconnect);
+    ChatSocketService.off('error', this.onSocketError);
+    ChatSocketService.off('auth:error', this.onSocketAuthError);
+    ChatSocketService.off('chat:userOnline', this.onUserOnline);
+    ChatSocketService.off('chat:userOffline', this.onUserOffline);
+    ChatSocketService.off('chat:userTyping', this.onUserTyping);
+    ChatSocketService.off('chat:messageDelivered', this.onMessageDelivered);
+    ChatSocketService.off('chat:messageRead', this.onMessageRead);
 
     ChatSocketService.on('connect', this.onSocketConnect);
     ChatSocketService.on('disconnect', this.onSocketDisconnect);
     ChatSocketService.on('error', this.onSocketError);
     ChatSocketService.on('auth:error', this.onSocketAuthError);
-
     ChatSocketService.on('chat:userOnline', this.onUserOnline);
     ChatSocketService.on('chat:userOffline', this.onUserOffline);
     ChatSocketService.on('chat:userTyping', this.onUserTyping);
     ChatSocketService.on('chat:messageDelivered', this.onMessageDelivered);
     ChatSocketService.on('chat:messageRead', this.onMessageRead);
 
-    ChatSocketService.joinRoom({chatId: this.chatId, userId: this.userId});
-    console.log('[Chat][Socket] joinRoom', {
-      chatId: this.chatId,
-      userId: this.userId,
-    });
+    if (!ChatSocketService.isConnected()) {
+      ChatSocketService.connect(token);
+    }
+
+    if (ChatSocketService.isConnected()) {
+      this.joinChatSocketRoom();
+    }
   };
 
   cleanupSocket = () => {
@@ -330,6 +586,7 @@ class ChatScreen extends Component {
 
   onSocketConnect = () => {
     console.log('[Chat][Socket] connected');
+    this.joinChatSocketRoom();
   };
   onSocketDisconnect = reason => {
     console.log('[Chat][Socket] disconnected', reason);
@@ -393,33 +650,85 @@ class ChatScreen extends Component {
   };
 
   sendMessageToApi = async giftedMessage => {
-    const {t} = this.props?.i18n;
+    const t = this.props.t || this.props.i18n?.t;
     if (!this.chatId || !giftedMessage) {
       errorToast('Chat is not ready yet', t);
       return;
     }
     try {
+      const attachments = this.buildSendMessageAttachments(giftedMessage);
+
+      if (attachments.length) {
+        const missingFileUrl = attachments.find(
+          a => !a.fileUrl || !String(a.fileUrl).trim(),
+        );
+        if (missingFileUrl) {
+          errorToast(
+            t?.('CHAT_SCREEN.ATTACHMENT_FILE_URL_MISSING', {
+              defaultValue:
+                'Attachment needs a file URL. Set CHAT_DEFAULT_CONTRACT_FILE_URL in .env or pass fileUrl from your API.',
+            }),
+            t,
+          );
+          return;
+        }
+      }
+
+      const trimmedContent = (giftedMessage.text || '').trim();
       const payload = {
         chatId: this.chatId,
-        content: giftedMessage.text || '',
-        attachments: giftedMessage.attachments || [],
+        // Some APIs reject empty body when only attachments are sent.
+        content: trimmedContent || (attachments.length ? ' ' : ''),
       };
+      if (attachments.length) {
+        payload.attachments = attachments;
+      }
       console.log('[Chat][Send] payload', payload);
       const response = await makeChatSendMessageRequest(payload);
       console.log('[Chat][Send] response', response);
     } catch (e) {
       console.log('[Chat][Send] failed', e?.response?.data || e?.message || e);
       errorToast(
-        t('CHAT_SCREEN.FAILED_TO_SEND', {defaultValue: 'Failed to send message'}),
+        t?.('CHAT_SCREEN.FAILED_TO_SEND', {defaultValue: 'Failed to send message'}),
         t,
       );
     }
   };
 
-  // Attachments temporarily disabled
-
   renderBubble = props => {
     const {currentMessage} = props;
+    const t = this.props.t || this.props.i18n?.t;
+
+    if (currentMessage?.paymentRequest?.type) {
+      const title =
+        currentMessage.paymentRequest.label ||
+        (t
+          ? `${t('CHAT_SCREEN.PAYMENT_SENT_PREFIX', {defaultValue: 'Payment request'})}: ${
+              currentMessage.paymentRequest.type
+            }`
+          : currentMessage.paymentRequest.type);
+      return (
+        <View
+          style={[
+            styles.contractMessageContainer,
+            currentMessage.user._id === this.userId
+              ? styles.contractMessageRight
+              : styles.contractMessageLeft,
+          ]}>
+          <View style={styles.paymentRequestRow}>
+            <CoinIcon size={22} />
+            <StyledText
+              size={14}
+              variant="regular"
+              color={COLORS.PRIMARY}
+              textStyle={styles.paymentRequestText}>
+              {title}
+            </StyledText>
+          </View>
+        </View>
+      );
+    }
+
     const hasContracts =
       currentMessage?.contracts && currentMessage.contracts.length > 0;
 
@@ -519,60 +828,41 @@ class ChatScreen extends Component {
 
   renderComposer = props => {
     const existingTextInputProps = props.textInputProps || {};
-    const {t} = this.props?.i18n;
+    const t = this.props.t || this.props.i18n?.t;
     return (
-      <>
-        <View style={styles.inputPill}>
+      <View style={styles.inputPill}>
           <Composer
             {...props}
-            placeholderTextColor={COLORS.GREYSCALE_400}
+          placeholderTextColor={COLORS.GREYSCALE_400}
             textInputProps={{
               ...existingTextInputProps,
-              multiline: false,
+            multiline: false,
               blurOnSubmit: false,
-              placeholder: t('CHAT_SCREEN.TYPE_MESSAGE', {
-                defaultValue: 'Type Message...',
-              }),
-              style: styles.composerTextInput,
-            }}
-          />
-        </View>
-      </>
+            placeholder: t?.('CHAT_SCREEN.TYPE_MESSAGE', {
+              defaultValue: 'Type Message...',
+            }),
+            style: styles.composerTextInput,
+          }}
+        />
+        <TouchableOpacity
+          style={styles.attachInsideInput}
+          onPress={() => this.setState({showAttachmentOptions: true})}
+          hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+          <PaperClickIcon color={COLORS.GREYSCALE_500} width={18} height={22} />
+        </TouchableOpacity>
+      </View>
     );
   };
 
   renderSend = props => {
     const {text} = props;
-    const {selectedContracts} = this.state;
     const hasText = text && text.trim().length > 0;
-    const hasContracts = selectedContracts.length > 0;
-    const canSend = hasText || hasContracts;
 
     return (
       <TouchableOpacity
         onPress={() => {
           const txt = (text || '').trim();
-          if (canSend) {
-            if (hasContracts) {
-              // Send contracts message
-              props.onSend(
-                [
-                  {
-                    _id: Math.round(Math.random() * 1000000),
-                    text: '',
-                    contracts: selectedContracts,
-                    createdAt: new Date(),
-                    user: {
-                      _id: this.userId,
-                    },
-                  },
-                ],
-                true,
-              );
-              // Clear contracts after sending
-              this.setState({selectedContracts: []});
-            } else {
-              // Send regular text message
+          if (hasText) {
               props.onSend(
                 [
                   {
@@ -586,37 +876,21 @@ class ChatScreen extends Component {
                 ],
                 true,
               );
-            }
           }
         }}
-        style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
-        disabled={!canSend}>
+        style={[styles.sendButton, !hasText && styles.sendButtonDisabled]}
+        disabled={!hasText}>
         <SendIcon size={20} color={COLORS.WHITE} />
       </TouchableOpacity>
     );
   };
 
   renderInputToolbar = props => {
-    const {selectedContracts} = this.state;
     return (
       <View>
         <InputToolbar
           {...props}
-          containerStyle={[
-            styles.inputToolbarContainer,
-            {
-              height:
-                selectedContracts?.length >= 6
-                  ? 250
-                  : selectedContracts.length >= 3 &&
-                    selectedContracts?.length < 6
-                  ? 200
-                  : selectedContracts.length <= 3 &&
-                    selectedContracts?.length > 0
-                  ? 160
-                  : 140,
-            },
-          ]}
+          containerStyle={styles.inputToolbarContainer}
           primaryStyle={styles.inputToolbarRow}
           renderComposer={this.renderComposer}
           renderSend={this.renderSend}
@@ -679,7 +953,7 @@ class ChatScreen extends Component {
   render() {
     const insetTop = this.props?.insets?.top || 0;
     const insetBottom = this.props?.insets?.bottom || 0;
-    const {messages, contactName, contactLocation} = this.state;
+    const {messages, contactName, contactLocation, contractCatalog} = this.state;
 
     return (
       <ScreenContainer
@@ -691,6 +965,43 @@ class ChatScreen extends Component {
           subTitle={contactLocation}
         />
         <View style={{height: 1, backgroundColor: COLORS.GREYSCALE_100}} />
+        <AttachmentOptionsModal
+          visible={this.state.showAttachmentOptions}
+          onClose={() =>
+            this.setState({
+              showAttachmentOptions: false,
+              pendingAfterAttach: null,
+            })
+          }
+          onModalHide={this.handleAttachmentModalHide}
+          onSendContract={() =>
+            this.setState({
+              pendingAfterAttach: 'contract',
+              showAttachmentOptions: false,
+            })
+          }
+          onSendPaymentRequest={() =>
+            this.setState({
+              pendingAfterAttach: 'payment',
+              showAttachmentOptions: false,
+            })
+          }
+          bottomOffset={insetBottom}
+        />
+        <SendPaymentRequestModal
+          visible={this.state.showPaymentModal}
+          onClose={() => this.setState({showPaymentModal: false})}
+          onDone={this.handlePaymentRequestDone}
+          paymentTypes={this.getPaymentRequestOptions()}
+          bottomOffset={insetBottom}
+        />
+        <SendContractModal
+          visible={this.state.showContractModal}
+          onClose={() => this.setState({showContractModal: false})}
+          onDone={this.handleContractsDone}
+          contracts={contractCatalog}
+          bottomOffset={insetBottom}
+        />
         <GiftedChat
           textInputRef={this.textInputRef}
           messages={messages}

@@ -39,7 +39,9 @@ const SendPaymentRequestModal = ({
       animationOut="slideOutDown"
       backdropOpacity={0.5}
       useNativeDriverForBackdrop
-      hideModalContentWhileAnimating>
+      hideModalContentWhileAnimating
+      coverScreen
+      statusBarTranslucent>
       <View style={[styles.modalContent, {marginBottom: bottomOffset + 70}]}>
         {/* Header */}
         <View style={styles.header}>
@@ -65,11 +67,13 @@ const SendPaymentRequestModal = ({
           <DropdownComponent
             label={t('CHAT_SCREEN.PAYMENT_REQUEST')}
             labelColor={COLORS.GREYSCALE_900}
-            placeholder="Select"
+            placeholder={t('CHAT_SCREEN.SELECT', {defaultValue: 'Select'})}
             value={selectedPaymentType}
             data={paymentTypes}
             onChange={item => setSelectedPaymentType(item.value)}
             containerStyle={styles.dropdownContainer}
+            mode="modal"
+            dropdownPosition="auto"
           />
         </View>
 

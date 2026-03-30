@@ -8,6 +8,30 @@ let handlersRegistered = false;
 const now = () => new Date().toISOString();
 const log = (...args) => console.log(`[Socket][${now()}]`, ...args);
 
+/**
+ * Handshake auth: many backends expect the same shape as REST (`Authorization: Bearer …`)
+ * or a raw JWT in `token`. We send both so either convention works.
+ */
+const buildHandshakeAuth = token => {
+  const raw = String(token || '')
+    .trim()
+    .replace(/^bearer\s+/i, '')
+    .trim();
+  if (!raw) {
+    return {};
+  }
+  const bearer = `Bearer ${raw}`;
+  return {
+    token: raw,
+    accessToken: raw,
+    access_token: raw,
+    jwt: raw,
+    authorization: bearer,
+    Authorization: bearer,
+    bearer,
+  };
+};
+
 const getSocketUrl = () => {
   // Prefer explicit SOCKET_URL env; fallback to API_URL without trailing /api
   const raw = Config.SOCKET_URL || Config.API_URL || '';
@@ -26,8 +50,13 @@ const connect = (token = '') => {
     throw new Error('Missing SOCKET_URL/API_URL for socket connection');
   }
 
+  const nextToken = String(token || '')
+    .trim()
+    .replace(/^bearer\s+/i, '')
+    .trim();
+
   // If already connected with same token, reuse
-  if (socket && currentToken === token) {
+  if (socket && currentToken === nextToken && nextToken) {
     log('reuse existing connection', {connected: socket.connected});
     return socket;
   }
@@ -42,7 +71,8 @@ const connect = (token = '') => {
     handlersRegistered = false;
   }
 
-  currentToken = token || '';
+  currentToken = nextToken;
+  const handshakeAuth = buildHandshakeAuth(currentToken);
   log('connecting socket', {
     url,
     hasToken: Boolean(currentToken),
@@ -51,7 +81,14 @@ const connect = (token = '') => {
   socket = io(url, {
     transports: ['websocket'],
     autoConnect: true,
-    auth: {token: currentToken},
+    auth: handshakeAuth,
+    // Many Socket.IO backends also read the JWT from the connection query string.
+    query: currentToken
+      ? {
+          token: currentToken,
+          access_token: currentToken,
+        }
+      : {},
   });
   registerBaseHandlers();
 
@@ -100,8 +137,16 @@ const registerBaseHandlers = () => {
 
 // --- Emits (per backend doc) ---
 const joinRoom = ({chatId, userId}) => {
-  log('emit chat:joinRoom', {chatId, userId});
-  socket?.emit('chat:joinRoom', {chatId, userId});
+  const tok = currentToken;
+  const payload = {
+    chatId,
+    userId,
+    ...(tok
+      ? {token: tok, accessToken: tok, access_token: tok}
+      : {}),
+  };
+  log('emit chat:joinRoom', {chatId, userId, hasToken: Boolean(tok)});
+  socket?.emit('chat:joinRoom', payload);
 };
 
 const leaveRoom = ({chatId, userId}) => {

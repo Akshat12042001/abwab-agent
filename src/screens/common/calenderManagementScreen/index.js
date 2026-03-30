@@ -195,25 +195,43 @@ class CalenderManagementScreen extends Component {
       'saturday',
     ];
 
-    const mapByDay = {};
+    /** Multiple API rows can share the same `day` (one row per slot). */
+    const slotsByDay = {};
     (payload || []).forEach(item => {
       if (!item?.day) return;
-      mapByDay[String(item.day).toLowerCase()] = item;
+      const key = String(item.day).toLowerCase();
+      if (!slotsByDay[key]) {
+        slotsByDay[key] = [];
+      }
+      slotsByDay[key].push(item);
     });
 
     return order.map(dayKey => {
-      const apiDay = mapByDay[dayKey];
       const label = `${dayKey.charAt(0).toUpperCase()}${dayKey.slice(1)}`;
+      const rows = slotsByDay[dayKey] || [];
+      if (!rows.length) {
+        return {
+          day: label,
+          isAvailable: false,
+          timeSlots: [
+            {
+              id: `${label}-slot-0`,
+              start: this.formatFrom24hToAmPm('08:00'),
+              end: this.formatFrom24hToAmPm('22:00'),
+            },
+          ],
+        };
+      }
+      const isAvailable = rows.some(r => r?.isAvailable);
+      const timeSlots = rows.map((row, idx) => ({
+        id: `${label}-slot-${idx}`,
+        start: this.formatFrom24hToAmPm(row?.startTime || '08:00'),
+        end: this.formatFrom24hToAmPm(row?.endTime || '22:00'),
+      }));
       return {
         day: label,
-        isAvailable: Boolean(apiDay?.isAvailable),
-        timeSlots: [
-          {
-            id: `${label}-slot-0`,
-            start: this.formatFrom24hToAmPm(apiDay?.startTime || '08:00'),
-            end: this.formatFrom24hToAmPm(apiDay?.endTime || '10:00'),
-          },
-        ],
+        isAvailable: Boolean(isAvailable),
+        timeSlots,
       };
     });
   };
@@ -235,12 +253,23 @@ class CalenderManagementScreen extends Component {
       });
       const res = await makeGetAvailabilityRequest({agentId});
       this.logApi('GET_AVAILABILITY:SUCCESS', res);
-      const payload =
+      let payload =
         res?.data?.workingHours ||
         res?.data?.data?.workingHours ||
         res?.workingHours ||
         res?.data ||
         [];
+      if (Array.isArray(payload) && payload.length && typeof payload[0] === 'string') {
+        payload = payload
+          .map(s => {
+            try {
+              return JSON.parse(s);
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean);
+      }
       this.logApi('GET_AVAILABILITY:PARSED_WORKING_HOURS', {
         count: Array.isArray(payload) ? payload.length : 0,
         payload,
@@ -280,14 +309,44 @@ class CalenderManagementScreen extends Component {
     }
   };
 
+  /** Compare "HH:mm" strings as minutes from midnight. */
+  hhmmToMinutes = hhmm => {
+    const [h, m] = String(hhmm || '0:0').split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+
+  /**
+   * API requires exactly 7 `workingHours` rows (one per weekday). Extra UI slots
+   * for the same day are merged into one interval: earliest start → latest end.
+   * (Gaps between slots are not preserved — backend needs a richer schema for that.)
+   */
   buildSetPayload = () => {
     return (this.state.workingHours || []).map(dayData => {
-      const firstSlot = dayData?.timeSlots?.[0] || {};
+      const day = String(dayData?.day || '').toLowerCase();
+      const isAvailable = Boolean(dayData?.isAvailable);
+      const slots =
+        dayData?.timeSlots?.length > 0
+          ? dayData.timeSlots
+          : [{start: '08:00am', end: '10:00pm'}];
+      const ranges = slots.map(s => ({
+        start: this.formatTo24h(s?.start || '08:00am'),
+        end: this.formatTo24h(s?.end || '10:00pm'),
+      }));
+      let minStart = ranges[0].start;
+      let maxEnd = ranges[0].end;
+      ranges.forEach(({start, end}) => {
+        if (this.hhmmToMinutes(start) < this.hhmmToMinutes(minStart)) {
+          minStart = start;
+        }
+        if (this.hhmmToMinutes(end) > this.hhmmToMinutes(maxEnd)) {
+          maxEnd = end;
+        }
+      });
       return {
-        day: String(dayData?.day || '').toLowerCase(),
-        isAvailable: Boolean(dayData?.isAvailable),
-        startTime: this.formatTo24h(firstSlot?.start || '08:00am'),
-        endTime: this.formatTo24h(firstSlot?.end || '10:00pm'),
+        day,
+        isAvailable,
+        startTime: minStart,
+        endTime: maxEnd,
       };
     });
   };

@@ -10,6 +10,7 @@ import {useTranslation} from 'react-i18next';
 const AttachmentOptionsModal = ({
   visible = false,
   onClose,
+  onModalHide,
   onSendContract,
   onSendPaymentRequest,
   bottomOffset = 0,
@@ -20,6 +21,7 @@ const AttachmentOptionsModal = ({
       isVisible={visible}
       onBackdropPress={onClose}
       onBackButtonPress={onClose}
+      onModalHide={onModalHide}
       style={styles.modal}
       animationIn="slideInUp"
       animationOut="slideOutDown"
@@ -28,39 +30,10 @@ const AttachmentOptionsModal = ({
       hideModalContentWhileAnimating>
       <View style={[styles.modalContent, {marginBottom: bottomOffset + 70}]}>
         <Pressable
-          style={({pressed}) => [
-            styles.option,
-            // pressed && styles.optionPressed,
-          ]}
-          onPress={() => {
-            onSendContract?.();
-            onClose?.();
-          }}>
-          {/* <View style={styles.optionIcon}> */}
-          {/* Icon placeholder - will be replaced with actual icon */}
-          <ContractIcon />
-          {/* </View> */}
-          <StyledText
-            size={14}
-            variant="bold"
-            color={COLORS.GREYSCALE_900}
-            textStyle={styles.optionText}>
-            {t('CHAT_SCREEN.SEND_CONTRACT')}
-          </StyledText>
-        </Pressable>
-        <View style={styles.optionDivider} />
-        <Pressable
-          style={({pressed}) => [
-            styles.option,
-            // pressed && styles.optionPressed,
-          ]}
+          style={({pressed}) => [styles.option]}
           onPress={() => {
             onSendPaymentRequest?.();
-            onClose?.();
           }}>
-          {/* <View style={styles.optionIcon}> */}
-          {/* Icon placeholder - will be replaced with actual icon */}
-          {/* </View> */}
           <CoinIcon />
           <StyledText
             size={14}
@@ -68,6 +41,21 @@ const AttachmentOptionsModal = ({
             color={COLORS.GREYSCALE_900}
             textStyle={styles.optionText}>
             {t('CHAT_SCREEN.SEND_PAYMENT_REQUEST')}
+          </StyledText>
+        </Pressable>
+        <View style={styles.optionDivider} />
+        <Pressable
+          style={({pressed}) => [styles.option]}
+          onPress={() => {
+            onSendContract?.();
+          }}>
+          <ContractIcon />
+          <StyledText
+            size={14}
+            variant="bold"
+            color={COLORS.GREYSCALE_900}
+            textStyle={styles.optionText}>
+            {t('CHAT_SCREEN.SEND_CONTRACT')}
           </StyledText>
         </Pressable>
       </View>

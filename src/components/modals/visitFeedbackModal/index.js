@@ -19,6 +19,7 @@ const VisitFeedbackModal = ({
   isVisible,
   onCloseModal,
   onSubmitFeedback,
+  isSubmitting = false,
   propertyTitle = '2 Bedroom Apartment in NewKairo',
   developer = 'SODIC',
   location = 'New Cairo',
@@ -29,14 +30,21 @@ const VisitFeedbackModal = ({
   const [selectedFeedback, setSelectedFeedback] = useState('interested');
   const [notes, setNotes] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    let shouldClose = true;
     if (onSubmitFeedback) {
-      onSubmitFeedback({
+      const result = await onSubmitFeedback({
         feedback: selectedFeedback,
         notes: notes.trim(),
       });
+      if (result === false) {
+        shouldClose = false;
+      }
     }
-    onCloseModal();
+    if (shouldClose) {
+      onCloseModal();
+    }
   };
 
   const feedbackOptions = [
@@ -202,6 +210,8 @@ const VisitFeedbackModal = ({
             title={t('VISIT_FEEDBACK_MODAL.SUBMIT_FEEDBACK')}
             onPress={handleSubmit}
             containerStyle={styles.submitButton}
+            isLoading={isSubmitting}
+            isDisabled={isSubmitting}
           />
           <TouchableOpacity
             style={styles.cancelButton}

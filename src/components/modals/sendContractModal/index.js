@@ -7,23 +7,49 @@ import {COLORS} from '../../../constants';
 import styles from './styles';
 import {useTranslation} from 'react-i18next';
 
+/** Default catalog when the API does not supply contracts yet (kept in sync with chat message mapping). */
+export const DEFAULT_CHAT_CONTRACT_CATALOG = [
+  {id: 'noc_1', label: 'NOC Contract', type: 'noc'},
+  {id: 'cce_1', label: 'CCE Contract', type: 'cce'},
+  {id: 'ab_1', label: 'AB Contract', type: 'ab'},
+  {id: 'noc_2', label: 'NOC Contract', type: 'noc'},
+  {id: 'cce_2', label: 'CCE Contract', type: 'cce'},
+  {id: 'ab_2', label: 'AB Contract', type: 'ab'},
+  {id: 'noc_3', label: 'NOC Contract', type: 'noc'},
+  {id: 'cce_3', label: 'CCE Contract', type: 'cce'},
+  {id: 'ab_3', label: 'AB Contract', type: 'ab'},
+];
+
+/** Stable fallback so useEffect deps are not a new [] every render (avoids max update depth). */
+const EMPTY_SELECTED = [];
+const EMPTY_CONTRACTS = [];
+
 const SendContractModal = ({
   visible = false,
   onClose,
   onDone,
-  contracts = [],
-  selectedContracts = [],
+  contracts,
+  selectedContracts: selectedContractsProp,
   bottomOffset = 0,
 }) => {
   const {t} = useTranslation();
-  const [selectedItems, setSelectedItems] = useState(selectedContracts || []);
+  const selectedContracts = selectedContractsProp ?? EMPTY_SELECTED;
+  const contractsList = contracts ?? EMPTY_CONTRACTS;
 
-  // Sync selectedItems with selectedContracts prop when modal opens
+  const [selectedItems, setSelectedItems] = useState(() =>
+    selectedContracts.length ? [...selectedContracts] : [],
+  );
+
+  // Only when opening: sync from props. Do not depend on default `[]` (new ref each render).
   useEffect(() => {
     if (visible) {
-      setSelectedItems(selectedContracts || []);
+      setSelectedItems(selectedContracts.length ? [...selectedContracts] : []);
     }
   }, [visible, selectedContracts]);
+
+  const resetSelection = () => {
+    setSelectedItems(selectedContracts.length ? [...selectedContracts] : []);
+  };
 
   const handleContractPress = contractId => {
     setSelectedItems(prev => {
@@ -43,25 +69,12 @@ const SendContractModal = ({
   };
 
   const handleClose = () => {
-    setSelectedItems(selectedContracts || []);
+    resetSelection();
     onClose?.();
   };
 
-  // Default contracts if none provided
-  const defaultContracts = [
-    {id: 'noc_1', label: 'NOC Contract', type: 'noc'},
-    {id: 'cce_1', label: 'CCE Contract', type: 'cce'},
-    {id: 'ab_1', label: 'AB Contract', type: 'ab'},
-    {id: 'noc_2', label: 'NOC Contract', type: 'noc'},
-    {id: 'cce_2', label: 'CCE Contract', type: 'cce'},
-    {id: 'ab_2', label: 'AB Contract', type: 'ab'},
-    {id: 'noc_3', label: 'NOC Contract', type: 'noc'},
-    {id: 'cce_3', label: 'CCE Contract', type: 'cce'},
-    {id: 'ab_3', label: 'AB Contract', type: 'ab'},
-  ];
-
   const contractsToDisplay =
-    contracts.length > 0 ? contracts : defaultContracts;
+    contractsList.length > 0 ? contractsList : DEFAULT_CHAT_CONTRACT_CATALOG;
 
   return (
     <Modal
@@ -73,7 +86,9 @@ const SendContractModal = ({
       animationOut="slideOutDown"
       backdropOpacity={0.5}
       useNativeDriverForBackdrop
-      hideModalContentWhileAnimating>
+      hideModalContentWhileAnimating
+      coverScreen
+      statusBarTranslucent>
       <View style={[styles.modalContent, {marginBottom: bottomOffset + 70}]}>
         {/* Header */}
         <View style={styles.header}>

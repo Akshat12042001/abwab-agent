@@ -67,7 +67,15 @@ class AppNavigator extends React.Component {
   render() {
     return (
       <NavigationContainer ref={ref => NavigationService.setNavigatorRef(ref)}>
-        <Stack.Navigator screenOptions={config}>
+        <Stack.Navigator
+          key={
+            !this.props.isOnboardingCompleted
+              ? 'onboarding'
+              : !this.props.isLoggedIn
+              ? 'auth'
+              : 'main'
+          }
+          screenOptions={config}>
            {!this.props.isOnboardingCompleted ? (
             <Stack.Screen
               name={NAVIGATION.STACKS.ONBOARDING}
@@ -78,15 +86,19 @@ class AppNavigator extends React.Component {
               name={NAVIGATION.STACKS.AUTH}
               component={AuthenticationStack}
             />
-          ) : (
-            <> 
-          <Stack.Screen name={NAVIGATION.STACKS.TABS} component={BottomTabs} /> 
-           <Stack.Screen
-                name={NAVIGATION.STACKS.COMMON}
-                component={CommonStack}
-              /> 
-          </>
-          )} 
+          ) : null}
+          {this.props.isOnboardingCompleted && this.props.isLoggedIn ? (
+            <Stack.Screen
+              name={NAVIGATION.STACKS.TABS}
+              component={BottomTabs}
+            />
+          ) : null}
+          {this.props.isOnboardingCompleted && this.props.isLoggedIn ? (
+            <Stack.Screen
+              name={NAVIGATION.STACKS.COMMON}
+              component={CommonStack}
+            />
+          ) : null}
           {/* <Stack.Screen
             name={NAVIGATION.STACKS.COMMON}
             component={CommonStack}

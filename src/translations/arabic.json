@@ -99,7 +99,8 @@
     "COMMISSION_TRACKING": "تتبع العمولة",
     "PENDING": "قيد المراجعة",
     "ACCEPTED": "مقبول",
-    "DECLINED": "مرفوض"
+    "DECLINED": "مرفوض",
+    "AGENT_NAME_FALLBACK": "الوكيل"
   },
   "MODALS": {
     "NEW_VIEWING_REQUEST": {
@@ -183,7 +184,28 @@
     "TODAY_APPOINTMENTS": "مواعيد اليوم",
     "EMPTY_STATE_TITLE": "جدولك فارغ",
     "EMPTY_STATE_DESCRIPTION": "ستظهر المواعيد المحجوزة هنا مع جميع التفاصيل التي تحتاجها.",
-    "SELECT_DATE": "اختر التاريخ"
+    "SELECT_DATE": "اختر التاريخ",
+    "RESCHEDULE_TITLE": "إعادة جدولة المواعيد",
+    "APPOINTMENT_DETAILS": "تفاصيل الموعد",
+    "APPOINTMENT_DATE": "تاريخ الموعد",
+    "APPOINTMENT_TIME": "وقت الموعد",
+    "SELECT_NEW_DATE": "اختر تاريخًا جديدًا",
+    "SELECT_NEW_TIME": "اختر وقتًا جديدًا",
+    "RESCHEDULE_REASON_LABEL": "سبب إعادة الجدولة (اختياري)",
+    "RESCHEDULE_REASON_PLACEHOLDER": "أخبرنا لماذا تحتاج إعادة الجدولة...",
+    "CONFIRM_RESCHEDULE": "تأكيد وإعادة الجدولة",
+    "CANCEL_CONFIRM_TITLE": "هل أنت متأكد أنك تريد الإلغاء؟",
+    "CANCEL_CONFIRM_SUBTITLE": "سيتم إخطار مقدم الخدمة بإلغاء الموعد وتحرير الفترة الزمنية.",
+    "CANCEL_REASON_LABEL": "أخبرنا السبب (اختياري)",
+    "CANCEL_REASON_PLACEHOLDER": "تعارض في الجدول، غيرت رأيي...",
+    "CANCEL_BOOKING": "إلغاء الحجز",
+    "RESCHEDULE_CTA": "إعادة الجدولة",
+    "CANCEL_CTA": "إلغاء",
+    "RESCHEDULE_SUCCESS": "تمت إعادة جدولة الموعد",
+    "RESCHEDULE_FAILED": "تعذرت إعادة الجدولة",
+    "CANCEL_SUCCESS": "تم إلغاء الموعد",
+    "CANCEL_FAILED": "تعذر إلغاء الموعد",
+    "RESCHEDULE_DATE_REQUIRED": "يرجى اختيار تاريخ ووقت صالحين"
   },
   "MESSAGES_SCREEN": {
     "MESSAGES": "الرسائل",
@@ -197,7 +219,13 @@
     "SEND_CONTRACT": "إرسال العقد",
     "SEND_PAYMENT_REQUEST": "إرسال طلب الدفع",
     "CONTRACTS": "العقد",
-    "PAYMENT_REQUEST": "طلب الدفع"
+    "PAYMENT_REQUEST": "طلب الدفع",
+    "SELECT": "اختر",
+    "PAYMENT_OPTION_BOOKING": "رسوم الحجز",
+    "PAYMENT_OPTION_DOWN": "دفعة مقدمة",
+    "PAYMENT_OPTION_COMMISSION": "عمولة",
+    "PAYMENT_SENT_PREFIX": "طلب دفع",
+    "ATTACHMENT_FILE_URL_MISSING": "المرفق يحتاج رابط ملف. عيّن CHAT_DEFAULT_CONTRACT_FILE_URL في .env أو مرّر fileUrl من واجهة الخادم."
   },
   "APPOINTMENT_DETAIL_SCREEN": {
     "TITLE": "تفاصيل الموعد",
@@ -231,7 +259,8 @@
     "ADD_PRIVATE_NOTE": "إضافة ملاحظة خاصة (اختياري)",
     "NOTE_PLACEHOLDER": "مثال: \"انتظرت 15 دقيقة.\"، \"اتصل العميل لإلغاء الموعد في اللحظة الأخيرة.\"، \"لا رد على المكالمات أو الرسائل.\"",
     "CONFIRM_AND_LOG": "تأكيد وتسجيل عدم الحضور",
-    "CANCEL": "إلغاء"
+    "CANCEL": "إلغاء",
+    "SUCCESS_TOAST": "تم تسجيل عدم الحضور بنجاح"
   },
   "CALENDAR_MANAGEMENT_SCREEN": {
     "TITLE": "إدارة التقويم",

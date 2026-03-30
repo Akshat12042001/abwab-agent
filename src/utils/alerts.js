@@ -35,14 +35,27 @@ export const showAlert = ({
   Alert.alert(title, message, buttons);
 };
 
+const baseToastOptions = {
+  position: TOAST_POSITION,
+  /** Required to appear above react-native-modal / nested screens (toastify-react-native v7) */
+  useModal: true,
+  visibilityTime: 4000,
+};
+
 export const errorToast = (title, t) => {
   const msg = title ? title : t?.('STRINGS.BUTTONS.ERROR') || 'Error';
-  // Use custom error component registered in ToastManager.config
-  Toast.show({type: 'customError', text1: msg, position: TOAST_POSITION});
+  Toast.show({
+    type: 'customError',
+    text1: msg,
+    ...baseToastOptions,
+  });
 };
 
 export const successToast = (title, t) => {
   const msg = title ? title : t?.('STRINGS.BUTTONS.SUCCESS') || 'Success';
-  // Use custom success component registered in ToastManager.config
-  Toast.show({type: 'customSuccess', text1: msg, position: TOAST_POSITION});
+  Toast.show({
+    type: 'customSuccess',
+    text1: msg,
+    ...baseToastOptions,
+  });
 };

@@ -91,7 +91,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
     backgroundColor: COLORS.WHITE,
-    height: 150,
+    minHeight: 140,
+    height: 140,
   },
   inputToolbarRow: {
     position: 'relative',
@@ -124,6 +125,24 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
     color: COLORS.GREYSCALE_900,
     paddingVertical: 0,
+    paddingRight: 8,
+  },
+  attachInsideInput: {
+    paddingLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paymentRequestRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.PRIMARY_30,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  paymentRequestText: {
+    marginLeft: 10,
+    flex: 1,
   },
   contractsContainer: {
     flexDirection: 'row',

@@ -25,10 +25,12 @@ import styles from './styles';
 import {SharedStyles} from '../../../shared';
 import {withTranslation} from 'react-i18next';
 import {
+  makeGetAgentProfileRequest,
   makeRequestViewingActionRequest,
   makeRequestViewingListingRequest,
 } from '../../../api/auth';
 import {errorToast, successToast} from '../../../utils/alerts';
+import {connect} from 'react-redux';
 
 const data = [
   {
@@ -52,12 +54,111 @@ class HomeScreen extends Component {
       isRequestsLoading: false,
       actionLoadingId: '',
       requestsList: [],
+      headerProfile: {
+        name: '',
+        subtitle: '',
+        imageSource: ASSETS.IMAGES.PERSON,
+      },
+      isHeaderProfileLoading: false,
     };
   }
 
   componentDidMount() {
+    this.prefillHeaderFromAuth();
+    this.fetchAgentProfileForHeader();
     this.fetchViewingRequests();
   }
+
+  prefillHeaderFromAuth = () => {
+    const ud = this.props.userData || {};
+    const name =
+      ud.name ||
+      ud.fullName ||
+      [ud.firstName, ud.lastName].filter(Boolean).join(' ').trim();
+    const uri = ud.image || ud.avatar || ud.profileImage;
+    if (!name && !uri) {
+      return;
+    }
+    this.setState(prev => ({
+      headerProfile: {
+        ...prev.headerProfile,
+        ...(name ? {name} : {}),
+        ...(uri ? {imageSource: {uri}} : {}),
+      },
+    }));
+  };
+
+  getAgentIdForProfile = () => {
+    const userData = this.props?.userData || {};
+    const userId = this.props?.userId || '';
+    return (
+      userId ||
+      userData?._id ||
+      userData?.id ||
+      userData?.agentId ||
+      userData?.agent?._id ||
+      userData?.user?._id ||
+      userData?.user?.id ||
+      ''
+    );
+  };
+
+  getProfilePayload = response => {
+    const candidates = [
+      response?.data?.agent,
+      response?.data?.data,
+      response?.data,
+      response?.agent,
+      response,
+    ];
+    return candidates.find(item => item && typeof item === 'object') || {};
+  };
+
+  buildHomeHeaderProfile = payload => {
+    const firstName = payload?.firstName || payload?.first_name || '';
+    const lastName = payload?.lastName || payload?.last_name || '';
+    const fallbackName = [firstName, lastName].filter(Boolean).join(' ').trim();
+    const name = payload?.name || payload?.fullName || fallbackName || '';
+    const imageUri =
+      payload?.image ||
+      payload?.avatar ||
+      payload?.profileImage ||
+      payload?.photo;
+    const subtitle =
+      payload?.companyName ||
+      payload?.brokerageName ||
+      payload?.agencyName ||
+      payload?.organizationName ||
+      payload?.brokerage?.name ||
+      payload?.company?.name ||
+      payload?.officeName ||
+      payload?.employerName ||
+      '';
+    return {
+      name,
+      subtitle: String(subtitle || '').trim(),
+      imageSource: imageUri ? {uri: imageUri} : ASSETS.IMAGES.PERSON,
+    };
+  };
+
+  fetchAgentProfileForHeader = async () => {
+    const agentId = this.getAgentIdForProfile();
+    if (!agentId) {
+      return;
+    }
+    this.setState({isHeaderProfileLoading: true});
+    try {
+      const response = await makeGetAgentProfileRequest(agentId);
+      const payload = this.getProfilePayload(response);
+      this.setState({
+        headerProfile: this.buildHomeHeaderProfile(payload),
+      });
+    } catch (e) {
+      // Keep defaults; avoid noisy toast for header-only failure
+    } finally {
+      this.setState({isHeaderProfileLoading: false});
+    }
+  };
 
   getRequestsListFromResponse = response => {
     const candidates = [
@@ -178,6 +279,12 @@ class HomeScreen extends Component {
         page: 1,
         limit: 10,
         status: 'pending',
+        sort: [
+          {
+            field: 'createdAt',
+            order: -1,
+          },
+        ],
       });
       const requestsList = this.getRequestsListFromResponse(response);
       this.setState({requestsList});
@@ -254,8 +361,12 @@ class HomeScreen extends Component {
       });
       successToast(
         status === 'accepted'
-          ? t?.('HOME_SCREEM.REQUEST_ACCEPTED', {defaultValue: 'Request accepted'})
-          : t?.('HOME_SCREEM.REQUEST_DECLINED', {defaultValue: 'Request declined'}),
+          ? t?.('HOME_SCREEM.REQUEST_ACCEPTED', {
+              defaultValue: 'Request accepted',
+            })
+          : t?.('HOME_SCREEM.REQUEST_DECLINED', {
+              defaultValue: 'Request declined',
+            }),
         t,
       );
       this.setState(prevState => ({
@@ -277,6 +388,10 @@ class HomeScreen extends Component {
 
   render() {
     const {t} = this.props?.i18n;
+    const {headerProfile, isHeaderProfileLoading} = this.state;
+    const displayName =
+      headerProfile.name ||
+      t?.('HOME_SCREEM.AGENT_NAME_FALLBACK', {defaultValue: 'Agent'});
     return (
       <ScreenContainer paddingTop={-1} backgroundColor={COLORS.WHITE}>
         <ScrollView contentContainerStyle={{paddingBottom: 100}}>
@@ -284,19 +399,30 @@ class HomeScreen extends Component {
             <View style={styles.headerRow}>
               <View style={styles.profileRow}>
                 <Image
-                  source={ASSETS.IMAGES.PERSON}
+                  source={headerProfile.imageSource}
                   style={styles.profileImage}
                 />
                 <View style={styles.profileInfo}>
-                  <StyledText size={18} variant="semiBold" color={COLORS.WHITE}>
-                    Ahmed Hassan
-                  </StyledText>
-                  <StyledText
-                    size={14}
-                    variant="semiBold"
-                    color={COLORS.WHITE_80}>
-                    Palm Hills Brokerage
-                  </StyledText>
+                  {isHeaderProfileLoading && !headerProfile.name ? (
+                    <ActivityIndicator color={COLORS.WHITE} size="small" />
+                  ) : (
+                    <>
+                      <StyledText
+                        size={18}
+                        variant="semiBold"
+                        color={COLORS.WHITE}>
+                        {displayName}
+                      </StyledText>
+                      {!!headerProfile.subtitle && (
+                        <StyledText
+                          size={14}
+                          variant="semiBold"
+                          color={COLORS.WHITE_80}>
+                          {headerProfile.subtitle}
+                        </StyledText>
+                      )}
+                    </>
+                  )}
                 </View>
               </View>
               <TouchableOpacity
@@ -366,7 +492,9 @@ class HomeScreen extends Component {
                     {...this.mapRequestItemToCardProps(item)}
                     onAccept={() => this.handleAcceptRequest(item)}
                     onDecline={() => this.handleDeclineRequest(item)}
-                    showButtons={this.state.actionLoadingId !== this.getRequestId(item)}
+                    showButtons={
+                      this.state.actionLoadingId !== this.getRequestId(item)
+                    }
                   />
                 )}
               />
@@ -449,4 +577,9 @@ class HomeScreen extends Component {
   }
 }
 
-export default withTranslation()(HomeScreen);
+const mapStateToProps = ({auth}) => ({
+  userData: auth?.userData,
+  userId: auth?.userId,
+});
+
+export default withTranslation()(connect(mapStateToProps)(HomeScreen));

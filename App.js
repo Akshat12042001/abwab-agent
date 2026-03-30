@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {View} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation';
 import {getStore, getPersistor} from './src/redux/index';
@@ -46,13 +47,17 @@ const App = () => {
           loading={<StyledText>Loading...</StyledText>}
           persistor={persistor}
           onBeforeLift={onBeforeLift}>
-          <ToastManager
-            animationStyle="fade"
-            showCloseIcon={false}
-            config={toastConfig}
-            duration={2000}
-          />
-          {isLoading ? <SplashScreen /> : <AppNavigator />}
+          <View style={{flex: 1}}>
+            {isLoading ? <SplashScreen /> : <AppNavigator />}
+            {/* After navigator so toast layer paints above app; useModal shows over RN modals */}
+            <ToastManager
+              useModal
+              animationStyle="fade"
+              showCloseIcon={false}
+              config={toastConfig}
+              duration={3500}
+            />
+          </View>
         </PersistGate>
       </Provider>
     </SafeAreaProvider>
