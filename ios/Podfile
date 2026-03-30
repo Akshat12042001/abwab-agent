@@ -7,6 +7,11 @@ require Pod::Executable.execute_command('node', ['-p',
  
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
+
+# Mapbox iOS install hooks
+pre_install do |installer|
+  $RNMapboxMaps.pre_install(installer)
+end
  
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -24,6 +29,9 @@ target 'AbwabAgent' do
   )
  
   post_install do |installer|
+
+     # Mapbox post_install
+     $RNMapboxMaps.post_install(installer)
  
     react_native_post_install(
       installer,
