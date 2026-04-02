@@ -6,7 +6,7 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, FORM_SCHEMA} from '../../../constants';
+import {COLORS, FORM_SCHEMA, NAVIGATION} from '../../../constants';
 import {Pressable, TouchableOpacity, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {withTranslation} from 'react-i18next';
@@ -14,6 +14,8 @@ import {Formik} from 'formik';
 import styles from './styles';
 import {LeftArrowIcon} from '../../../components/svgs';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeForgotPasswordRequest} from '../../../api/auth';
+import {successToast} from '../../../utils/alerts';
 
 class ForgotPasswordScreen extends Component {
   constructor(props) {
@@ -29,12 +31,37 @@ class ForgotPasswordScreen extends Component {
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = () => {};
+  onSubmit = async values => {
+    try {
+      this.setState({isLoading: true});
+      const res = await makeForgotPasswordRequest({
+        email: values?.email,
+      });
+      if (res?.statusCode === 200) {
+        successToast(res?.message);
+        this.props.navigation.navigate(
+          NAVIGATION.AUTH.VERIFICATION_CODE_SCREEN,
+          {
+            email: values?.email,
+          },
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.setState({isLoading: false});
+    }
+
+    // this.props.navigation.navigate(NAVIGATION.AUTH.VERIFICATION_CODE_SCREEN);
+  };
 
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer paddingTop={!!this.props?.insets?.top ? 30 : 0}>
+      <ScreenContainer
+        paddingTop={
+          !!this.props?.insets?.top ? this.props?.insets?.top - 10 : 0
+        }>
         <View style={styles.screen}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
@@ -43,7 +70,9 @@ class ForgotPasswordScreen extends Component {
             enableAutoAutomaticScroll={false}
             showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => this.props.navigation.goBack()}>
                 <LeftArrowIcon />
               </TouchableOpacity>
               <StyledText
@@ -85,7 +114,7 @@ class ForgotPasswordScreen extends Component {
                     <View style={styles.formTopSpacing}>
                       {this.form.fields.map((field, index) => {
                         const fieldKey = field?.type;
-                        const parsedPlaceholder = t(field?.label) || '';
+                        const parsedPlaceholder = t(field?.placeholder) || '';
                         const label = t(field?.label) || '';
 
                         return (
@@ -114,6 +143,7 @@ class ForgotPasswordScreen extends Component {
                         onPress={handleSubmit}
                         containerStyle={{marginTop: 25}}
                         isDisabled={values?.email?.length === 0}
+                        isLoading={this.state.isLoading}
                       />
                     </View>
                   );

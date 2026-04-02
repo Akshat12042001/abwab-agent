@@ -34,6 +34,44 @@ const fields = {
     type: 'confirmNewPassword',
     isPassword: true,
   },
+  currentPassword: {
+    label: 'LABELS.CURRENT_PASSWORD',
+    placeholder: 'PLACEHOLDERS.ENTER_YOUR_CURRENT_PASSWORD',
+    type: 'currentPassword',
+    isPassword: true,
+  },
+  firstName: {
+    label: 'LABELS.FIRST_NAME',
+    placeholder: 'PLACEHOLDERS.FIRST_NAME',
+    type: 'firstName',
+  },
+  lastName: {
+    label: 'LABELS.LAST_NAME',
+    placeholder: 'PLACEHOLDERS.LAST_NAME',
+    type: 'lastName',
+  },
+  bioMulti: {
+    label: 'LABELS.BIO',
+    placeholder: 'PLACEHOLDERS.BIO',
+    type: 'bio',
+    multiline: true,
+    numberOfLines: 4,
+  },
+  address: {
+    label: 'LABELS.LOCATION',
+    placeholder: 'PLACEHOLDERS.LOCATION',
+    type: 'address',
+  },
+  specialization: {
+    label: 'LABELS.SERVICE_AREA',
+    placeholder: 'PLACEHOLDERS.SERVICE_AREA',
+    type: 'specialization',
+  },
+  experience: {
+    label: 'LABELS.EXPERIENCE',
+    placeholder: 'PLACEHOLDERS.EXPERIENCE',
+    type: 'experience',
+  },
 };
 
 const schemas = {
@@ -87,6 +125,7 @@ const schemas = {
     .oneOf([Yup.ref('newPassword'), ''], 'ERRORS.PASSWORD_MUST_MATCH')
     .min(8, 'ERRORS.MUST_BE_AT_LEAST_8_CHARACTERS')
     .required('ERRORS.REQUIRED'),
+  currentPassword: Yup.string().required('ERRORS.REQUIRED'),
 };
 
 export default {
@@ -94,7 +133,7 @@ export default {
     fields: [fields.email, fields.password],
     schema: Yup.object().shape({
       email: schemas.email,
-      password: schemas.password,
+      password: schemas.stringRequired,
     }),
   },
   FORGOT_PASSWORD: {
@@ -108,6 +147,40 @@ export default {
     schema: Yup.object().shape({
       newPassword: schemas.newPassword,
       confirmNewPassword: schemas.confirmNewPassword,
+    }),
+  },
+  CHANGE_PASSWORD: {
+    fields: [
+      fields.currentPassword,
+      fields.newPassword,
+      fields.confirmNewPassword,
+    ],
+    schema: Yup.object().shape({
+      currentPassword: schemas.currentPassword,
+      newPassword: schemas.newPassword,
+      confirmNewPassword: schemas.confirmNewPassword,
+    }),
+  },
+  EDIT_PROFILE: {
+    fields: [
+      fields.firstName,
+      fields.lastName,
+      fields.email,
+      fields.phoneNumber,
+      fields.bioMulti,
+      fields.address,
+      fields.specialization,
+      fields.experience,
+    ],
+    schema: Yup.object().shape({
+      firstName: schemas.stringRequired2,
+      lastName: schemas.stringRequired2,
+      email: schemas.email,
+      phoneNumber: Yup.string().trim().min(5, 'ERRORS.REQUIRED').required('ERRORS.REQUIRED'),
+      bio: Yup.string().trim().optional().nullable(),
+      address: Yup.string().trim().optional().nullable(),
+      specialization: Yup.string().trim().optional().nullable(),
+      experience: Yup.string().trim().optional().nullable(),
     }),
   },
 };

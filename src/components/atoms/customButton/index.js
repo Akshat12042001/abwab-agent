@@ -1,19 +1,34 @@
 import React from 'react';
-import {TouchableOpacity} from 'react-native';
+import {ActivityIndicator, TouchableOpacity} from 'react-native';
 import styles from './styles';
 import StyledText from '../styledText';
 import {COLORS} from '../../../constants';
 
-const CustomButton = ({title, onPress, containerStyle, isDisabled = false}) => {
+const CustomButton = ({
+  title,
+  onPress,
+  containerStyle,
+  isDisabled = false,
+  isLoading = false,
+}) => {
   const backgroundColor = isDisabled ? COLORS.BUTTON_DISABLE : COLORS.PRIMARY;
   return (
     <TouchableOpacity
-      disabled={isDisabled}
+      activeOpacity={0.8}
+      disabled={isDisabled || isLoading}
       style={[styles.root, containerStyle, {backgroundColor}]}
       onPress={onPress}>
-      <StyledText variant="bold" color={COLORS.WHITE}>
-        {title}
-      </StyledText>
+      {isLoading ? (
+        <ActivityIndicator
+          size="small"
+          color={COLORS.WHITE}
+          style={{paddingVertical: 2.5}}
+        />
+      ) : (
+        <StyledText variant="bold" color={COLORS.WHITE}>
+          {title}
+        </StyledText>
+      )}
     </TouchableOpacity>
   );
 };

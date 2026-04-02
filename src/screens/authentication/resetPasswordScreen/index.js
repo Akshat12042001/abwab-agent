@@ -6,7 +6,7 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, FORM_SCHEMA} from '../../../constants';
+import {COLORS, FORM_SCHEMA, NAVIGATION} from '../../../constants';
 import {Pressable, TouchableOpacity, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {withTranslation} from 'react-i18next';
@@ -14,11 +14,14 @@ import {Formik} from 'formik';
 import styles from './styles';
 import {LeftArrowIcon} from '../../../components/svgs';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeChangePasswordRequest} from '../../../api/auth';
+import {successToast} from '../../../utils/alerts';
 
 class ResetPasswordScreen extends Component {
   constructor(props) {
     super(props);
     this.form = FORM_SCHEMA.RESET_PASSWORD;
+    this.token = props?.route?.params?.token;
     this.state = {
       isLoading: false,
     };
@@ -30,12 +33,32 @@ class ResetPasswordScreen extends Component {
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = () => {};
+  onSubmit = async values => {
+    this.setState({isLoading: true});
+    try {
+      const params = {
+        password: values?.newPassword,
+      };
+
+      const res = await makeChangePasswordRequest(params, this.token);
+
+      if (res?.statusCode === 200) {
+        successToast(res?.message);
+        this.props.navigation.navigate(NAVIGATION.AUTH.LOGIN_SCREEN);
+      }
+    } catch (error) {
+    } finally {
+      this.setState({isLoading: false});
+    }
+  };
 
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer paddingTop={!!this.props?.insets?.top ? 30 : 0}>
+      <ScreenContainer
+        paddingTop={
+          !!this.props?.insets?.top ? this.props?.insets?.top - 10 : 0
+        }>
         <View style={styles.screen}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
@@ -44,7 +67,9 @@ class ResetPasswordScreen extends Component {
             enableAutoAutomaticScroll={false}
             showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => this.props.navigation.goBack()}>
                 <LeftArrowIcon />
               </TouchableOpacity>
               <StyledText
@@ -86,7 +111,7 @@ class ResetPasswordScreen extends Component {
                     <View style={styles.formTopSpacing}>
                       {this.form.fields.map((field, index) => {
                         const fieldKey = field?.type;
-                        const parsedPlaceholder = t(field?.label) || '';
+                        const parsedPlaceholder = t(field?.placeholder) || '';
                         const label = t(field?.label) || '';
 
                         return (
@@ -113,6 +138,7 @@ class ResetPasswordScreen extends Component {
                       <CustomButton
                         title={t('BUTTONS.CONFIRM')}
                         onPress={handleSubmit}
+                        isLoading={this.state.isLoading}
                         containerStyle={{marginTop: 25}}
                         isDisabled={
                           values?.newPassword?.length === 0 ||

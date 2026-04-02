@@ -14,8 +14,32 @@ import {
 
 const persistConfig = {
   key: 'root',
-  blacklist: [],
   storage: AsyncStorage,
+  whitelist: ['onboarding', 'auth'],
+  migrate: async state => {
+    try {
+      const rememberFromState = state?.auth?.rememberMe;
+      if (rememberFromState === false && state?.auth) {
+        return {
+          ...state,
+          auth: undefined,
+        };
+      }
+
+      // Backward compatibility for previously stored flag.
+      const isRememberMe = await AsyncStorage.getItem('isRememberMe');
+      // Clear auth only when explicitly opted out.
+      if (isRememberMe === 'false' && state?.auth) {
+        return {
+          ...state,
+          auth: undefined,
+        };
+      }
+      return state;
+    } catch (e) {
+      return state;
+    }
+  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

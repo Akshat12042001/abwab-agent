@@ -5,22 +5,26 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {Pressable, TouchableOpacity, View} from 'react-native';
 import {LeftArrowIcon} from '../../../components/svgs';
 import styles from './styles';
 import {withTranslation} from 'react-i18next';
 import {SharedStyles} from '../../../shared';
 import {withSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeResendOtpRequest, makeVerifyOtpRequest} from '../../../api/auth';
+import {successToast} from '../../../utils/alerts';
 
 class VerificationCodeScreen extends Component {
   constructor(props) {
     super(props);
+    this.email = props?.route?.params?.email;
     this.state = {
       otp: [],
       error: '',
       canResend: true,
       resendSeconds: 60,
+      isLoading: false,
     };
   }
 
@@ -45,19 +49,54 @@ class VerificationCodeScreen extends Component {
     }, 1000);
   };
 
-  handleResend = () => {
+  handleResend = async () => {
     if (!this.state.canResend) return;
     // TODO: trigger resend code API here if available
-    this.startResendTimer();
+    try {
+      const res = await makeResendOtpRequest({
+        email: this.email,
+        type: 'AGENT',
+      });
+      if (res?.statusCode === 200) {
+        successToast(res?.message);
+        this.startResendTimer();
+      }
+    } catch (error) {}
+  };
+
+  handleVerify = async () => {
+    this.setState({isLoading: true});
+    try {
+      const params = {
+        email: this.email,
+        otp: this.state.otp.join(''),
+      };
+
+      const res = await makeVerifyOtpRequest(params);
+
+      if (res?.statusCode === 200) {
+        this.props.navigation.navigate(NAVIGATION.AUTH.RESET_PASSWORD_SCREEN, {
+          token: res?.data?.token,
+        });
+      }
+    } catch (error) {
+      console.log(error,"error>>>>>>>")
+    } finally {
+      this.setState({isLoading: false});
+    }
   };
 
   render() {
     const {t} = this.props?.i18n;
     return (
       <ScreenContainer
-        paddingTop={!!this.props?.insets?.top ? 30 : 0}
+        paddingTop={
+          !!this.props?.insets?.top ? this.props?.insets?.top - 10 : 0
+        }
         backgroundColor={COLORS.WHITE}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => this.props.navigation.goBack()}>
           <LeftArrowIcon />
         </TouchableOpacity>
         <View style={styles.container}>
@@ -75,13 +114,18 @@ class VerificationCodeScreen extends Component {
           <View style={styles.otpWrap}>
             <OtpInput
               otp={this.state.otp}
-              length={6}
+              length={4}
               setOtp={text => this.setState({otp: text, error: ''})}
               onSubmit={() => {}}
               error={this.state.error}
             />
           </View>
-          <CustomButton title={t('BUTTONS.VERIFY')} isDisabled={true} />
+          <CustomButton
+            title={t('BUTTONS.VERIFY')}
+            isDisabled={this.state.otp.length !== 4}
+            isLoading={this.state.isLoading}
+            onPress={this.handleVerify}
+          />
           <View style={styles.resendWrap}>
             {this.state.canResend ? (
               <Pressable style={styles.rowStart} onPress={this.handleResend}>

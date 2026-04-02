@@ -21,10 +21,6 @@ export default StyleSheet.create({
   positionAbsolute: {
     position: 'absolute',
   },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   justifySpaceBetween: {
     width: '100%',
     justifyContent: 'space-between',
@@ -50,5 +46,11 @@ export default StyleSheet.create({
       width: 4,
       height: 4,
     },
+  },
+  hitSlop10: {
+    top: 10,
+    bottom: 10,
+    left: 10,
+    right: 10,
   },
 });

@@ -7,13 +7,17 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, FORM_SCHEMA} from '../../../constants';
+import {COLORS, FORM_SCHEMA, NAVIGATION} from '../../../constants';
 import {Image, Pressable, TouchableOpacity, View} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {ASSETS} from '../../../constants/assets';
 import {withTranslation} from 'react-i18next';
 import {Formik} from 'formik';
 import styles from './styles';
+import {makeLoginRequest} from '../../../api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {connect} from 'react-redux';
+import {setRememberMe, setUserData} from '../../../redux/auth/auth.reducer';
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -21,21 +25,87 @@ class LoginScreen extends Component {
     this.form = FORM_SCHEMA.LOGIN;
     this.state = {
       isLoading: false,
-    };
-    this.initialValues = {
-      email: '',
-      password: '',
+      isChecked: true,
+      initialValues: {
+        email: '',
+        password: '',
+      },
     };
     this.formRef = null;
     this.inputRefs = this.form.fields.map(() => null);
   }
 
-  onSubmit = () => {};
+  async componentDidMount() {
+    try {
+      const isRememberMe = await AsyncStorage.getItem('isRememberMe');
+      const savedEmail = await AsyncStorage.getItem('rememberedEmail');
+      const savedPassword = await AsyncStorage.getItem('rememberedPassword');
+      const shouldRemember = isRememberMe !== 'false';
+
+      this.setState({
+        isChecked: shouldRemember,
+        initialValues: shouldRemember
+          ? {
+              email: savedEmail || '',
+              password: savedPassword || '',
+            }
+          : {
+              email: '',
+              password: '',
+            },
+      });
+    } catch (e) {}
+  }
+
+ onSubmit = async values => {
+  console.log("🟡 LOGIN BUTTON CLICKED");
+  console.log("🟡 FORM VALUES:", values);
+
+  this.setState({isLoading: true});
+
+  try {
+    const params = {
+      email: values?.email,
+      password: values?.password,
+    };
+
+    console.log("📤 FINAL PARAMS:", params);
+
+    const res = await makeLoginRequest(params);
+
+    console.log("🟢 FINAL RESPONSE:", res);
+    console.log("🟢 TOKEN:", res?.data?.token);
+
+    await AsyncStorage.setItem(
+      'isRememberMe',
+      this.state.isChecked ? 'true' : 'false',
+    );
+
+    if (this.state.isChecked) {
+      await AsyncStorage.setItem('rememberedEmail', values?.email || '');
+      await AsyncStorage.setItem('rememberedPassword', values?.password || '');
+    } else {
+      await AsyncStorage.removeItem('rememberedEmail');
+      await AsyncStorage.removeItem('rememberedPassword');
+    }
+
+    this.props.setRememberMe(this.state.isChecked);
+
+    console.log("👤 USER DATA SET:", res?.data);
+
+    this.props.setUserData(res?.data);
+
+  } catch (error) {
+    console.log("🔴 LOGIN ERROR:", error);
+  } finally {
+    this.setState({isLoading: false});
+  }
+};
 
   render() {
     const {t} = this.props?.i18n;
     return (
-      <ScreenContainer>
+      <ScreenContainer paddingBottom={1}>
         <View style={styles.screen}>
           <KeyboardAwareScrollView
             enableOnAndroid={true}
@@ -56,7 +126,7 @@ class LoginScreen extends Component {
                 textStyle={styles.titleSpacing}>
                 {t('LOGIN_SCREEN.SIGN_IN_TO_YOUR_ACCOUNT')}
               </StyledText>
-              <Pressable style={styles.rowStart}>
+              {/* <Pressable style={styles.rowStart}>
                 <StyledText
                   size={14}
                   variant="regular"
@@ -70,14 +140,14 @@ class LoginScreen extends Component {
                   textStyle={styles.registerGap}>
                   {t('LOGIN_SCREEN.REGISTER')}
                 </StyledText>
-              </Pressable>
+              </Pressable> */}
             </View>
             <View style={styles.card}>
               <Formik
                 validateOnChange
-                enableReinitialize={false}
+                enableReinitialize={true}
                 onSubmit={this.onSubmit}
-                initialValues={this.initialValues}
+                initialValues={this.state.initialValues}
                 validationSchema={this.form.schema}
                 innerRef={formRef => (this.formRef = formRef)}>
                 {({
@@ -132,7 +202,12 @@ class LoginScreen extends Component {
                             {t('LOGIN_SCREEN.REMEMBER_ME')}
                           </StyledText>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() =>
+                            this.props.navigation.navigate(
+                              NAVIGATION.AUTH.FORGOT_PASSWORD_SCREEN,
+                            )
+                          }>
                           <StyledText
                             size={14}
                             variant="medium"
@@ -142,6 +217,7 @@ class LoginScreen extends Component {
                         </TouchableOpacity>
                       </View>
                       <CustomButton
+                        isLoading={this.state.isLoading}
                         title={t('BUTTONS.SIGN_IN')}
                         onPress={handleSubmit}
                         isDisabled={
@@ -160,4 +236,6 @@ class LoginScreen extends Component {
     );
   }
 }
-export default withTranslation()(LoginScreen);
+export default withTranslation()(
+  connect(null, {setUserData, setRememberMe})(LoginScreen),
+);

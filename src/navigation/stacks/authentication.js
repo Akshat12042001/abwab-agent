@@ -14,18 +14,18 @@ const Stack = createStackNavigator();
 export default () => {
   return (
     <Stack.Navigator screenOptions={config}>
-      {/* <Stack.Screen
+      <Stack.Screen
         name={NAVIGATION.AUTH.LOGIN_SCREEN}
         component={LoginScreen}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={NAVIGATION.AUTH.FORGOT_PASSWORD_SCREEN}
         component={ForgotPasswordScreen}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={NAVIGATION.AUTH.VERIFICATION_CODE_SCREEN}
         component={VerificationCodeScreen}
-      /> */}
+      />
       <Stack.Screen
         name={NAVIGATION.AUTH.RESET_PASSWORD_SCREEN}
         component={ResetPasswordScreen}

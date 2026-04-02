@@ -7,5 +7,10 @@ export const ASSETS = {
     LOGO_ONE: require('../assets/images/logo1.png'),
     MAIN_LOGO: require('../assets/images/mainLogo.png'),
     LOGO: require('../assets/images/logo.png'),
+    PERSON: require('../assets/images/person.png'),
+    DUMMY_IMAGE: require('../assets/images/dummyImage.png'),
+    BG_IMAGE: require('../assets/images/bgImage.png'),
+    ENG_IMAGE: require('../assets/images/eng.png'),
+    AR_IMAGE: require('../assets/images/arabic.png'),
   },
 };
