@@ -1,15 +1,15 @@
-import React, {Fragment} from 'react';
+import React, { Fragment } from 'react';
 import {
   CustomButton,
   DropdownComponent,
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS, NAVIGATION, SCREEN} from '../../../constants';
-import {withTranslation} from 'react-i18next';
-import {withSafeAreaInsets} from 'react-native-safe-area-context';
+import { COLORS, NAVIGATION, SCREEN } from '../../../constants';
+import { withTranslation } from 'react-i18next';
+import { withSafeAreaInsets } from 'react-native-safe-area-context';
 import Carousel from 'react-native-reanimated-carousel';
-import {ASSETS} from '../../../constants/assets';
+import { ASSETS } from '../../../constants/assets';
 import {
   ActivityIndicator,
   Image,
@@ -19,7 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import RangeSlider from 'react-native-sticky-range-slider';
 import {
@@ -40,10 +40,11 @@ import {
   ExpectedRoiIcon,
 } from '../../../components/svgs';
 import styles from './styles';
-import {SharedStyles} from '../../../shared';
-import {connect} from 'react-redux';
+import { SharedStyles } from '../../../shared';
+import { connect } from 'react-redux';
+import Config from 'react-native-config';
 
-const DocumentRow = React.memo(({title, t}) => {
+const DocumentRow = React.memo(({ title, t }) => {
   return (
     <View style={styles.docRow}>
       <View style={styles.docLeftIcon}>
@@ -66,7 +67,7 @@ const DocumentRow = React.memo(({title, t}) => {
   );
 });
 
-const PlanTag = React.memo(({label}) => {
+const PlanTag = React.memo(({ label }) => {
   return (
     <View style={styles.planTag}>
       <StyledText size={10} variant="semiBold" color={COLORS.GREYSCALE_700}>
@@ -76,7 +77,7 @@ const PlanTag = React.memo(({label}) => {
   );
 });
 
-const PlanCard = React.memo(({title, price, per, pill, tags = [], onPress}) => {
+const PlanCard = React.memo(({ title, price, per, pill, tags = [], onPress }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -301,7 +302,7 @@ class PropertyDetailScreen extends React.Component {
 
   componentDidMount() {
     MapboxGL.setAccessToken(
-      '__REDACTED_MAPBOX_PK__',
+      Config.MAPBOX_TOKEN,
     );
     this.fetchData();
   }
@@ -309,11 +310,11 @@ class PropertyDetailScreen extends React.Component {
   getCarouselItems = () => {
     // Return dummy images for carousel
     return [
-      {id: '1', image: ASSETS.IMAGES.DUMMY_IMAGE},
-      {id: '2', image: ASSETS.IMAGES.DUMMY_IMAGE},
-      {id: '3', image: ASSETS.IMAGES.DUMMY_IMAGE},
-      {id: '4', image: ASSETS.IMAGES.DUMMY_IMAGE},
-      {id: '5', image: ASSETS.IMAGES.DUMMY_IMAGE},
+      { id: '1', image: ASSETS.IMAGES.DUMMY_IMAGE },
+      { id: '2', image: ASSETS.IMAGES.DUMMY_IMAGE },
+      { id: '3', image: ASSETS.IMAGES.DUMMY_IMAGE },
+      { id: '4', image: ASSETS.IMAGES.DUMMY_IMAGE },
+      { id: '5', image: ASSETS.IMAGES.DUMMY_IMAGE },
     ];
   };
 
@@ -322,9 +323,9 @@ class PropertyDetailScreen extends React.Component {
       const lines = e?.nativeEvent?.lines || [];
       const canExpand = Array.isArray(lines) ? lines.length > 2 : false;
       if (this.state.overviewCanExpand !== canExpand) {
-        this.setState({overviewCanExpand: canExpand});
+        this.setState({ overviewCanExpand: canExpand });
       }
-    } catch (_e) {}
+    } catch (_e) { }
   };
 
   formatPrice = value => {
@@ -353,15 +354,15 @@ class PropertyDetailScreen extends React.Component {
     return [31.2357, 30.0444];
   };
 
-  fetchData = async (showLoading = true) => {};
+  fetchData = async (showLoading = true) => { };
 
-  onFavouritePress = async it => {};
+  onFavouritePress = async it => { };
 
   render() {
-    const {t} = this.props?.i18n;
+    const { t } = this.props?.i18n;
     const insetTop = this.props?.insets?.top || 0;
     const overlayMarginStyle = StyleSheet.create({
-      mt: {marginTop: 14 + insetTop},
+      mt: { marginTop: 14 + insetTop },
     }).mt;
 
     // Dummy data for overview tab
@@ -377,10 +378,10 @@ class PropertyDetailScreen extends React.Component {
       bathrooms: '3',
       area: '3450',
       amenities: [
-        {id: '1', name: 'Wifi'},
-        {id: '2', name: 'Fitness'},
-        {id: '3', name: 'Restaurant'},
-        {id: '4', name: 'Minibar'},
+        { id: '1', name: 'Wifi' },
+        { id: '2', name: 'Fitness' },
+        { id: '3', name: 'Restaurant' },
+        { id: '4', name: 'Minibar' },
       ],
       developer: {
         name: 'SODIC',
@@ -425,11 +426,11 @@ class PropertyDetailScreen extends React.Component {
             {carouselItems.length > 0 ? (
               <Carousel
                 width={SCREEN.WIDTH}
-                onSnapToItem={index => this.setState({currentIndex: index})}
+                onSnapToItem={index => this.setState({ currentIndex: index })}
                 pagingEnabled
                 height={carouselHeight}
                 data={carouselItems}
-                renderItem={({item}) => (
+                renderItem={({ item }) => (
                   <ImageBackground
                     source={item.image}
                     style={styles.carouselImageBg}
@@ -544,7 +545,7 @@ class PropertyDetailScreen extends React.Component {
                 return (
                   <TouchableOpacity
                     key={item.id}
-                    onPress={() => this.setState({selectedTab: item.id})}
+                    onPress={() => this.setState({ selectedTab: item.id })}
                     style={[
                       styles.tabChip,
                       isSelected && styles.tabChipSelected,
@@ -751,7 +752,7 @@ class PropertyDetailScreen extends React.Component {
                     title={t(
                       'PROPERTY_DETAIL_SCREEN.VIEW_FULL_FINANCING_OPTIONS',
                     )}
-                    onPress={() => {}}
+                    onPress={() => { }}
                     containerStyle={styles.viewFullFinancingBtn}
                   />
                 </View>
@@ -820,14 +821,14 @@ class PropertyDetailScreen extends React.Component {
                   </View>
                 ))}
                 <TouchableOpacity
-                  onPress={() => this.setState({aiSchoolsExpanded: true})}
+                  onPress={() => this.setState({ aiSchoolsExpanded: true })}
                   activeOpacity={0.8}>
                   <StyledText
                     size={14}
                     variant="semiBold"
                     color={COLORS.PRIMARY_300}
                     textStyle={styles.aiMoreLink}>
-                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', {count: 3})}
+                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', { count: 3 })}
                   </StyledText>
                 </TouchableOpacity>
 
@@ -873,14 +874,14 @@ class PropertyDetailScreen extends React.Component {
                   </View>
                 ))}
                 <TouchableOpacity
-                  onPress={() => this.setState({aiClinicsExpanded: true})}
+                  onPress={() => this.setState({ aiClinicsExpanded: true })}
                   activeOpacity={0.8}>
                   <StyledText
                     size={14}
                     variant="semiBold"
                     color={COLORS.PRIMARY_300}
                     textStyle={styles.aiMoreLink}>
-                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', {count: 3})}
+                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', { count: 3 })}
                   </StyledText>
                 </TouchableOpacity>
 
@@ -926,14 +927,14 @@ class PropertyDetailScreen extends React.Component {
                   </View>
                 ))}
                 <TouchableOpacity
-                  onPress={() => this.setState({aiMallsExpanded: true})}
+                  onPress={() => this.setState({ aiMallsExpanded: true })}
                   activeOpacity={0.8}>
                   <StyledText
                     size={14}
                     variant="semiBold"
                     color={COLORS.PRIMARY_300}
                     textStyle={styles.aiMoreLink}>
-                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', {count: 3})}
+                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', { count: 3 })}
                   </StyledText>
                 </TouchableOpacity>
 
@@ -979,20 +980,20 @@ class PropertyDetailScreen extends React.Component {
                   </View>
                 ))}
                 <TouchableOpacity
-                  onPress={() => this.setState({aiClubsExpanded: true})}
+                  onPress={() => this.setState({ aiClubsExpanded: true })}
                   activeOpacity={0.8}>
                   <StyledText
                     size={14}
                     variant="semiBold"
                     color={COLORS.PRIMARY_300}
                     textStyle={styles.aiMoreLink}>
-                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', {count: 3})}
+                    {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', { count: 3 })}
                   </StyledText>
                 </TouchableOpacity>
 
                 <CustomButton
                   title="Explore Nearby on Map"
-                  onPress={() => {}}
+                  onPress={() => { }}
                   containerStyle={styles.aiExploreBtnWrap}
                 />
               </View>
@@ -1064,7 +1065,7 @@ class PropertyDetailScreen extends React.Component {
                     renderHighValue={() => null}
                     renderNotch={() => <View style={styles.rsNotch} />}
                     onValueChanged={low => {
-                      this.setState({downPayment: Math.round(low)});
+                      this.setState({ downPayment: Math.round(low) });
                     }}
                   />
 
@@ -1090,11 +1091,11 @@ class PropertyDetailScreen extends React.Component {
                   <DropdownComponent
                     placeholder={t('PROPERTY_DETAIL_SCREEN.PLAN_DURATION')}
                     value={this.state.planDuration}
-                    onChange={value => this.setState({planDuration: value})}
+                    onChange={value => this.setState({ planDuration: value })}
                     data={[
-                      {label: '5 years', value: '5'},
-                      {label: '8 years', value: '8'},
-                      {label: '10 years', value: '10'},
+                      { label: '5 years', value: '5' },
+                      { label: '8 years', value: '8' },
+                      { label: '10 years', value: '10' },
                     ]}
                   />
 
@@ -1143,7 +1144,7 @@ class PropertyDetailScreen extends React.Component {
                   title={t(
                     'PROPERTY_DETAIL_SCREEN.VIEW_FULL_FINANCING_OPTIONS',
                   )}
-                  onPress={() => {}}
+                  onPress={() => { }}
                   containerStyle={styles.viewFullFinancingBtn}
                 />
               </View>
@@ -1230,7 +1231,7 @@ class PropertyDetailScreen extends React.Component {
                       <View key={h?._id || idx} style={styles.cuTimelineCard}>
                         {hasImg && (
                           <Image
-                            source={{uri: h.media[0]}}
+                            source={{ uri: h.media[0] }}
                             style={styles.cuTimelineThumb}
                           />
                         )}
@@ -1266,14 +1267,14 @@ class PropertyDetailScreen extends React.Component {
                 })()}
                 {!this.state.timelineExpanded && (
                   <TouchableOpacity
-                    onPress={() => this.setState({timelineExpanded: true})}
+                    onPress={() => this.setState({ timelineExpanded: true })}
                     activeOpacity={0.8}>
                     <StyledText
                       size={14}
                       variant="semiBold"
                       color={COLORS.PRIMARY_300}
                       textStyle={styles.cuMoreLink}>
-                      {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', {count: 3})}
+                      {t('PROPERTY_DETAIL_SCREEN.AND_N_MORE', { count: 3 })}
                     </StyledText>
                   </TouchableOpacity>
                 )}
@@ -1286,7 +1287,7 @@ class PropertyDetailScreen extends React.Component {
                   )
                     .flatMap(h => (Array.isArray(h?.media) ? h.media : []))
                     .filter(u => typeof u === 'string' && u.length > 0)
-                    .map((u, i) => ({id: `h-${i}`, image: {uri: u}}));
+                    .map((u, i) => ({ id: `h-${i}`, image: { uri: u } }));
                   const gallery = histImgs;
                   if (gallery.length === 0) {
                     return null;
@@ -1312,7 +1313,7 @@ class PropertyDetailScreen extends React.Component {
                           ))}
                           <Pressable
                             onPress={() =>
-                              this.setState({galleryExpanded: true})
+                              this.setState({ galleryExpanded: true })
                             }
                             style={styles.cuGalleryThirdWrap}>
                             <Image
@@ -1391,7 +1392,7 @@ class PropertyDetailScreen extends React.Component {
                 </StyledText>
                 <TouchableOpacity
                   style={styles.developerCard}
-                  onPress={() => {}}>
+                  onPress={() => { }}>
                   <View style={styles.developerLogo} />
                   <View style={styles.flex1}>
                     <StyledText
