@@ -11,6 +11,7 @@ import {SplashScreen} from './src/screens/authentication';
 import ToastManager from 'toastify-react-native';
 import {reset} from './src/redux/auth/auth.reducer';
 import MapboxGL from '@rnmapbox/maps';
+import Config from 'react-native-config';
 
 const toastConfig = {
   customSuccess: ({text1, text2, hide}) => (
@@ -32,9 +33,7 @@ const App = () => {
     store.dispatch(reset());
     // i18n.init();
 
-    MapboxGL.setAccessToken(
-      '__REDACTED_MAPBOX_PK__',
-    );
+    MapboxGL.setAccessToken(Config.MAPBOX_TOKEN || '');
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
